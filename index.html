@@ -2153,30 +2153,39 @@ function mesclar(sv, lv) {
   return out;
 }
 function iniciar() {
-render();
-
-(async () => {
-  let serverEstado = null, serverSeq = -1;
-  try {
-    const r = await apiReq('/api/data', 'GET');
-    if (r && !r.erro && r.clientes) { serverEstado = r; serverSeq = r.seq || 0; }
-  } catch (e) { }
-  let localEstado = null, localSeq = -1;
-  try {
-    const raw = localStorage.getItem('cf-cobranca');
-    if (raw) {
-      const d = JSON.parse(raw);
-      if (d && d.estado && d.estado.clientes) { localEstado = d.estado; localSeq = d.estado.seq || 0; }
-    }
-  } catch (e) { }
-
-  if (serverSeq >= 0 && localSeq >= 0) ESTADO = mesclar(serverEstado, localEstado);
-  else if (serverSeq >= 0) ESTADO = serverEstado;
-  else if (localSeq >= 0) ESTADO = localEstado;
-  normalizarEstado();
-  KV_ONLINE = serverSeq >= 0;
-  atualizarRodape();
   render();
+
+  (async () => {
+    let serverEstado = null, serverSeq = -1;
+    try {
+      const r = await apiReq('/api/data', 'GET');
+      if (r && !r.erro && r.clientes) {
+        serverEstado = r; serverSeq = r.seq || 0;
+        if (window.atualizarHud) atualizarHud('LOAD servidor ok vendas=' + Object.keys(r.vendas || {}).length);
+      } else {
+        if (window.atualizarHud) atualizarHud('LOAD servidor erro=' + JSON.stringify(r && r.erro));
+      }
+    } catch (e) {
+      if (window.atualizarHud) atualizarHud('LOAD servidor excecao=' + (e && e.message));
+    }
+    let localEstado = null, localSeq = -1;
+    try {
+      const raw = localStorage.getItem('cf-cobranca');
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d && d.estado && d.estado.clientes) { localEstado = d.estado; localSeq = d.estado.seq || 0; }
+        if (window.atualizarHud) atualizarHud('LOAD local ok vendas=' + Object.keys((d && d.estado && d.estado.vendas) || {}).length);
+      }
+    } catch (e) { }
+
+    if (serverSeq >= 0 && localSeq >= 0) ESTADO = mesclar(serverEstado, localEstado);
+    else if (serverSeq >= 0) ESTADO = serverEstado;
+    else if (localSeq >= 0) ESTADO = localEstado;
+    normalizarEstado();
+    KV_ONLINE = serverSeq >= 0;
+    atualizarRodape();
+    if (window.atualizarHud) atualizarHud('LOAD merge feito ESTADO.vendas=' + Object.keys(ESTADO.vendas || {}).length);
+    render();
   // sobe o estado mesclado para a nuvem (inclui dados que estavam só no navegador)
   if (serverSeq >= 0) agendarSalvar();
   marcarPendente(false);
