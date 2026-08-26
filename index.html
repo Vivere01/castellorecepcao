@@ -380,16 +380,16 @@ tr.perdido{opacity:.45}
           <option value="RIO DAS OSTRAS">Rio das Ostras</option>
           <option value="BUZIOS">Búzios</option>
           <option value="CABO FRIO">Cabo Frio</option>
+          <option value="todas">ADM (Todas as unidades)</option>
         </select>
       </label>
       <label class="lb">Senha<input class="field" id="login-senha" type="password" placeholder="••••••" required></label>
       <button class="btn btn-primary" type="submit">Entrar</button>
     </form>
     <div class="login-erro" id="login-erro" hidden></div>
-    <div class="login-foot">
-      <button class="theme-btn" id="login-theme" type="button" title="Alternar tema">🌙</button>
-    </div>
-    <div class="login-hint">Administrador: <b>Sávio</b> · senha <b>123456</b> · unidade <b>Todas</b></div>
+      <div class="login-foot">
+        <button class="theme-btn" id="login-theme" type="button" title="Alternar tema">🌙</button>
+      </div>
   </div>
 </div>
 
@@ -2241,7 +2241,8 @@ function listaCanc() { return Object.values(ESTADO.cancelados || {}); }
 function listaVendas() { return Object.values(ESTADO.vendas || {}); }
 function vendasVisiveis() {
   if (SESSAO && SESSAO.perfil === 'admin') return listaVendas();
-  return daUnidade(listaVendas(), UI.unidade);
+  const u = (SESSAO && SESSAO.unidade) || UI.unidade;
+  return listaVendas().filter(v => !v.unidade || v.unidade === u || v.unidade === 'todas');
 }
 function metaDa(u) {
   if (u === 'REDE') return unidadesAtivas().reduce((a, x) => a + (ESTADO.metas[x] || META_PADRAO), 0);
@@ -2880,7 +2881,8 @@ function popularPlanosVenda() {
 function popularUnidadesVenda() {
   const sel = document.getElementById('v-unidade');
   const def = (SESSAO && SESSAO.perfil !== 'admin' && SESSAO.unidade) ? SESSAO.unidade : (UI.unidade !== 'REDE' && UI.unidade !== 'SEM' ? UI.unidade : UNIS[0]);
-  sel.innerHTML = UNIS.map(u => '<option value="' + esc(u) + '">' + esc(nomeBonito(u)) + '</option>').join('');
+  const opts = UNIS.map(u => '<option value="' + esc(u) + '">' + esc(nomeBonito(u)) + '</option>').join('');
+  sel.innerHTML = '<option value="todas">ADM (Todas as unidades)</option>' + opts;
   if (!sel.value) sel.value = def;
 }
 document.getElementById('v-busca').oninput = e => { UI.vBusca = e.target.value.trim(); renderVendas(); };
