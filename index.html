@@ -338,6 +338,26 @@ tr.perdido{opacity:.45}
 .user-row .info{flex:1; min-width:0}
 .user-row .info .n{font-size:13px; font-weight:500; color:var(--ink)}
 .user-row .info .m{font-size:11px; color:var(--ink3)}
+.perf-filtros{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px}
+.perf-filtros .field{width:auto; padding:7px 10px}
+.perf-filtros label{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink2)}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden}
+.seg button{border:0; background:transparent; color:var(--ink2); padding:7px 12px; font-size:12.5px; cursor:pointer}
+.seg button.on{background:var(--brass); color:#1a1206; font-weight:600}
+.perf-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:4px}
+.perf-periodo{font-size:12px; color:var(--ink2)}
+.perf-table{width:100%; border-collapse:collapse; font-size:13px}
+.perf-table th{text-align:left; color:var(--ink3); font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; padding:7px 8px; border-bottom:1px solid var(--line)}
+.perf-table td{padding:8px; border-bottom:1px solid var(--line)}
+.perf-table tr:last-child td{border-bottom:0}
+.perf-table .num{font-family:"IBM Plex Mono",monospace; text-align:right}
+.perf-table .nm{font-weight:500}
+.perf-top td{background:rgba(191,149,69,.12)}
+.perf-top .nm{color:var(--brass)}
+.perf-bar{display:inline-block; height:7px; border-radius:6px; background:var(--brass); vertical-align:middle; margin-left:8px}
+.perf-bar.r{background:var(--ok)}
+.perf-scroll{max-height:340px; overflow:auto}
+.badge-zero{color:var(--ink3)}
 </style>
 
 </head>
@@ -398,6 +418,7 @@ tr.perdido{opacity:.45}
       <span class="pf" id="user-perfil"></span>
       <button class="theme-btn" id="theme-btn" type="button" title="Tema">🌙</button>
       <button class="btn btn-sm btn-ghost" id="btn-admin" type="button" hidden>Gerenciar</button>
+      <button class="btn btn-sm btn-ghost" id="btn-perf" type="button" hidden>Desempenho</button>
       <button class="btn btn-sm btn-ghost" id="btn-logout" type="button">Sair</button>
     </div>
   </div>
@@ -530,6 +551,41 @@ tr.perdido{opacity:.45}
       <section class="panel">
         <div class="panel-h"><h2>Uploads</h2></div>
         <div class="panel-b"><div class="hist" id="r-uploads"></div></div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- ============ DESEMPENHO ============ -->
+  <div class="cols" id="view-performance" hidden>
+    <main class="panel">
+      <div class="perf-filtros">
+        <div class="seg" id="seg-perf">
+          <button type="button" data-per="hoje">Hoje</button>
+          <button type="button" data-per="semana">Semana</button>
+          <button type="button" data-per="quinzena">Quinzena</button>
+          <button type="button" data-per="mes">Mês</button>
+          <button type="button" data-per="custom">Personalizado</button>
+        </div>
+        <label>De <input type="date" id="perf-de" class="field"></label>
+        <label>Até <input type="date" id="perf-ate" class="field"></label>
+        <select class="field" id="perf-uni"></select>
+        <button class="btn btn-sm" id="perf-atualizar" type="button">Atualizar</button>
+        <button class="btn btn-sm btn-ghost" id="btn-perf-voltar" type="button">← Voltar</button>
+      </div>
+      <div class="kpis" id="perf-kpis"></div>
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-h"><h2>Ranking da recepção</h2><span class="hint" id="perf-periodo-label"></span></div>
+        <div class="panel-b perf-scroll"><table class="perf-table" id="perf-ranking"></table></div>
+      </div>
+    </main>
+    <aside class="rail">
+      <section class="panel">
+        <div class="panel-h"><h2>Execução por dia</h2><span class="hint">baixas · resgates · contatos</span></div>
+        <div class="panel-b perf-scroll"><table class="perf-table" id="perf-series"></table></div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>Por unidade</h2></div>
+        <div class="panel-b"><table class="perf-table" id="perf-unis"></table></div>
       </section>
     </aside>
   </div>
@@ -2076,6 +2132,9 @@ function normalizarEstado() {
 normalizarEstado();
 
 let MODO = 'cobranca';
+let TELA_PERF = false;
+let TELA_PERF_UNI = 'REDE';
+let PERF_PER = 'mes';
 try { MODO = localStorage.getItem('cf-modo') || 'cobranca'; } catch (e) { }
 let RUI = { ordem: 'proximoToque', desc: false, busca: '', situacao: 'hoje', toque: '', motivo: '' };
 
@@ -2109,6 +2168,22 @@ function renderModos() {
   $('#acoes-cob').hidden = MODO !== 'cobranca';
   $('#acoes-res').hidden = MODO !== 'resgate';
   $('#brand-sub').textContent = MODO === 'cobranca' ? 'Régua de cobrança' : 'Régua de resgate';
+  if (TELA_PERF) {
+    document.getElementById('modos').hidden = true;
+    document.getElementById('tabs').hidden = true;
+    $('#view-cobranca').hidden = true;
+    $('#view-resgate').hidden = true;
+    $('#acoes-cob').hidden = true;
+    $('#acoes-res').hidden = true;
+    document.getElementById('kpis').hidden = true;
+    document.getElementById('view-performance').hidden = false;
+    document.getElementById('brand-sub').textContent = 'Desempenho da recepção';
+  } else {
+    document.getElementById('modos').hidden = false;
+    document.getElementById('tabs').hidden = false;
+    document.getElementById('kpis').hidden = false;
+    document.getElementById('view-performance').hidden = true;
+  }
 }
 function daUnidadeC(lista, u) {
   if (u === 'REDE') return lista;
@@ -2739,6 +2814,7 @@ function mostrarApp() {
   document.getElementById('user-nome').textContent = s.nome;
   document.getElementById('user-perfil').textContent = s.perfil === 'admin' ? 'Admin' : nomeBonito(s.unidade);
   document.getElementById('btn-admin').hidden = s.perfil !== 'admin';
+  document.getElementById('btn-perf').hidden = s.perfil !== 'admin';
   if (s.perfil === 'admin') {
     UI.unidade = localStorage.getItem('cf-unidade') || 'REDE';
   } else {
@@ -2753,6 +2829,183 @@ function mostrarLogin() {
   document.querySelector('.wrap').hidden = true;
   document.getElementById('user-chip').hidden = true;
 }
+
+/* ---------- desempenho / performance (ADM) ---------- */
+function periodoPreset(per) {
+  const hoje = hojeISO();
+  if (per === 'hoje') return { de: hoje, ate: hoje };
+  if (per === 'semana') {
+    const d = new Date(); const dw = (d.getDay() + 6) % 7;
+    return { de: somarDias(hoje, -dw), ate: hoje };
+  }
+  if (per === 'quinzena') return { de: somarDias(hoje, -14), ate: hoje };
+  if (per === 'mes') return { de: hoje.slice(0, 7) + '-01', ate: hoje };
+  return { de: hoje.slice(0, 7) + '-01', ate: hoje };
+}
+function isoNoPeriodo(d, de, ate) { return d && d >= de && d <= ate; }
+function computarPerformance(de, ate, unidade) {
+  const clientes = daUnidade(listaBase(), unidade);
+  const baixas = {}, resgates = {}, contatos = {};
+  let valorBaixas = 0, valorResgates = 0;
+  const series = {}, porUni = {};
+  const addUni = (u, k) => { u = u || 'Sem unidade'; (porUni[u] = porUni[u] || { b: 0, r: 0 })[k]++; };
+  for (const c of clientes) {
+    if (c.baixa && isoNoPeriodo(c.baixa.data, de, ate)) {
+      const nome = (c.baixa.por || '').trim() || 'sem registro';
+      baixas[nome] = baixas[nome] || { baixas: 0, valor: 0 };
+      baixas[nome].baixas++; baixas[nome].valor += (c.valor || 0);
+      valorBaixas += (c.valor || 0);
+      addUni(c.unidade, 'b');
+      const dia = c.baixa.data;
+      series[dia] = series[dia] || { baixas: 0, resgates: 0, contatos: 0 };
+      series[dia].baixas++;
+    }
+  }
+  const canc = daUnidadeC(listaCanc(), unidade);
+  for (const c of canc) {
+    if (c.situacao === 'resgatado' && isoNoPeriodo(c.resgatadoEm, de, ate)) {
+      const nome = (c.resgatadoPor || '').trim() || 'sem registro';
+      resgates[nome] = resgates[nome] || { resgates: 0, valor: 0 };
+      resgates[nome].resgates++; resgates[nome].valor += (c.valor || 0);
+      valorResgates += (c.valor || 0);
+      addUni(c.unidade, 'r');
+      const dia = c.resgatadoEm;
+      series[dia] = series[dia] || { baixas: 0, resgates: 0, contatos: 0 };
+      series[dia].resgates++;
+    }
+    for (const t of (c.toques || [])) {
+      if (isoNoPeriodo(t.data, de, ate) && t.resultado) {
+        const nome = (t.por || '').trim() || 'sem registro';
+        contatos[nome] = contatos[nome] || { contatos: 0, voltou: 0 };
+        contatos[nome].contatos++;
+        if (t.resultado === 'voltou') contatos[nome].voltou++;
+        const dia = t.data;
+        series[dia] = series[dia] || { baixas: 0, resgates: 0, contatos: 0 };
+        series[dia].contatos++;
+      }
+    }
+  }
+  return { baixas, resgates, contatos, valorBaixas, valorResgates, series, porUni };
+}
+async function abrirPerformance() {
+  TELA_PERF = true;
+  const sel = document.getElementById('perf-uni');
+  sel.innerHTML = '<option value="REDE">Todas as unidades</option>' +
+    unidadesAtivas().map(u => '<option value="' + esc(u) + '">' + esc(nomeBonito(u)) + '</option>').join('');
+  sel.value = TELA_PERF_UNI || 'REDE';
+  setPerfPeriod(PERF_PER || 'mes');
+  render();
+}
+function sairPerformance() { TELA_PERF = false; render(); }
+function setPerfPeriod(per) {
+  PERF_PER = per;
+  const { de, ate } = periodoPreset(per);
+  document.getElementById('perf-de').value = de;
+  document.getElementById('perf-ate').value = ate;
+  document.querySelectorAll('#seg-perf button').forEach(b => b.classList.toggle('on', b.dataset.per === per));
+  renderPerformance();
+}
+async function renderPerformance() {
+  const de = document.getElementById('perf-de').value || hojeISO().slice(0, 7) + '-01';
+  const ate = document.getElementById('perf-ate').value || hojeISO();
+  const unidade = document.getElementById('perf-uni').value || 'REDE';
+  TELA_PERF_UNI = unidade;
+  const c = computarPerformance(de, ate, unidade);
+  const usuarios = await carregarUsuarios();
+  document.getElementById('perf-periodo-label').textContent =
+    'De ' + dataBr(de) + ' a ' + dataBr(ate) + ' · ' + (unidade === 'REDE' ? 'Todas as unidades' : nomeBonito(unidade));
+
+  const totB = Object.values(c.baixas).reduce((a, x) => a + x.baixas, 0);
+  const totR = Object.values(c.resgates).reduce((a, x) => a + x.resgates, 0);
+  const totC = Object.values(c.contatos).reduce((a, x) => a + x.contatos, 0);
+  const kpis = document.getElementById('perf-kpis');
+  const cards = [
+    { lab: 'Baixas de inadimplentes', val: String(totB), foot: brl(c.valorBaixas) + ' recuperado' },
+    { lab: 'Resgates (clientes voltaram)', val: String(totR), foot: brl(c.valorResgates) + ' de volta' },
+    { lab: 'Contatos registrados', val: String(totC), foot: 'ligações na fila de resgate' },
+    { lab: 'Valor total recuperado', val: brl(c.valorBaixas + c.valorResgates), foot: 'soma das baixas + resgates' }
+  ];
+  kpis.innerHTML = cards.map(k =>
+    '<div class="kpi"><span class="lab">' + esc(k.lab) + '</span><span class="val num">' + esc(k.val) +
+    '</span><span class="foot">' + esc(k.foot) + '</span></div>').join('');
+
+  const nomes = new Map();
+  Object.values(usuarios).forEach(u => { if (u.perfil !== 'admin') { const n = (u.nome || '').trim(); if (n) nomes.set(n, true); } });
+  Object.keys(c.baixas).forEach(n => { if (n) nomes.set(n, true); });
+  Object.keys(c.resgates).forEach(n => { if (n) nomes.set(n, true); });
+  Object.keys(c.contatos).forEach(n => { if (n) nomes.set(n, true); });
+  const linhas = [...nomes.keys()].map(nome => ({
+    nome,
+    baixas: (c.baixas[nome] || {}).baixas || 0,
+    vBaixas: (c.baixas[nome] || {}).valor || 0,
+    resgates: (c.resgates[nome] || {}).resgates || 0,
+    vResgates: (c.resgates[nome] || {}).valor || 0,
+    contatos: (c.contatos[nome] || {}).contatos || 0,
+    voltou: (c.contatos[nome] || {}).voltou || 0
+  })).filter(l => l.nome).sort((a, b) => b.baixas - a.baixas || b.resgates - a.resgates || b.contatos - a.contatos);
+  const maxB = Math.max(1, ...linhas.map(l => l.baixas));
+  const rank = document.getElementById('perf-ranking');
+  if (!linhas.length) {
+    rank.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Nenhuma ação registrada no período.</td></tr></tbody>';
+  } else {
+    rank.innerHTML = '<thead><tr><th>Recepcionista</th><th class="num">Baixas</th><th class="num">R$ baixas</th><th class="num">Resgates</th><th class="num">R$ resgates</th><th class="num">Contatos</th></tr></thead><tbody>' +
+      linhas.map((l, i) => {
+        const top = i === 0 && l.baixas > 0 ? ' perf-top' : '';
+        const bw = Math.round(l.baixas / maxB * 100);
+        return '<tr class="' + top.trim() + '">' +
+          '<td class="nm">' + esc(l.nome) + (i === 0 && l.baixas > 0 ? ' 🏆' : '') + '</td>' +
+          '<td class="num">' + l.baixas + (l.baixas ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
+          '<td class="num">' + brl(l.vBaixas) + '</td>' +
+          '<td class="num">' + l.resgates + (l.resgates ? '<span class="perf-bar r" style="width:' + Math.min(60, l.resgates * 12) + 'px"></span>' : '') + '</td>' +
+          '<td class="num">' + brl(l.vResgates) + '</td>' +
+          '<td class="num' + (l.contatos ? '' : ' badge-zero') + '">' + l.contatos + '</td>' +
+          '</tr>';
+      }).join('') + '</tbody>';
+  }
+
+  const series = document.getElementById('perf-series');
+  const dias = [];
+  let d = de; let guard = 0;
+  while (d <= ate && guard < 400) { dias.push(d); d = somarDias(d, 1); guard++; }
+  if (!dias.length) {
+    series.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Período inválido.</td></tr></tbody>';
+  } else {
+    const sMax = Math.max(1, ...dias.map(x => (c.series[x] || {}).baixas || 0));
+    series.innerHTML = '<thead><tr><th>Data</th><th class="num">Baixas</th><th class="num">Resgates</th><th class="num">Contatos</th></tr></thead><tbody>' +
+      dias.map(x => {
+        const s = c.series[x] || { baixas: 0, resgates: 0, contatos: 0 };
+        const bw = Math.round((s.baixas || 0) / sMax * 60);
+        return '<tr><td>' + dataBr(x) + '</td>' +
+          '<td class="num">' + (s.baixas || 0) + (s.baixas ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
+          '<td class="num">' + (s.resgates || 0) + '</td>' +
+          '<td class="num">' + (s.contatos || 0) + '</td></tr>';
+      }).join('') + '</tbody>';
+  }
+
+  const unis = document.getElementById('perf-unis');
+  const uKeys = Object.keys(c.porUni);
+  if (!uKeys.length) {
+    unis.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Sem dados no período.</td></tr></tbody>';
+  } else {
+    const uMax = Math.max(1, ...uKeys.map(u => (c.porUni[u].b + c.porUni[u].r)));
+    unis.innerHTML = '<thead><tr><th>Unidade</th><th class="num">Baixas</th><th class="num">Resgates</th></tr></thead><tbody>' +
+      uKeys.sort((a, b) => (c.porUni[b].b + c.porUni[b].r) - (c.porUni[a].b + c.porUni[a].r)).map(u => {
+        const x = c.porUni[u];
+        const bw = Math.round(x.b / uMax * 60);
+        return '<tr><td class="nm">' + esc(nomeBonito(u)) + '</td>' +
+          '<td class="num">' + x.b + (x.b ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
+          '<td class="num">' + x.r + (x.r ? '<span class="perf-bar r" style="width:' + Math.min(60, x.r * 12) + 'px"></span>' : '') + '</td></tr>';
+      }).join('') + '</tbody>';
+  }
+}
+
+document.getElementById('btn-perf').onclick = () => { if (TELA_PERF) sairPerformance(); else abrirPerformance(); };
+document.getElementById('btn-perf-voltar').onclick = sairPerformance;
+document.querySelectorAll('#seg-perf button').forEach(b => { b.onclick = () => setPerfPeriod(b.dataset.per); });
+document.getElementById('perf-atualizar').onclick = () => renderPerformance();
+document.getElementById('perf-de').onchange = () => { PERF_PER = 'custom'; document.querySelectorAll('#seg-perf button').forEach(b => b.classList.toggle('on', b.dataset.per === 'custom')); renderPerformance(); };
+document.getElementById('perf-ate').onchange = () => { PERF_PER = 'custom'; document.querySelectorAll('#seg-perf button').forEach(b => b.classList.toggle('on', b.dataset.per === 'custom')); renderPerformance(); };
+document.getElementById('perf-uni').onchange = () => { TELA_PERF_UNI = document.getElementById('perf-uni').value; renderPerformance(); };
 
 /* ---------- admin: gerenciar usuários ---------- */
 async function abrirAdmin() {
