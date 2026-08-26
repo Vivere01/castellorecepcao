@@ -360,6 +360,9 @@ tr.perdido{opacity:.45}
 .badge-zero{color:var(--ink3)}
 .perf-comissao-filtro{display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap}
 .perf-comissao-filtro .field{width:84px}
+.v-form label{display:block; margin-bottom:10px; font-size:12px; color:var(--ink2)}
+.v-form .field{width:100%}
+.v-form .btn{width:100%; margin-top:4px}
 </style>
 
 </head>
@@ -403,6 +406,7 @@ tr.perdido{opacity:.45}
     <div class="modos" id="modos" role="tablist">
       <button class="modo" type="button" data-modo="cobranca" aria-selected="true">Cobrança<span class="cnt" id="cnt-cob"></span></button>
       <button class="modo" type="button" data-modo="resgate" aria-selected="false">Resgate<span class="cnt" id="cnt-res"></span></button>
+      <button class="modo" type="button" data-modo="vendas" aria-selected="false">Novas vendas<span class="cnt" id="cnt-ven"></span></button>
     </div>
     <div class="tabs" id="tabs" role="tablist"></div>
     <span id="acoes-cob" class="acoes">
@@ -553,6 +557,51 @@ tr.perdido{opacity:.45}
       <section class="panel">
         <div class="panel-h"><h2>Uploads</h2></div>
         <div class="panel-b"><div class="hist" id="r-uploads"></div></div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- ============ NOVAS VENDAS ============ -->
+  <div class="cols" id="view-vendas" hidden>
+    <main class="panel">
+      <div class="toolbar">
+        <input class="field" id="v-busca" type="search" placeholder="Buscar cliente ou plano…">
+        <select class="field" id="v-plano-filtro"><option value="">Todos os planos</option></select>
+        <span class="hint mono" id="v-contagem"></span>
+      </div>
+      <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Plano</th>
+              <th class="num">Valor</th>
+              <th>Vencimento</th>
+              <th>Unidade</th>
+              <th>Quem registrou</th>
+              <th>Data</th>
+              <th class="no"></th>
+            </tr>
+          </thead>
+          <tbody id="v-corpo"></tbody>
+        </table>
+      </div>
+    </main>
+    <aside class="rail">
+      <section class="panel">
+        <div class="panel-h"><h2>Registrar nova venda</h2></div>
+        <div class="panel-b v-form">
+          <label class="lb">Cliente<input class="field" id="v-nome" placeholder="Nome do cliente"></label>
+          <label class="lb">Plano de assinatura<select class="field" id="v-plano"></select></label>
+          <label class="lb">Valor do plano (R$)<input class="field" id="v-valor" type="number" min="0" step="0.01"></label>
+          <label class="lb">Vencimento<input class="field" id="v-venc" type="date"></label>
+          <label class="lb">Unidade<select class="field" id="v-unidade"></select></label>
+          <button class="btn btn-primary" id="v-add" type="button">Adicionar venda</button>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>Resumo do período</h2></div>
+        <div class="panel-b" id="v-resumo"></div>
       </section>
     </aside>
   </div>
@@ -1543,7 +1592,7 @@ function daUnidade(lista, u) {
 }
 function abertos(lista) { return lista.filter(c => c.situacao === 'aberto'); }
 
-let UI = { unidade: 'REDE', ordem: 'dias', desc: true, busca: '', situacao: 'aberto', aging: '', contato: '' };
+let UI = { unidade: 'REDE', ordem: 'dias', desc: true, busca: '', situacao: 'aberto', aging: '', contato: '', vBusca: '', vPlano: '' };
 try {
   const u = localStorage.getItem('cf-unidade');
   if (u) UI.unidade = u;
@@ -1560,7 +1609,9 @@ function unidadesAtivas() {
 /* ============ render ============ */
 function render() {
   renderModos(); renderTabs();
-  if (MODO === 'resgate') renderResgate(); else renderCobranca();
+  if (MODO === 'resgate') renderResgate();
+  else if (MODO === 'vendas') renderVendas();
+  else renderCobranca();
   marcarPendente(false);
 }
 function renderCobranca() {
@@ -1569,6 +1620,7 @@ function renderCobranca() {
 
 function contaAba(id) {
   if (MODO === 'resgate') return daUnidadeC(listaCanc(), id).filter(naFila).length;
+  if (MODO === 'vendas') return daUnidade(listaVendas(), id).length;
   return abertos(daUnidade(listaBase(), id)).length;
 }
 function renderTabs() {
@@ -2131,12 +2183,21 @@ const MODELOS_RESGATE_PADRAO = [
   'Oi {primeiro}, aqui é da Castello Forte {unidade}, meu último contato sobre isso.\nSeparei uma condição de retorno especial pra você, válida até o fim da semana. Se fizer sentido eu te mando os detalhes; se não fizer, sem problema — a porta fica aberta quando quiser voltar.'
 ];
 const META_PADRAO = 8;
+const PLANOS_VENDA = [
+  { nome: 'CORTE PRIME', valor: 99.90 },
+  { nome: 'BARBA PRIME', valor: 119.99 },
+  { nome: 'CORTE E BARBA PRIME', valor: 179.99 },
+  { nome: 'CORTE BLACK', valor: 119.99 },
+  { nome: 'BARBA BLACK', valor: 131.99 },
+  { nome: 'CORTE & BARBA BLACK', valor: 209.99 }
+];
 
 function normalizarEstado() {
   if (!ESTADO.clientes) ESTADO.clientes = {};
   if (!ESTADO.unidadeDe) ESTADO.unidadeDe = {};
   if (!ESTADO.uploads) ESTADO.uploads = [];
   if (!ESTADO.cancelados) ESTADO.cancelados = {};
+  if (!ESTADO.vendas) ESTADO.vendas = {};
   if (!ESTADO.uploadsCanc) ESTADO.uploadsCanc = [];
   if (!ESTADO.modelo) ESTADO.modelo = MODELO_PADRAO;
   if (!ESTADO.modelosResgate || ESTADO.modelosResgate.length !== 3) ESTADO.modelosResgate = MODELOS_RESGATE_PADRAO.slice();
@@ -2154,6 +2215,7 @@ try { MODO = localStorage.getItem('cf-modo') || 'cobranca'; } catch (e) { }
 let RUI = { ordem: 'proximoToque', desc: false, busca: '', situacao: 'hoje', toque: '', motivo: '' };
 
 function listaCanc() { return Object.values(ESTADO.cancelados || {}); }
+function listaVendas() { return Object.values(ESTADO.vendas || {}); }
 function metaDa(u) {
   if (u === 'REDE') return unidadesAtivas().reduce((a, x) => a + (ESTADO.metas[x] || META_PADRAO), 0);
   return ESTADO.metas[u] || META_PADRAO;
@@ -2174,20 +2236,24 @@ document.querySelectorAll('#modos .modo').forEach(b => { b.onclick = () => troca
 function renderModos() {
   const emAberto = abertos(daUnidade(listaBase(), UI.unidade)).length;
   const hoje = daUnidadeC(listaCanc(), UI.unidade).filter(paraHoje).length;
+  const ven = daUnidade(listaVendas(), UI.unidade).length;
   $('#cnt-cob').textContent = emAberto;
   $('#cnt-res').textContent = hoje;
+  $('#cnt-ven').textContent = ven;
   document.querySelectorAll('#modos .modo').forEach(b =>
     b.setAttribute('aria-selected', b.dataset.modo === MODO ? 'true' : 'false'));
   $('#view-cobranca').hidden = MODO !== 'cobranca';
   $('#view-resgate').hidden = MODO !== 'resgate';
+  $('#view-vendas').hidden = MODO !== 'vendas';
   $('#acoes-cob').hidden = MODO !== 'cobranca';
   $('#acoes-res').hidden = MODO !== 'resgate';
-  $('#brand-sub').textContent = MODO === 'cobranca' ? 'Régua de cobrança' : 'Régua de resgate';
+  $('#brand-sub').textContent = MODO === 'cobranca' ? 'Régua de cobrança' : (MODO === 'resgate' ? 'Régua de resgate' : 'Novas vendas');
   if (TELA_PERF) {
     document.getElementById('modos').hidden = true;
     document.getElementById('tabs').hidden = true;
     $('#view-cobranca').hidden = true;
     $('#view-resgate').hidden = true;
+    $('#view-vendas').hidden = true;
     $('#acoes-cob').hidden = true;
     $('#acoes-res').hidden = true;
     document.getElementById('kpis').hidden = true;
@@ -2739,6 +2805,90 @@ function renderResgate() {
   renderKpisResgate(); renderTabelaResgate(); renderPlacar(); renderRanking(); renderMotivos(); renderUploadsRes();
 }
 
+function renderVendas() {
+  if (document.getElementById('v-plano').options.length <= 1) popularPlanosVenda();
+  if (document.getElementById('v-unidade').options.length === 0) popularUnidadesVenda();
+  const lista = daUnidade(listaVendas(), UI.unidade);
+  const busca = (UI.vBusca || '').toLowerCase();
+  const pf = UI.vPlano || '';
+  const filt = lista.filter(c => (!busca || (c.nome || '').toLowerCase().includes(busca) || (c.plano || '').toLowerCase().includes(busca)) && (!pf || c.plano === pf));
+  const corpo = document.getElementById('v-corpo');
+  const maxV = Math.max(1, ...filt.map(c => c.valor || 0));
+  if (!filt.length) {
+    corpo.innerHTML = '<tr><td colspan="8" style="color:var(--ink3);padding:18px;text-align:center">Nenhuma venda registrada ainda.</td></tr>';
+  } else {
+    corpo.innerHTML = filt.sort((a, b) => (b.data || '').localeCompare(a.data || '')).map(c => {
+      const bw = Math.max(2, Math.round((c.valor || 0) / maxV * 100));
+      return '<tr>' +
+        '<td class="nm">' + esc(c.nome) + '</td>' +
+        '<td>' + esc(c.plano) + '</td>' +
+        '<td class="num">' + brl(c.valor) + (c.valor ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
+        '<td>' + dataBr(c.vencimento) + '</td>' +
+        '<td>' + esc(c.unidade ? nomeBonito(c.unidade) : '—') + '</td>' +
+        '<td>' + esc(c.por || '—') + '</td>' +
+        '<td>' + dataBr(c.data) + '</td>' +
+        '<td class="no" style="text-align:right"><button class="btn btn-sm btn-ghost" data-del="' + esc(c.chave) + '">Excluir</button></td>' +
+        '</tr>';
+    }).join('');
+    corpo.querySelectorAll('button[data-del]').forEach(b => b.onclick = () => {
+      const k = b.dataset.del;
+      const nome = ESTADO.vendas[k] && ESTADO.vendas[k].nome;
+      if (confirm('Excluir a venda de ' + nome + '?')) { delete ESTADO.vendas[k]; agendarSalvar(); renderVendas(); toast('Venda excluída.', 'ok'); }
+    });
+  }
+  document.getElementById('v-contagem').textContent = filt.length + ' venda' + (filt.length === 1 ? '' : 's');
+  const total = filt.reduce((a, c) => a + (c.valor || 0), 0);
+  const porPlano = {};
+  filt.forEach(c => { porPlano[c.plano] = (porPlano[c.plano] || 0) + (c.valor || 0); });
+  const resumo = document.getElementById('v-resumo');
+  resumo.innerHTML = '<div class="resumo">' +
+    '<div class="rz"><div class="v num">' + filt.length + '</div><div class="l">Vendas</div></div>' +
+    '<div class="rz"><div class="v num">' + brl(total) + '</div><div class="l">Valor total</div></div></div>' +
+    '</div>' +
+    Object.keys(porPlano).map(p => '<div style="font-size:12.5px;color:var(--ink2);margin-top:8px">' + esc(p) + ': <b style="color:var(--ink)">' + brl(porPlano[p]) + '</b></div>').join('');
+  const sel = document.getElementById('v-plano-filtro');
+  const opts = '<option value="">Todos os planos</option>' + PLANOS_VENDA.map(p => '<option value="' + esc(p.nome) + '">' + esc(p.nome) + '</option>').join('');
+  if (sel.innerHTML !== opts) sel.innerHTML = opts;
+}
+function popularPlanosVenda() {
+  const sel = document.getElementById('v-plano');
+  sel.innerHTML = '<option value="">Selecione o plano…</option>' + PLANOS_VENDA.map(p =>
+    '<option value="' + esc(p.nome) + '" data-valor="' + p.valor + '">' + esc(p.nome) + ' — ' + brl(p.valor) + '</option>').join('');
+}
+function popularUnidadesVenda() {
+  const sel = document.getElementById('v-unidade');
+  const def = (SESSAO && SESSAO.perfil !== 'admin' && SESSAO.unidade) ? SESSAO.unidade : (UI.unidade !== 'REDE' && UI.unidade !== 'SEM' ? UI.unidade : UNIS[0]);
+  sel.innerHTML = UNIS.map(u => '<option value="' + esc(u) + '">' + esc(nomeBonito(u)) + '</option>').join('');
+  if (!sel.value) sel.value = def;
+}
+document.getElementById('v-busca').oninput = e => { UI.vBusca = e.target.value.trim(); renderVendas(); };
+document.getElementById('v-plano-filtro').onchange = e => { UI.vPlano = e.target.value; renderVendas(); };
+document.getElementById('v-plano').onchange = () => {
+  const o = document.getElementById('v-plano').selectedOptions[0];
+  const v = o && o.dataset ? parseFloat(o.dataset.valor) : 0;
+  if (v) document.getElementById('v-valor').value = v.toFixed(2);
+};
+document.getElementById('v-add').onclick = () => {
+  const nome = document.getElementById('v-nome').value.trim();
+  const plano = document.getElementById('v-plano').value;
+  const valor = parseFloat(document.getElementById('v-valor').value);
+  const venc = document.getElementById('v-venc').value;
+  const unidade = document.getElementById('v-unidade').value;
+  if (!nome) { toast('Informe o nome do cliente.', 'err'); return; }
+  if (!plano) { toast('Escolha o plano de assinatura.', 'err'); return; }
+  if (!(valor >= 0)) { toast('Informe o valor do plano.', 'err'); return; }
+  if (!venc) { toast('Informe o vencimento.', 'err'); return; }
+  if (!unidade) { toast('Escolha a unidade.', 'err'); return; }
+  const chave = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  ESTADO.vendas[chave] = { chave, nome, plano, valor, vencimento: venc, unidade, por: (SESSAO && SESSAO.nome) || '', data: hojeISO() };
+  agendarSalvar();
+  document.getElementById('v-nome').value = '';
+  document.getElementById('v-valor').value = '';
+  document.getElementById('v-venc').value = '';
+  renderVendas();
+  toast('Venda de ' + nome + ' registrada.', 'ok');
+};
+
 iniciar();
 </script>
 
@@ -2900,7 +3050,16 @@ function computarPerformance(de, ate, unidade) {
       }
     }
   }
-  return { baixas, resgates, contatos, valorBaixas, valorResgates, series, porUni };
+  const vendas = {}; let valorVendas = 0;
+  for (const c of daUnidade(listaVendas(), unidade)) {
+    if (isoNoPeriodo(c.data, de, ate)) {
+      const nome = (c.por || '').trim() || 'sem registro';
+      vendas[nome] = vendas[nome] || { vendas: 0, valor: 0 };
+      vendas[nome].vendas++; vendas[nome].valor += (c.valor || 0);
+      valorVendas += (c.valor || 0);
+    }
+  }
+  return { baixas, resgates, contatos, valorBaixas, valorResgates, series, porUni, vendas, valorVendas };
 }
 async function abrirPerformance() {
   TELA_PERF = true;
@@ -2933,12 +3092,14 @@ async function renderPerformance() {
   const totB = Object.values(c.baixas).reduce((a, x) => a + x.baixas, 0);
   const totR = Object.values(c.resgates).reduce((a, x) => a + x.resgates, 0);
   const totC = Object.values(c.contatos).reduce((a, x) => a + x.contatos, 0);
+  const totV = Object.values(c.vendas).reduce((a, x) => a + x.vendas, 0);
   const kpis = document.getElementById('perf-kpis');
   const cards = [
     { lab: 'Baixas de inadimplentes', val: String(totB), foot: brl(c.valorBaixas) + ' recuperado' },
     { lab: 'Resgates (clientes voltaram)', val: String(totR), foot: brl(c.valorResgates) + ' de volta' },
     { lab: 'Contatos registrados', val: String(totC), foot: 'ligações na fila de resgate' },
-    { lab: 'Valor total recuperado', val: brl(c.valorBaixas + c.valorResgates), foot: 'soma das baixas + resgates' }
+    { lab: 'Novas vendas', val: String(totV), foot: brl(c.valorVendas) + ' em planos' },
+    { lab: 'Valor total recuperado', val: brl(c.valorBaixas + c.valorResgates + c.valorVendas), foot: 'baixas + resgates + vendas' }
   ];
   kpis.innerHTML = cards.map(k =>
     '<div class="kpi"><span class="lab">' + esc(k.lab) + '</span><span class="val num">' + esc(k.val) +
@@ -2949,6 +3110,7 @@ async function renderPerformance() {
   Object.keys(c.baixas).forEach(n => { if (n) nomes.set(n, true); });
   Object.keys(c.resgates).forEach(n => { if (n) nomes.set(n, true); });
   Object.keys(c.contatos).forEach(n => { if (n) nomes.set(n, true); });
+  Object.keys(c.vendas).forEach(n => { if (n) nomes.set(n, true); });
   const linhas = [...nomes.keys()].map(nome => {
     const vb = (c.baixas[nome] || {}).valor || 0;
     const vr = (c.resgates[nome] || {}).valor || 0;
@@ -2959,6 +3121,7 @@ async function renderPerformance() {
       resgates: (c.resgates[nome] || {}).resgates || 0,
       vResgates: vr,
       total: vb + vr,
+      vendas: (c.vendas[nome] || {}).vendas || 0,
       contatos: (c.contatos[nome] || {}).contatos || 0,
       voltou: (c.contatos[nome] || {}).voltou || 0
     };
@@ -2970,7 +3133,7 @@ async function renderPerformance() {
   if (!linhas.length) {
     rank.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Nenhuma ação registrada no período.</td></tr></tbody>';
   } else {
-    rank.innerHTML = '<thead><tr><th>Recepcionista</th><th class="num">Baixas</th><th>R$ baixas<br><span class="hint">recuperado</span></th><th class="num">Resgates</th><th>R$ resgates<br><span class="hint">recuperado</span></th><th>Total recuperado</th><th class="num">Contatos</th></tr></thead><tbody>' +
+    rank.innerHTML = '<thead><tr><th>Recepcionista</th><th class="num">Baixas</th><th>R$ baixas<br><span class="hint">recuperado</span></th><th class="num">Resgates</th><th>R$ resgates<br><span class="hint">recuperado</span></th><th class="num">Vendas</th><th>Total recuperado</th><th class="num">Contatos</th></tr></thead><tbody>' +
       linhas.map((l, i) => {
         const top = i === 0 && l.total > 0 ? ' perf-top' : '';
         const pb = Math.max(2, Math.round(l.vBaixas / maxVB * 100));
@@ -2982,6 +3145,7 @@ async function renderPerformance() {
           '<td><div class="num">' + brl(l.vBaixas) + '</div><span class="perf-bar" style="width:' + pb + '%" title="R$ recuperado em baixas de inadimplentes"></span></td>' +
           '<td class="num">' + l.resgates + '</td>' +
           '<td><div class="num">' + brl(l.vResgates) + '</div><span class="perf-bar r" style="width:' + pr + '%" title="R$ recuperado em resgates de cancelados"></span></td>' +
+          '<td class="num' + (l.vendas ? '' : ' badge-zero') + '">' + l.vendas + '</td>' +
           '<td><div class="num" style="font-weight:600">' + brl(l.total) + '</div><span class="perf-bar" style="width:' + pt + '%;background:linear-gradient(90deg,var(--brass),var(--ok))" title="Total recuperado"></span></td>' +
           '<td class="num' + (l.contatos ? '' : ' badge-zero') + '">' + l.contatos + '</td>' +
           '</tr>';
