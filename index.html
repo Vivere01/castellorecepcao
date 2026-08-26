@@ -1564,24 +1564,20 @@ async function salvar() {
   if (typeof ESTADO.seq !== 'number') ESTADO.seq = 0;
   ESTADO.seq++;
   localBackup();
-  var enviadas = Object.keys(ESTADO.vendas || {}).length;
   try {
     const r = await apiReq('/api/data', 'POST', { estado: ESTADO, por: (SESSAO && SESSAO.nome) || 'sistema' });
     if (r && r.erro) {
       KV_ONLINE = false; atualizarRodape();
       if (!window.__avisoKV) { toast('Vercel KV não conectado: os dados ficam salvos SÓ neste navegador.', 'err'); window.__avisoKV = true; }
       marcarPendente(false);
-      if (window.atualizarHud) atualizarHud('salvar->ERRO ' + JSON.stringify(r) + ' (enviadas=' + enviadas + ')');
       clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
     } else {
       KV_ONLINE = true; atualizarRodape();
       marcarPendente(false);
-      if (window.atualizarHud) atualizarHud('salvar->OK enviadas=' + enviadas);
     }
   } catch (err) {
     KV_ONLINE = false; atualizarRodape();
     marcarPendente(false);
-    if (window.atualizarHud) atualizarHud('salvar->EXCECAO ' + (err && err.message));
     clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
   } finally { salvando = false; }
 }
@@ -1619,7 +1615,6 @@ function render() {
   else if (MODO === 'vendas') renderVendas();
   else renderCobranca();
   marcarPendente(false);
-  if (window.atualizarHud) atualizarHud();
 }
 function renderCobranca() {
   renderKpis(); renderAging(); renderAlertas(); renderFila(); renderUploads(); renderTabela();
@@ -2159,22 +2154,14 @@ function iniciar() {
     let serverEstado = null, serverSeq = -1;
     try {
       const r = await apiReq('/api/data', 'GET');
-      if (r && !r.erro && r.clientes) {
-        serverEstado = r; serverSeq = r.seq || 0;
-        if (window.atualizarHud) atualizarHud('LOAD servidor ok vendas=' + Object.keys(r.vendas || {}).length);
-      } else {
-        if (window.atualizarHud) atualizarHud('LOAD servidor erro=' + JSON.stringify(r && r.erro));
-      }
-    } catch (e) {
-      if (window.atualizarHud) atualizarHud('LOAD servidor excecao=' + (e && e.message));
-    }
+      if (r && !r.erro && r.clientes) { serverEstado = r; serverSeq = r.seq || 0; }
+    } catch (e) { }
     let localEstado = null, localSeq = -1;
     try {
       const raw = localStorage.getItem('cf-cobranca');
       if (raw) {
         const d = JSON.parse(raw);
         if (d && d.estado && d.estado.clientes) { localEstado = d.estado; localSeq = d.estado.seq || 0; }
-        if (window.atualizarHud) atualizarHud('LOAD local ok vendas=' + Object.keys((d && d.estado && d.estado.vendas) || {}).length);
       }
     } catch (e) { }
 
@@ -2184,7 +2171,6 @@ function iniciar() {
     normalizarEstado();
     KV_ONLINE = serverSeq >= 0;
     atualizarRodape();
-    if (window.atualizarHud) atualizarHud('LOAD merge feito ESTADO.vendas=' + Object.keys(ESTADO.vendas || {}).length);
     render();
   // sobe o estado mesclado para a nuvem (inclui dados que estavam só no navegador)
   if (serverSeq >= 0) agendarSalvar();
@@ -2920,7 +2906,6 @@ document.getElementById('v-add').onclick = () => {
     if (!unidade) { toast('Escolha a unidade.', 'err'); return; }
     const chave = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     ESTADO.vendas[chave] = { chave, nome, plano, valor, vencimento: venc, unidade, por: (SESSAO && SESSAO.nome) || '', data: hojeISO() };
-    if (window.atualizarHud) atualizarHud('ADD venda na memoria (total=' + Object.keys(ESTADO.vendas).length + ')');
     agendarSalvar();
     document.getElementById('v-nome').value = '';
     document.getElementById('v-valor').value = '';
@@ -2928,7 +2913,6 @@ document.getElementById('v-add').onclick = () => {
     renderVendas();
     toast('Venda de ' + nome + ' registrada.', 'ok');
   } catch (e) {
-    if (window.atualizarHud) atualizarHud('ERRO no add: ' + (e && e.message));
     toast('Erro ao adicionar venda: ' + (e && e.message), 'err');
   }
 };
@@ -3325,23 +3309,6 @@ document.querySelectorAll('#theme-btn, #login-theme').forEach(b => { if (b) b.on
 aplicarTema((function () { try { return localStorage.getItem(LS_TEMA); } catch (e) { return 'dark'; } })() || 'dark');
 if (SESSAO) mostrarApp(); else mostrarLogin();
 iniciar();
-</script>
-
-<div id="hud" style="position:fixed;left:8px;bottom:8px;z-index:9999;background:#000c;color:#6f6;font:11px/1.4 monospace;padding:8px 10px;border-radius:6px;max-width:340px;white-space:pre-wrap;pointer-events:none"></div>
-<script>
-  function atualizarHud(extra) {
-    var h = document.getElementById('hud'); if (!h) return;
-    var loc = 0;
-    try { var d = JSON.parse(localStorage.getItem('cf-cobranca') || '{}'); loc = Object.keys((d.estado && d.estado.vendas) || {}).length; } catch (e) {}
-    var mem = Object.keys(ESTADO.vendas || {}).length;
-    h.textContent = 'DEBUG HUD' + (location.search.indexOf('debug') >= 0 ? '' : ' (adicione ?debug na URL)') +
-      '\nKV_ONLINE=' + KV_ONLINE +
-      '\nvendas memoria=' + mem +
-      '\nvendas backup local=' + loc +
-      (extra ? '\n' + extra : '');
-  }
-  window.atualizarHud = atualizarHud;
-  atualizarHud('boot');
 </script>
 
 </body>
