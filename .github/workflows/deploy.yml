@@ -31,10 +31,14 @@ jobs:
 
       - name: Criar e vincular Vercel KV
         run: |
-          if ! vercel kv list --token="$VERCEL_TOKEN" ${VERCEL_SCOPE:+--scope="$VERCEL_SCOPE"} 2>/dev/null | grep -q castello-kv; then
-            vercel kv create castello-kv --yes --token="$VERCEL_TOKEN" ${VERCEL_SCOPE:+--scope="$VERCEL_SCOPE"}
+          vercel kv create castello-kv --yes --token="$VERCEL_TOKEN" ${VERCEL_SCOPE:+--scope="$VERCEL_SCOPE"} || true
+          vercel env pull .env.local --token="$VERCEL_TOKEN" ${VERCEL_SCOPE:+--scope="$VERCEL_SCOPE"} || true
+          if grep -q 'KV_REST_API_URL' .env.local 2>/dev/null; then
+            vercel env add KV_REST_API_URL "$(grep '^KV_REST_API_URL=' .env.local | cut -d= -f2-)" -t production -t preview -t development --token="$VERCEL_TOKEN" ${VERCEL_SCOPE:+--scope="$VERCEL_SCOPE"} || true
+            vercel env add KV_REST_API_TOKEN "$(grep '^KV_REST_API_TOKEN=' .env.local | cut -d= -f2-)" -t production -t preview -t development --token="$VERCEL_TOKEN" ${VERCEL_SCOPE:+--scope="$VERCEL_SCOPE"} || true
+            echo "KV vinculado: variaveis adicionadas ao projeto."
           else
-            echo "Store castello-kv ja existe."
+            echo "AVISO: variaveis do KV nao apareceram apos criar. Vincule manualmente no dashboard (Storage -> castello-kv -> connect)."
           fi
 
       - name: Verificar vinculo do KV no projeto
