@@ -1560,6 +1560,8 @@ async function salvar() {
   if (MODO_LEITURA) return;
   if (salvando) { clearTimeout(salvarT); salvarT = setTimeout(salvar, 500); return; }
   salvando = true;
+  if (typeof ESTADO.seq !== 'number') ESTADO.seq = 0;
+  ESTADO.seq++;
   localBackup();
   try {
     const r = await apiReq('/api/data', 'POST', { estado: ESTADO, por: (SESSAO && SESSAO.nome) || 'sistema' });
@@ -2123,37 +2125,53 @@ $('#btn-salvar-modelo').onclick = () => {
 };
 
 /* ============ boot ============ */
+function mesclar(sv, lv) {
+  const out = sv ? JSON.parse(JSON.stringify(sv)) : { clientes: {}, cancelados: {}, vendas: {}, uploads: [], uploadsCanc: [], modelo: '', modelosResgate: [], metas: {}, seq: 0 };
+  normalizarEstado(out);
+  const L = lv || {};
+  const porChave = (col) => {
+    Object.keys(L[col] || {}).forEach(k => {
+      const a = L[col][k], b = out[col][k];
+      if (!b) { out[col][k] = a; return; }
+      const ta = a.ultimaAlteracao || a.data || '';
+      const tb = b.ultimaAlteracao || b.data || '';
+      if (ta >= tb) out[col][k] = a;
+    });
+  };
+  porChave('clientes'); porChave('vendas'); porChave('cancelados');
+  const ids = new Set((out.uploads || []).map(u => u && u.id));
+  (L.uploads || []).forEach(u => { if (u && u.id && !ids.has(u.id)) { out.uploads.push(u); ids.add(u.id); } });
+  const idsC = new Set((out.uploadsCanc || []).map(u => u && u.id));
+  (L.uploadsCanc || []).forEach(u => { if (u && u.id && !idsC.has(u.id)) { out.uploadsCanc.push(u); idsC.add(u.id); } });
+  out.seq = Math.max(out.seq || 0, L.seq || 0);
+  return out;
+}
 function iniciar() {
 render();
 
 (async () => {
-  // dados mais recentes no servidor (Vercel KV)
-  let serverSeq = -1;
+  let serverEstado = null, serverSeq = -1;
   try {
     const r = await apiReq('/api/data', 'GET');
-    if (r && !r.erro && r.clientes) {
-      serverSeq = r.seq || 0;
-      if (serverSeq >= (ESTADO.seq || 0)) { ESTADO = r; normalizarEstado(); render(); }
-    }
+    if (r && !r.erro && r.clientes) { serverEstado = r; serverSeq = r.seq || 0; }
   } catch (e) { }
-  // backup local, se for mais novo (ou servidor indisponível)
-  let localSeq = -1;
+  let localEstado = null, localSeq = -1;
   try {
     const raw = localStorage.getItem('cf-cobranca');
     if (raw) {
       const d = JSON.parse(raw);
-      if (d && d.estado && d.estado.clientes) {
-        localSeq = d.estado.seq || 0;
-        if (localSeq > (ESTADO.seq || 0)) { ESTADO = d.estado; normalizarEstado(); render(); }
-      }
+      if (d && d.estado && d.estado.clientes) { localEstado = d.estado; localSeq = d.estado.seq || 0; }
     }
   } catch (e) { }
 
-  MODO_LEITURA = false;
+  if (serverSeq >= 0 && localSeq >= 0) ESTADO = mesclar(serverEstado, localEstado);
+  else if (serverSeq >= 0) ESTADO = serverEstado;
+  else if (localSeq >= 0) ESTADO = localEstado;
+  normalizarEstado();
   KV_ONLINE = serverSeq >= 0;
   atualizarRodape();
-  // se o KV está online e temos dados mais novos no navegador, sobe para o KV
-  if (serverSeq >= 0 && localSeq > serverSeq) agendarSalvar();
+  // sobe o estado mesclado para a nuvem (inclui dados que estavam só no navegador)
+  if (serverSeq >= 0) agendarSalvar();
   marcarPendente(false);
 })();
 }
@@ -2194,17 +2212,18 @@ const PLANOS_VENDA = [
   { nome: 'CORTE & BARBA BLACK', valor: 209.99 }
 ];
 
-function normalizarEstado() {
-  if (!ESTADO.clientes) ESTADO.clientes = {};
-  if (!ESTADO.unidadeDe) ESTADO.unidadeDe = {};
-  if (!ESTADO.uploads) ESTADO.uploads = [];
-  if (!ESTADO.cancelados) ESTADO.cancelados = {};
-  if (!ESTADO.vendas) ESTADO.vendas = {};
-  if (!ESTADO.uploadsCanc) ESTADO.uploadsCanc = [];
-  if (!ESTADO.modelo) ESTADO.modelo = MODELO_PADRAO;
-  if (!ESTADO.modelosResgate || ESTADO.modelosResgate.length !== 3) ESTADO.modelosResgate = MODELOS_RESGATE_PADRAO.slice();
-  if (!ESTADO.metas) ESTADO.metas = {};
-  if (!ESTADO.seq) ESTADO.seq = 0;
+function normalizarEstado(e) {
+  e = e || ESTADO;
+  if (!e.clientes) e.clientes = {};
+  if (!e.unidadeDe) e.unidadeDe = {};
+  if (!e.uploads) e.uploads = [];
+  if (!e.cancelados) e.cancelados = {};
+  if (!e.vendas) e.vendas = {};
+  if (!e.uploadsCanc) e.uploadsCanc = [];
+  if (!e.modelo) e.modelo = MODELO_PADRAO;
+  if (!e.modelosResgate || e.modelosResgate.length !== 3) e.modelosResgate = MODELOS_RESGATE_PADRAO.slice();
+  if (!e.metas) e.metas = {};
+  if (!e.seq) e.seq = 0;
 }
 normalizarEstado();
 
