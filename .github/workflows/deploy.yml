@@ -1,0 +1,46 @@
+name: Vercel Deploy + KV
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar Vercel CLI
+        run: npm i -g vercel
+
+      - name: Linkar projeto
+        run: |
+          if [ -n "$VERCEL_SCOPE" ]; then
+            vercel link --yes --token="$VERCEL_TOKEN" --project=castellorecepcao --scope="$VERCEL_SCOPE"
+          else
+            vercel link --yes --token="$VERCEL_TOKEN" --project=castellorecepcao
+          fi
+
+      - name: Criar e vincular Vercel KV (idempotente)
+        run: |
+          if [ -n "$VERCEL_SCOPE" ]; then
+            vercel kv create castello-kv --token="$VERCEL_TOKEN" --scope="$VERCEL_SCOPE" || true
+          else
+            vercel kv create castello-kv --token="$VERCEL_TOKEN" || true
+          fi
+
+      - name: Deploy em produção
+        run: |
+          if [ -n "$VERCEL_SCOPE" ]; then
+            vercel deploy --prod --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_SCOPE"
+          else
+            vercel deploy --prod --yes --token="$VERCEL_TOKEN"
+          fi
