@@ -1,0 +1,2559 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Réguas Castello Forte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" data-mine>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin data-mine>
+<link data-mine rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style data-mine>
+:root{
+  --bg:#131110; --surface:#1B1815; --surface2:#232019; --surface3:#2C271F;
+  --line:#332D25; --line2:#443C31;
+  --ink:#F2EDE5; --ink2:#A89C8C; --ink3:#7A7063;
+  --brass:#C79A46; --brass-dim:#8A6D33;
+  --ok:#5FA97E; --ok-bg:#16281f;
+  --warn:#D9873C; --warn-bg:#2B2015;
+  --bad:#D3544A; --bad-bg:#2E1917;
+  --info:#7095C7; --info-bg:#181f2b;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.28);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#F5F2EC; --surface:#FFFFFF; --surface2:#F0EBE2; --surface3:#E6E0D4;
+    --line:#DFD8CA; --line2:#CDC4B2;
+    --ink:#1D1915; --ink2:#6B6255; --ink3:#8C8375;
+    --brass:#8A6516; --brass-dim:#B7913F;
+    --ok:#2F7A50; --ok-bg:#E7F2EB;
+    --warn:#A65C13; --warn-bg:#FBEEE0;
+    --bad:#B23125; --bad-bg:#FBE9E7;
+    --info:#3A6098; --info-bg:#E9EFF8;
+    --shadow:0 1px 2px rgba(60,48,30,.08),0 8px 24px rgba(60,48,30,.08);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F5F2EC; --surface:#FFFFFF; --surface2:#F0EBE2; --surface3:#E6E0D4;
+  --line:#DFD8CA; --line2:#CDC4B2;
+  --ink:#1D1915; --ink2:#6B6255; --ink3:#8C8375;
+  --brass:#8A6516; --brass-dim:#B7913F;
+  --ok:#2F7A50; --ok-bg:#E7F2EB;
+  --warn:#A65C13; --warn-bg:#FBEEE0;
+  --bad:#B23125; --bad-bg:#FBE9E7;
+  --info:#3A6098; --info-bg:#E9EFF8;
+  --shadow:0 1px 2px rgba(60,48,30,.08),0 8px 24px rgba(60,48,30,.08);
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0; font-weight:500; text-wrap:balance}
+button{font:inherit; color:inherit; cursor:pointer}
+input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--brass); outline-offset:2px; border-radius:3px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+td.num{white-space:nowrap}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+
+/* topo */
+.topbar{
+  position:sticky; top:0; z-index:40; background:var(--surface);
+  border-bottom:1px solid var(--line);
+}
+.topbar-in{
+  max-width:1560px; margin:0 auto; padding:12px 20px;
+  display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:baseline; gap:10px; margin-right:auto}
+.brand .mark{
+  font-family:Fraunces,Georgia,serif; font-weight:700; font-size:19px;
+  letter-spacing:-.01em; color:var(--ink);
+}
+.brand .sub{
+  font-size:10.5px; text-transform:uppercase; letter-spacing:.14em;
+  color:var(--brass); font-weight:600;
+}
+.tabs{display:flex; gap:2px; background:var(--surface2); padding:3px; border-radius:8px; flex-wrap:wrap}
+.tab{
+  border:0; background:transparent; padding:6px 13px; border-radius:6px;
+  font-size:12.5px; font-weight:500; color:var(--ink2); white-space:nowrap;
+}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--surface); color:var(--ink); box-shadow:var(--shadow)}
+.tab .cnt{font-size:11px; color:var(--ink3); margin-left:6px; font-family:"IBM Plex Mono",monospace}
+.tab[aria-selected="true"] .cnt{color:var(--brass)}
+
+.btn{
+  border:1px solid var(--line2); background:var(--surface2); color:var(--ink);
+  padding:7px 14px; border-radius:7px; font-size:13px; font-weight:500;
+  display:inline-flex; align-items:center; gap:7px;
+}
+.btn:hover{background:var(--surface3); border-color:var(--brass-dim)}
+.btn-primary{background:var(--brass); border-color:var(--brass); color:#17130B; font-weight:600}
+.btn-primary:hover{filter:brightness(1.08); background:var(--brass)}
+.btn-sm{padding:4px 9px; font-size:12px; border-radius:6px}
+.btn-ghost{background:transparent; border-color:transparent; color:var(--ink2)}
+.btn-ghost:hover{background:var(--surface2); color:var(--ink)}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+
+/* layout */
+.wrap{max-width:1560px; margin:0 auto; padding:20px; display:flex; flex-direction:column; gap:16px}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(178px,1fr)); gap:12px}
+.kpi{
+  background:var(--surface); border:1px solid var(--line); border-radius:11px;
+  padding:14px 16px; display:flex; flex-direction:column; gap:5px; position:relative; overflow:hidden;
+}
+.kpi .lab{font-size:10.5px; text-transform:uppercase; letter-spacing:.11em; color:var(--ink3); font-weight:600}
+.kpi .val{font-size:25px; font-weight:600; letter-spacing:-.025em; line-height:1.1}
+.kpi .foot{font-size:11.5px; color:var(--ink2)}
+.kpi.is-bad .val{color:var(--bad)} .kpi.is-ok .val{color:var(--ok)} .kpi.is-warn .val{color:var(--warn)}
+
+.cols{display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:16px; align-items:start}
+@media (max-width:1120px){ .cols{grid-template-columns:minmax(0,1fr)} }
+.rail{display:flex; flex-direction:column; gap:14px}
+
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:11px; overflow:hidden}
+.panel-h{
+  display:flex; align-items:center; gap:10px; padding:11px 15px;
+  border-bottom:1px solid var(--line); background:var(--surface);
+}
+.panel-h h2{font-family:Fraunces,Georgia,serif; font-size:14.5px; font-weight:700; letter-spacing:-.01em}
+.panel-h .hint{font-size:11.5px; color:var(--ink3); margin-left:auto; text-align:right}
+.panel-b{padding:13px 15px}
+
+/* aging */
+.aging{display:flex; flex-direction:column; gap:9px}
+.aging-row{display:grid; grid-template-columns:64px 1fr 96px; align-items:center; gap:10px; font-size:12px}
+.aging-row .lb{color:var(--ink2); white-space:nowrap}
+.bar{height:9px; border-radius:5px; background:var(--surface3); overflow:hidden}
+.bar > i{display:block; height:100%; border-radius:5px}
+.aging-row .vl{text-align:right; color:var(--ink); font-size:12.5px}
+
+/* alertas */
+.alert{
+  display:flex; gap:10px; padding:10px 12px; border-radius:9px; font-size:12.5px;
+  border:1px solid transparent; align-items:flex-start;
+}
+.alert .ico{font-weight:700; font-size:13px; line-height:1.3}
+.alert.bad{background:var(--bad-bg); border-color:var(--bad); color:var(--ink)}
+.alert.warn{background:var(--warn-bg); border-color:var(--warn); color:var(--ink)}
+.alert.ok{background:var(--ok-bg); border-color:var(--ok); color:var(--ink)}
+.alert.info{background:var(--info-bg); border-color:var(--info); color:var(--ink)}
+.alert b{font-weight:600}
+.stack{display:flex; flex-direction:column; gap:9px}
+
+/* tabela */
+.toolbar{display:flex; gap:8px; padding:10px 15px; border-bottom:1px solid var(--line); flex-wrap:wrap; align-items:center}
+.field{
+  background:var(--surface2); border:1px solid var(--line); border-radius:7px;
+  padding:6px 10px; font-size:12.5px; color:var(--ink);
+}
+.field::placeholder{color:var(--ink3)}
+input.field{min-width:180px}
+.tblwrap{overflow-x:auto; max-height:min(70vh,900px); overflow-y:auto}
+table{border-collapse:collapse; width:100%; font-size:12.8px}
+thead th{
+  position:sticky; top:0; z-index:2; background:var(--surface2);
+  text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.09em;
+  color:var(--ink3); font-weight:600; padding:8px 9px; border-bottom:1px solid var(--line2);
+  white-space:nowrap; cursor:pointer; user-select:none;
+}
+thead th:hover{color:var(--ink)}
+thead th.no{cursor:default}
+tbody td{padding:8px 9px; border-bottom:1px solid var(--line); vertical-align:middle}
+tbody tr:hover{background:var(--surface2)}
+tbody tr.baixado{opacity:.5}
+tbody tr.recobranca{background:var(--bad-bg)}
+tbody tr.recobranca:hover{background:var(--bad-bg); filter:brightness(1.12)}
+tbody tr.sugerido{background:var(--ok-bg)}
+.cli{display:flex; flex-direction:column; gap:1px; min-width:150px}
+.cli .n{font-weight:500}
+.cli .p{font-size:10.5px; color:var(--ink3); max-width:215px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.chip{
+  display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:20px;
+  font-size:11px; font-weight:600; white-space:nowrap; border:1px solid transparent;
+}
+.chip.d0{background:var(--surface3); color:var(--ink2)}
+.chip.d1{background:var(--warn-bg); color:var(--warn); border-color:var(--warn)}
+.chip.d2{background:var(--bad-bg); color:var(--bad); border-color:var(--bad)}
+.chip.ok{background:var(--ok-bg); color:var(--ok); border-color:var(--ok)}
+.chip.bad{background:var(--bad-bg); color:var(--bad); border-color:var(--bad)}
+.chip.info{background:var(--info-bg); color:var(--info); border-color:var(--info)}
+.acts{display:flex; gap:5px; justify-content:flex-end; white-space:nowrap}
+td:has(> .acts){white-space:nowrap}
+.nowrap{white-space:nowrap}
+a.zap{
+  text-decoration:none; border:1px solid var(--line2); background:var(--surface2);
+  padding:4px 9px; border-radius:6px; font-size:12px; color:var(--ink);
+}
+a.zap:hover{border-color:var(--ok); color:var(--ok)}
+.sel-contato{
+  background:transparent; border:1px solid var(--line); border-radius:6px;
+  padding:3px 6px; font-size:11.5px; color:var(--ink2); max-width:132px;
+}
+.empty{padding:40px 20px; text-align:center; color:var(--ink3); font-size:13px}
+
+/* fila */
+.fila-item{
+  display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid var(--line);
+}
+.fila-item:last-child{border-bottom:0}
+.fila-item .info{min-width:0; flex:1}
+.fila-item .info .n{font-size:12.8px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.fila-item .info .m{font-size:11px; color:var(--ink3)}
+
+/* upload */
+.drop{
+  border:1.5px dashed var(--line2); border-radius:11px; padding:22px; text-align:center;
+  background:var(--surface2); transition:border-color .15s,background .15s;
+}
+.drop.over{border-color:var(--brass); background:var(--surface3)}
+.drop p{margin:6px 0 0; font-size:12.5px; color:var(--ink2)}
+
+/* modal */
+.modal{
+  position:fixed; inset:0; z-index:90; background:rgba(9,7,5,.7);
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  backdrop-filter:blur(3px);
+}
+.modal[hidden]{display:none}
+.sheet{
+  background:var(--surface); border:1px solid var(--line2); border-radius:13px;
+  width:min(660px,100%); max-height:88vh; overflow:auto; box-shadow:var(--shadow);
+}
+.sheet-h{display:flex; align-items:center; gap:12px; padding:15px 18px; border-bottom:1px solid var(--line)}
+.sheet-h h2{font-family:Fraunces,Georgia,serif; font-size:16px; font-weight:700}
+.sheet-b{padding:16px 18px; display:flex; flex-direction:column; gap:14px}
+.sheet-f{padding:13px 18px; border-top:1px solid var(--line); display:flex; gap:9px; justify-content:flex-end}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+label.lb{display:flex; flex-direction:column; gap:5px; font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink3); font-weight:600}
+label.lb .field{text-transform:none; letter-spacing:0; font-weight:400; color:var(--ink)}
+.resumo{display:grid; grid-template-columns:repeat(auto-fit,minmax(108px,1fr)); gap:9px}
+.rz{background:var(--surface2); border:1px solid var(--line); border-radius:9px; padding:10px 12px}
+.rz .v{font-size:20px; font-weight:600; letter-spacing:-.02em}
+.rz .l{font-size:10.5px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink3); font-weight:600}
+.lista-mini{max-height:200px; overflow:auto; font-size:12px; display:flex; flex-direction:column; gap:4px}
+.lista-mini div{padding:5px 9px; background:var(--surface2); border-radius:6px}
+
+/* toast */
+.toast{
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+  background:var(--surface3); border:1px solid var(--line2); color:var(--ink);
+  padding:10px 18px; border-radius:9px; font-size:13px; z-index:120; box-shadow:var(--shadow);
+}
+.toast[hidden]{display:none}
+.toast.err{border-color:var(--bad); color:var(--bad)}
+.toast.ok{border-color:var(--ok)}
+
+.readonly-banner{
+  background:var(--warn-bg); border-bottom:1px solid var(--warn);
+  padding:8px 20px; font-size:12.5px; text-align:center; color:var(--ink);
+}
+.hist{display:flex; flex-direction:column; gap:7px; font-size:11.5px; max-height:230px; overflow:auto}
+.hist .h{display:flex; gap:8px; align-items:baseline; padding-bottom:6px; border-bottom:1px solid var(--line)}
+.hist .h:last-child{border-bottom:0}
+.hist .d{color:var(--ink3); white-space:nowrap}
+.hist .t{color:var(--ink2)}
+
+/* alternador de modo */
+.modos{display:flex; gap:3px; background:var(--surface2); padding:3px; border-radius:9px; border:1px solid var(--line)}
+.modo{
+  border:0; background:transparent; padding:7px 15px; border-radius:7px;
+  font-size:13px; font-weight:600; color:var(--ink3); display:inline-flex; align-items:center; gap:7px;
+}
+.modo:hover{color:var(--ink)}
+.modo[aria-selected="true"]{background:var(--brass); color:#17130B}
+.modo .cnt{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  background:var(--surface3); color:var(--ink2); padding:1px 6px; border-radius:20px;
+}
+.modo[aria-selected="true"] .cnt{background:rgba(0,0,0,.22); color:#17130B}
+.acoes{display:flex; gap:8px; flex-wrap:wrap}
+.acoes[hidden]{display:none}
+.hint.mono, #contagem, #r-contagem{margin-left:auto; color:var(--ink3); font-size:11.5px}
+
+/* placar */
+.placar-meta{display:flex; flex-direction:column; gap:7px; margin-bottom:14px}
+.placar-meta .top{display:flex; align-items:baseline; gap:8px}
+.placar-meta .big{font-size:30px; font-weight:600; letter-spacing:-.03em; line-height:1}
+.placar-meta .of{font-size:13px; color:var(--ink2)}
+.placar-meta .lb{font-size:10.5px; text-transform:uppercase; letter-spacing:.11em; color:var(--ink3); font-weight:600; margin-left:auto}
+.meter{height:11px; border-radius:6px; background:var(--surface3); overflow:hidden}
+.meter > i{display:block; height:100%; border-radius:6px; background:var(--ok)}
+.meter.baixo > i{background:var(--bad)}
+.meter.medio > i{background:var(--warn)}
+.placar-grid{display:grid; grid-template-columns:1fr 1fr; gap:9px}
+.pg{background:var(--surface2); border:1px solid var(--line); border-radius:9px; padding:9px 11px}
+.pg .v{font-size:18px; font-weight:600; letter-spacing:-.02em}
+.pg .l{font-size:10px; line-height:1.35; text-transform:uppercase; letter-spacing:.09em; color:var(--ink3); font-weight:600}
+
+/* ranking */
+.rank{display:flex; flex-direction:column; gap:8px}
+.rank-row{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; font-size:12.5px; padding-bottom:8px; border-bottom:1px solid var(--line)}
+.rank-row:last-child{border-bottom:0; padding-bottom:0}
+.rank-row .nm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.rank-row .a{color:var(--ink2); font-family:"IBM Plex Mono",monospace; font-size:11.5px}
+.rank-row .b{color:var(--ok); font-weight:600; font-family:"IBM Plex Mono",monospace}
+.rank-row.zero .b{color:var(--ink3)}
+
+.chip.toque{background:var(--surface3); color:var(--ink2); font-family:"IBM Plex Mono",monospace}
+.chip.atrasado{background:var(--bad-bg); color:var(--bad); border-color:var(--bad)}
+.chip.hoje{background:var(--warn-bg); color:var(--warn); border-color:var(--warn)}
+.chip.agendado{background:var(--surface3); color:var(--ink3)}
+tr.resgatado{background:var(--ok-bg)}
+tr.perdido{opacity:.45}
+
+#modelo-preview{white-space:pre-wrap}
+.foot-note{font-size:11.5px; color:var(--ink3); text-align:center; padding:6px 0 22px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+
+</head>
+<body>
+<div id="ro-banner" class="readonly-banner" hidden>
+  Você está no modo leitura — dá pra consultar e ligar, mas o que você registrar aqui não vai ser salvo para os outros.
+</div>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="mark">Castello Forte</span>
+      <span class="sub" id="brand-sub">Régua de cobrança</span>
+    </div>
+    <div class="modos" id="modos" role="tablist">
+      <button class="modo" type="button" data-modo="cobranca" aria-selected="true">Cobrança<span class="cnt" id="cnt-cob"></span></button>
+      <button class="modo" type="button" data-modo="resgate" aria-selected="false">Resgate<span class="cnt" id="cnt-res"></span></button>
+    </div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <span id="acoes-cob" class="acoes">
+      <button class="btn" id="btn-modelo" type="button">Mensagem</button>
+      <button class="btn" id="btn-exportar" type="button">Exportar</button>
+      <button class="btn btn-primary" id="btn-upload" type="button">Subir inadimplentes</button>
+    </span>
+    <span id="acoes-res" class="acoes" hidden>
+      <button class="btn" id="btn-modelo-res" type="button">Mensagens</button>
+      <button class="btn" id="btn-exportar-res" type="button">Exportar</button>
+      <button class="btn btn-primary" id="btn-upload-res" type="button">Subir cancelados</button>
+    </span>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="kpis" id="kpis"></section>
+
+  <!-- ============ COBRANÇA ============ -->
+  <div class="cols" id="view-cobranca">
+    <main class="panel">
+      <div class="toolbar">
+        <input class="field" id="busca" type="search" placeholder="Buscar nome, telefone ou plano…">
+        <select class="field" id="f-situacao">
+          <option value="aberto">Em aberto</option>
+          <option value="todos">Todos</option>
+          <option value="baixado">Baixados</option>
+          <option value="recobranca">Voltaram a cobrar</option>
+          <option value="sugerido">A confirmar</option>
+        </select>
+        <select class="field" id="f-aging">
+          <option value="">Qualquer atraso</option>
+          <option value="a">Até 15 dias</option>
+          <option value="b">16 a 30 dias</option>
+          <option value="c">31 a 60 dias</option>
+          <option value="d">Mais de 60 dias</option>
+        </select>
+        <select class="field" id="f-contato">
+          <option value="">Qualquer contato</option>
+          <option value="nao_contatado">Não contatado</option>
+          <option value="contatado">Contatado</option>
+          <option value="prometeu">Prometeu pagar</option>
+          <option value="nao_atende">Não atende</option>
+          <option value="negociado">Negociado</option>
+        </select>
+        <span class="hint mono" id="contagem"></span>
+      </div>
+      <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="nome">Cliente</th>
+              <th data-sort="unidade">Unidade</th>
+              <th data-sort="vencimento">Vencimento</th>
+              <th data-sort="dias">Atraso</th>
+              <th data-sort="valor" style="text-align:right">Valor</th>
+              <th data-sort="cobranca">Cobrança</th>
+              <th data-sort="contato">Contato</th>
+              <th class="no" style="text-align:right">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="corpo"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <aside class="rail">
+      <section class="panel" id="p-fila" hidden>
+        <div class="panel-h"><h2>Sumiram da planilha</h2><span class="hint">confirme a baixa</span></div>
+        <div class="panel-b" id="fila"></div>
+      </section>
+      <section class="panel" id="p-alertas" hidden>
+        <div class="panel-h"><h2>Avisos</h2></div>
+        <div class="panel-b stack" id="alertas"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>Tempo de atraso</h2><span class="hint" id="aging-hint"></span></div>
+        <div class="panel-b aging" id="aging"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>Uploads</h2></div>
+        <div class="panel-b"><div class="hist" id="uploads"></div></div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- ============ RESGATE ============ -->
+  <div class="cols" id="view-resgate" hidden>
+    <main class="panel">
+      <div class="toolbar">
+        <input class="field" id="r-busca" type="search" placeholder="Buscar nome, telefone ou barbeiro…">
+        <select class="field" id="r-situacao">
+          <option value="hoje">Ligar hoje</option>
+          <option value="fila">Toda a fila</option>
+          <option value="resgatado">Resgatados</option>
+          <option value="perdido">Encerrados</option>
+          <option value="todos">Todos</option>
+        </select>
+        <select class="field" id="r-toque">
+          <option value="">Qualquer toque</option>
+          <option value="0">Toque 1 — ouvir o motivo</option>
+          <option value="1">Toque 2 — trazer de volta</option>
+          <option value="2">Toque 3 — condição final</option>
+        </select>
+        <select class="field" id="r-motivo"></select>
+        <span class="hint mono" id="r-contagem"></span>
+      </div>
+      <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-rsort="nome">Cliente</th>
+              <th data-rsort="unidade">Unidade</th>
+              <th data-rsort="cancelamento">Saiu em</th>
+              <th data-rsort="barbeiro">Barbeiro</th>
+              <th data-rsort="toque">Toque</th>
+              <th data-rsort="proximoToque">Contatar</th>
+              <th data-rsort="resultado">Situação</th>
+              <th class="no" style="text-align:right">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="r-corpo"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <aside class="rail">
+      <section class="panel">
+        <div class="panel-h"><h2>Placar do mês</h2><button class="btn btn-sm btn-ghost" id="btn-meta" type="button">Meta</button></div>
+        <div class="panel-b" id="placar"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>Quem está trabalhando a fila</h2></div>
+        <div class="panel-b" id="ranking"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>Por que estão saindo</h2><span class="hint" id="motivos-hint"></span></div>
+        <div class="panel-b aging" id="motivos"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>Uploads</h2></div>
+        <div class="panel-b"><div class="hist" id="r-uploads"></div></div>
+      </section>
+    </aside>
+  </div>
+
+  <p class="foot-note" id="rodape"></p>
+</div>
+
+<!-- modal upload inadimplentes -->
+<div class="modal" id="m-upload" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="t-upload">
+    <div class="sheet-h">
+      <h2 id="t-upload">Subir a planilha de inadimplentes</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <label class="lb">Data desta lista<input class="field" type="date" id="data-lista"></label>
+      <div class="drop" id="drop">
+        <strong style="font-size:13.5px">Arraste o arquivo aqui</strong>
+        <p>ou <button class="btn btn-sm" id="btn-escolher" type="button">escolher no computador</button></p>
+        <p style="font-size:11px;color:var(--ink3)">Aceita .xlsx e .csv — o mesmo arquivo que você exporta hoje</p>
+        <input type="file" id="arquivo" accept=".xlsx,.csv,.txt" hidden>
+      </div>
+      <div id="preview"></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btn-aplicar" type="button" disabled>Aplicar conciliação</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal upload cancelados -->
+<div class="modal" id="m-upload-res" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="t-upload-res">
+    <div class="sheet-h">
+      <h2 id="t-upload-res">Subir a planilha de cancelados</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <label class="lb">Data desta lista<input class="field" type="date" id="r-data-lista"></label>
+      <div class="drop" id="r-drop">
+        <strong style="font-size:13.5px">Arraste o arquivo aqui</strong>
+        <p>ou <button class="btn btn-sm" id="r-btn-escolher" type="button">escolher no computador</button></p>
+        <p style="font-size:11px;color:var(--ink3)">Se tiver coluna de data de cancelamento e de barbeiro, eu uso as duas</p>
+        <input type="file" id="r-arquivo" accept=".xlsx,.csv,.txt" hidden>
+      </div>
+      <div id="r-preview"></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Cancelar</button>
+      <button class="btn btn-primary" id="r-btn-aplicar" type="button" disabled>Colocar na fila de resgate</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal baixa -->
+<div class="modal" id="m-baixa" hidden>
+  <div class="sheet" style="width:min(460px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-baixa">
+    <div class="sheet-h">
+      <h2 id="t-baixa">Dar baixa</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <div id="baixa-quem" style="font-size:13px"></div>
+      <label class="lb">Motivo
+        <select class="field" id="baixa-motivo">
+          <option value="pago">Pagou</option>
+          <option value="negociado">Negociou / parcelou</option>
+          <option value="cancelado">Cancelou o plano</option>
+          <option value="perda">Perda — parou de cobrar</option>
+        </select>
+      </label>
+      <div class="grid2">
+        <label class="lb">Data<input class="field" type="date" id="baixa-data"></label>
+        <label class="lb">Quem deu baixa<input class="field" id="baixa-por" placeholder="Ex.: Recepção Cabo Frio"></label>
+      </div>
+      <label class="lb">Observação<input class="field" id="baixa-obs" placeholder="opcional"></label>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirmar-baixa" type="button">Confirmar baixa</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal registrar contato -->
+<div class="modal" id="m-toque" hidden>
+  <div class="sheet" style="width:min(520px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-toque">
+    <div class="sheet-h">
+      <h2 id="t-toque">Registrar contato</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <div id="toque-quem" style="font-size:13px"></div>
+      <div class="alert info" id="toque-roteiro"><span class="ico">→</span><span></span></div>
+      <label class="lb">O que aconteceu na ligação
+        <select class="field" id="toque-resultado">
+          <option value="voltou">Voltou — reativou o plano</option>
+          <option value="vai_pensar">Vai pensar / pediu pra ligar depois</option>
+          <option value="nao_quer">Não quer voltar</option>
+          <option value="nao_atende">Não atendeu</option>
+          <option value="numero_errado">Número errado</option>
+        </select>
+      </label>
+      <label class="lb" id="wrap-motivo">Motivo do cancelamento
+        <select class="field" id="toque-motivo"></select>
+      </label>
+      <div class="grid2">
+        <label class="lb">Barbeiro que atendia
+          <input class="field" id="toque-barbeiro" list="lista-barbeiros" placeholder="opcional">
+          <datalist id="lista-barbeiros"></datalist>
+        </label>
+        <label class="lb">Quem ligou
+          <input class="field" id="toque-por" placeholder="Ex.: Ana — Cabo Frio">
+        </label>
+      </div>
+      <label class="lb">Observação<input class="field" id="toque-obs" placeholder="o que o cliente falou, com as palavras dele"></label>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-toque" type="button">Salvar contato</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal meta -->
+<div class="modal" id="m-meta" hidden>
+  <div class="sheet" style="width:min(420px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-meta">
+    <div class="sheet-h">
+      <h2 id="t-meta">Meta de resgate</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <p style="margin:0;font-size:12.5px;color:var(--ink2)">Quantos clientes cada unidade precisa trazer de volta por mês. É o número que aparece no placar.</p>
+      <div id="meta-campos" class="stack"></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-meta" type="button">Salvar meta</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal cliente (cobrança) -->
+<div class="modal" id="m-cliente" hidden>
+  <div class="sheet" style="width:min(560px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-cliente">
+    <div class="sheet-h">
+      <h2 id="t-cliente">Cliente</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b" id="cliente-b"></div>
+    <div class="sheet-f"><button class="btn" data-fechar type="button">Fechar</button></div>
+  </div>
+</div>
+
+<!-- modal cliente (resgate) -->
+<div class="modal" id="m-cancelado" hidden>
+  <div class="sheet" style="width:min(560px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-cancelado">
+    <div class="sheet-h">
+      <h2 id="t-cancelado">Histórico do resgate</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b" id="cancelado-b"></div>
+    <div class="sheet-f"><button class="btn" data-fechar type="button">Fechar</button></div>
+  </div>
+</div>
+
+<!-- modal mensagem cobrança -->
+<div class="modal" id="m-modelo" hidden>
+  <div class="sheet" style="width:min(560px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-modelo">
+    <div class="sheet-h">
+      <h2 id="t-modelo">Mensagem de cobrança</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <p style="margin:0;font-size:12.5px;color:var(--ink2)">
+        Texto que abre no WhatsApp quando a recepção clica em <b>Zap</b>. Use
+        <span class="mono">{nome}</span>, <span class="mono">{primeiro}</span>, <span class="mono">{plano}</span>,
+        <span class="mono">{valor}</span>, <span class="mono">{vencimento}</span>, <span class="mono">{dias}</span> e
+        <span class="mono">{unidade}</span>.
+      </p>
+      <textarea class="field" id="modelo-txt" rows="7" style="resize:vertical"></textarea>
+      <div class="alert info"><span class="ico">↳</span><span id="modelo-preview"></span></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-modelo" type="button">Salvar modelo</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal mensagens resgate -->
+<div class="modal" id="m-modelo-res" hidden>
+  <div class="sheet" style="width:min(620px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-modelo-res">
+    <div class="sheet-h">
+      <h2 id="t-modelo-res">Mensagens de resgate</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <p style="margin:0;font-size:12.5px;color:var(--ink2)">
+        Uma mensagem para cada toque. Use <span class="mono">{primeiro}</span>, <span class="mono">{nome}</span>,
+        <span class="mono">{plano}</span>, <span class="mono">{unidade}</span>, <span class="mono">{barbeiro}</span>,
+        <span class="mono">{dias}</span> (dias desde o cancelamento) e <span class="mono">{motivo}</span>.
+      </p>
+      <label class="lb">Toque 1 — ouvir o motivo (2 dias após o cancelamento)
+        <textarea class="field" id="mr1" rows="4" style="resize:vertical"></textarea></label>
+      <label class="lb">Toque 2 — trazer de volta (10 dias)
+        <textarea class="field" id="mr2" rows="4" style="resize:vertical"></textarea></label>
+      <label class="lb">Toque 3 — condição final (25 dias)
+        <textarea class="field" id="mr3" rows="4" style="resize:vertical"></textarea></label>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-modelo-res" type="button">Salvar mensagens</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script type="application/json" id="estado">{"v":1,"clientes":{"tel:2298107860":{"chave":"tel:2298107860","nome":"Savio Vogt Lopes","email":"saviovogt@hotmail.com","telefone":"2298107860","telefoneBruto":"(22) 99810-7860","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-20","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2298453305":{"chave":"tel:2298453305","nome":"Eulalio Soares de Menezes","email":"eulalio1005@yahoo.com.br","telefone":"2298453305","telefoneBruto":"(22) 99845-3305","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"Manual","vencimento":"2026-08-13","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2299139922":{"chave":"tel:2299139922","nome":"Lucas de Oliveira Guimarães","email":"lucasguimaraes25@gmail.com","telefone":"2299139922","telefoneBruto":"(22) 99913-9922","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"Manual","vencimento":"2026-08-23","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2297023929":{"chave":"tel:2297023929","nome":"Natã Coutinho","email":"natanbuzios@hotmail.com","telefone":"2297023929","telefoneBruto":"(22) 9702-3929","cpf":"","unidade":"BUZIOS","plano":"PLANO BLACK - BARBA (BÚZIOS)","cobranca":"CashPag","vencimento":"2026-08-15","valor":109.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":109.9}],"duplicadoNoArquivo":0},"tel:2297813412":{"chave":"tel:2297813412","nome":"Diego Dias","email":"diegodias@castelloforte.com.br","telefone":"2297813412","telefoneBruto":"(22) 99781-3412","cpf":"","unidade":"RIO DAS OSTRAS","plano":"Black +  ( corte de cabelo )","cobranca":"Manual","vencimento":"2026-08-15","valor":149.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":149.99}],"duplicadoNoArquivo":0},"tel:2299938483":{"chave":"tel:2299938483","nome":"Lucas Morais Martins","email":"lucasmoraimartins@castelloforte.com.br","telefone":"2299938483","telefoneBruto":"(22) 99993-8483","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"CashPag","vencimento":"2026-08-19","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2292522811":{"chave":"tel:2292522811","nome":"Leandro Machado da Costa","email":"leandromachado1986@hotmail.com","telefone":"2292522811","telefoneBruto":"(22) 99252-2811","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-01","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2299003252":{"chave":"tel:2299003252","nome":"Guilherme Helison Moreira Coelho (art in ouro)","email":"guilhermehelison@castelloforte.com.br","telefone":"2299003252","telefoneBruto":"(22) 99900-3252","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO PRIME - CORTE E BARBA (SEGUNDA À QUARTA) - Rio das Ostras","cobranca":"Manual","vencimento":"2026-08-08","valor":179.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":179.99}],"duplicadoNoArquivo":0},"tel:2179548887":{"chave":"tel:2179548887","nome":"Bruno Almeida Afonso de Oliveira","email":"brunoalmeidaafonso@castelloforte.com.br","telefone":"2179548887","telefoneBruto":"(21) 97954-8887","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"CashPag","vencimento":"2026-08-07","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2192262882":{"chave":"tel:2192262882","nome":"Carlos Henrique da Silva","email":"carloshenriquedasilva@castelloforte.com.br","telefone":"2192262882","telefoneBruto":"(21) 99226-2882","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"CashPag","vencimento":"2026-08-04","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2299634214":{"chave":"tel:2299634214","nome":"Michel Alvim Bezerra","email":"michelalvimbezerra@castelloforte.com.br","telefone":"2299634214","telefoneBruto":"(22) 99963-4214","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"CashPag","vencimento":"2026-08-26","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2182619921":{"chave":"tel:2182619921","nome":"Caio Molter Mota","email":"caiomoltermota@castelloforte.com.br","telefone":"2182619921","telefoneBruto":"(21) 98261-9921","cpf":"","unidade":"RIO DAS OSTRAS","plano":"Clube EMBARCADO - Corte ILIMITADO - Rio das Ostras","cobranca":"CashPag","vencimento":"2026-08-11","valor":89.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":89.99}],"duplicadoNoArquivo":0},"tel:2180264201":{"chave":"tel:2180264201","nome":"Thiago Queiroz da Silva","email":"tqdsilva1@yahoo.com.br","telefone":"2180264201","telefoneBruto":"(21) 98026-4201","cpf":"","unidade":"","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"Cel Cash","vencimento":"2026-08-21","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2297726547":{"chave":"tel:2297726547","nome":"Walber Rodrigues Coutinho Junior","email":"walberrodriguescoutinhojunior@castelloforte.com.br","telefone":"2297726547","telefoneBruto":"(22) 99772-6547","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"CashPag","vencimento":"2026-08-22","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2181867761":{"chave":"tel:2181867761","nome":"Luiz Kaique Galdeano","email":"luizkaiquegaldeano@castelloforte.com.br","telefone":"2181867761","telefoneBruto":"(21) 98186-7761","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"Manual","vencimento":"2026-08-18","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2298172603":{"chave":"tel:2298172603","nome":"Rafael Moraes Caetano","email":"rafaelcaetano@castelloforte.com.br","telefone":"2298172603","telefoneBruto":"(22) 99817-2603","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-15","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2297144468":{"chave":"tel:2297144468","nome":"Mateus Xavier","email":"mateusxavier@castelloforte.com.br","telefone":"2297144468","telefoneBruto":"(22) 99714-4468","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-07","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2180111033":{"chave":"tel:2180111033","nome":"Conrado Mangifeste","email":"conmangifeste@gmail.com","telefone":"2180111033","telefoneBruto":"(21) 98011-1033","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO EMBARCADO - Cabelo & Barba - Rio das Ostras","cobranca":"Manual","vencimento":"2026-08-01","valor":165.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":165.9}],"duplicadoNoArquivo":0},"tel:2171971692":{"chave":"tel:2171971692","nome":"Rodrigo Saraiva Martins","email":"rodrigomartins@castelloforte.com.br","telefone":"2171971692","telefoneBruto":"(21) 97197-1692","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-23","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2298809725":{"chave":"tel:2298809725","nome":"VAGNER RODRIGUES(permuta)","email":"vagnerrodrigues@castelloforte.com.br","telefone":"2298809725","telefoneBruto":"(22) 99880-9725","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-25","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2281796557":{"chave":"tel:2281796557","nome":"Charles Arantes","email":"charlesaraes@castelloforte.com.br","telefone":"2281796557","telefoneBruto":"(22) 98179-6557","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-20","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2299822561":{"chave":"tel:2299822561","nome":"david assis damasena","email":"davidassis6993@gmail.com","telefone":"2299822561","telefoneBruto":"(22) 99982-2561","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"Manual","vencimento":"2026-08-15","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2299431978":{"chave":"tel:2299431978","nome":"Antonio Carlos Barroso","email":"antoniocarlosbarroso@castelloforte.com.br","telefone":"2299431978","telefoneBruto":"(22) 99943-1978","cpf":"","unidade":"BUZIOS","plano":"PLANO BLACK - CORTE & BARBA (BÚZIOS)","cobranca":"CashPag","vencimento":"2026-08-22","valor":179.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":179.9}],"duplicadoNoArquivo":0},"tel:2281158599":{"chave":"tel:2281158599","nome":"Thiago Silveira","email":"thiagosilveira@castelloforte.com.br","telefone":"2281158599","telefoneBruto":"(22) 98115-8599","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"CashPag","vencimento":"2026-08-31","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2297708930":{"chave":"tel:2297708930","nome":"Natanael Wellington da Silva","email":"natan_eumsm12@hotmail.com","telefone":"2297708930","telefoneBruto":"(22) 99770-8930","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"Manual","vencimento":"2026-08-22","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2292149245":{"chave":"tel:2292149245","nome":"Andre Castelo","email":"andredecastro.09@hotmail.com","telefone":"2292149245","telefoneBruto":"(22) 99214-9245","cpf":"","unidade":"BUZIOS","plano":"PLANO BLACK - CORTE ILIMITADO (BÚZIOS)","cobranca":"Manual","vencimento":"2026-08-15","valor":99.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":99.9}],"duplicadoNoArquivo":0},"tel:2288498307":{"chave":"tel:2288498307","nome":"Thiago Fernandes Pinto","email":"thiago.pdb@hotmail.com","telefone":"2288498307","telefoneBruto":"(22) 98849-8307","cpf":"","unidade":"BUZIOS","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"Cel Cash","vencimento":"2026-08-14","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2281026653":{"chave":"tel:2281026653","nome":"Gabriel Ribeiro da Silva Santos","email":"gabrielsantos01@castelloforte.com.br","telefone":"2281026653","telefoneBruto":"(22) 98102-6653","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO EMBARCADO - Cabelo & Barba - Rio das Ostras","cobranca":"CashPag","vencimento":"2026-08-22","valor":165.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":165.9}],"duplicadoNoArquivo":0},"tel:1134652571":{"chave":"tel:1134652571","nome":"Jessica Cristina","email":"jessicacristina@castelloforte.com.br","telefone":"1134652571","telefoneBruto":"(11) 93465-2571","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-04","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2292783308":{"chave":"tel:2292783308","nome":"Edgard Giraud","email":"edgargiurd@castelloforte.com.br","telefone":"2292783308","telefoneBruto":"(22) 99278-3308","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"Manual","vencimento":"2026-08-19","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2192311134":{"chave":"tel:2192311134","nome":"Arthur Mendes Rocha Dias","email":"erica@vivereentretenimento.com.br","telefone":"2192311134","telefoneBruto":"(21) 99231-1134","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-13","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2170065175":{"chave":"tel:2170065175","nome":"Joas Henrique","email":"joashenrique_97@hotmail.com","telefone":"2170065175","telefoneBruto":"(21) 97006-5175","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-02","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2299461408":{"chave":"tel:2299461408","nome":"Rafael Xavier","email":"rafaelxavier@castelloforte.com.br","telefone":"2299461408","telefoneBruto":"(22) 99946-1408","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-03","valor":131.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":131.99}],"duplicadoNoArquivo":0},"tel:2274052959":{"chave":"tel:2274052959","nome":"Rodrigo Rocha de Oliveira","email":"rodrigo.rocha@castelloforte.com.br","telefone":"2274052959","telefoneBruto":"(22) 97405-2959","cpf":"","unidade":"CABO FRIO","plano":"PLANO PRIME - CORTE DE CABELO ( SEGUNDA À QUARTA )","cobranca":"CashPag","vencimento":"2026-08-26","valor":89.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":89.9}],"duplicadoNoArquivo":0},"tel:2274023188":{"chave":"tel:2274023188","nome":"Gabriel Carvalho de Barros Oliveira","email":"caroline.rodrigo1311@gmail.com","telefone":"2274023188","telefoneBruto":"(22) 97402-3188","cpf":"","unidade":"CABO FRIO","plano":"PLANO PRIME - CORTE DE CABELO ( SEGUNDA À QUARTA )","cobranca":"CashPag","vencimento":"2026-08-10","valor":89.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":89.9}],"duplicadoNoArquivo":0},"tel:2299218134":{"chave":"tel:2299218134","nome":"Matheus Assis","email":"matheusassis@castelloforte.com.br","telefone":"2299218134","telefoneBruto":"(22) 99921-8134","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"CashPag","vencimento":"2026-08-11","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2298797621":{"chave":"tel:2298797621","nome":"Daniel Cezarete (art in ouro)","email":"danielcezarete@castelloforte.com.br","telefone":"2298797621","telefoneBruto":"(22) 99879-7621","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"Manual","vencimento":"2026-08-18","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2188340670":{"chave":"tel:2188340670","nome":"Fabricio Mello de Carvelho","email":"fabriciomellodecarvalho@castelloforte.com.br","telefone":"2188340670","telefoneBruto":"(21) 98834-0670","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-25","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2296028610":{"chave":"tel:2296028610","nome":"André Laurindo Modesto","email":"andrelaurindo@castelloforte.com.br","telefone":"2296028610","telefoneBruto":"(22) 99602-8610","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-12","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2195554535":{"chave":"tel:2195554535","nome":"João Guilherme Lopes Azevedo","email":"joaoguilhermelopesazevedo@castelloforte.com.br","telefone":"2195554535","telefoneBruto":"(21) 99555-4535","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-23","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2297673580":{"chave":"tel:2297673580","nome":"Victor Hugo cordeiro ramos (art in ouro)","email":"victorhugoramos@castelloforte.com.br","telefone":"2297673580","telefoneBruto":"(22) 99767-3580","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"Manual","vencimento":"2026-08-21","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2297632226":{"chave":"tel:2297632226","nome":"Michael Soares Magalhães","email":"maiicont.i22@gmail.com","telefone":"2297632226","telefoneBruto":"(22) 99763-2226","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE & BARBA (BÚZIOS)","cobranca":"CashPag","vencimento":"2026-08-25","valor":179.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":179.9}],"duplicadoNoArquivo":0},"tel:2299436052":{"chave":"tel:2299436052","nome":"Nahuel Sanchez","email":"nahuelsanchezj10@gmail.com","telefone":"2299436052","telefoneBruto":"(22) 99943-6052","cpf":"","unidade":"BUZIOS","plano":"PLANO BLACK - CORTE ILIMITADO (BÚZIOS)","cobranca":"Manual","vencimento":"2026-08-28","valor":99.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":99.9}],"duplicadoNoArquivo":0},"tel:2292867827":{"chave":"tel:2292867827","nome":"bruno santos sobreiro costa","email":"brunosantossc@castelloforte.com.br","telefone":"2292867827","telefoneBruto":"(22) 99286-7827","cpf":"","unidade":"BUZIOS","plano":"PLANO BLACK - BARBA","cobranca":"CashPag","vencimento":"2026-08-22","valor":131.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":131.99}],"duplicadoNoArquivo":0},"tel:2297599689":{"chave":"tel:2297599689","nome":"joão luiz dos reis","email":"joaoluizdosreis@castelloforte.com.br","telefone":"2297599689","telefoneBruto":"(22) 99759-9689","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO EMBARCADO - Cabelo & Barba - Rio das Ostras","cobranca":"Manual","vencimento":"2026-08-18","valor":165.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":165.9}],"duplicadoNoArquivo":0},"tel:5190104708":{"chave":"tel:5190104708","nome":"Luiz Martin","email":"luizmartinscastelloforte@gmail.com","telefone":"5190104708","telefoneBruto":"(51) 99010-4708","cpf":"","unidade":"BUZIOS","plano":"PLANO BLACK - CORTE ILIMITADO (BÚZIOS)","cobranca":"Manual","vencimento":"2026-08-02","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2274036728":{"chave":"tel:2274036728","nome":"Leonardo de Souza Rocha","email":"leonardodesouzarocha@castelloforte.com.br","telefone":"2274036728","telefoneBruto":"(22) 97403-6728","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-21","valor":194.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":194.99}],"duplicadoNoArquivo":0},"tel:2274034039":{"chave":"tel:2274034039","nome":"Pedro Marques dos Santos","email":"edatelfinanceiro@yahoo.com","telefone":"2274034039","telefoneBruto":"(22) 97403-4039","cpf":"","unidade":"BUZIOS","plano":"PLANO BLACK - CORTE ILIMITADO (BÚZIOS)","cobranca":"Manual","vencimento":"2026-08-19","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2296205926":{"chave":"tel:2296205926","nome":"gabriel de almeida ferreira","email":"gabiaf@castelloforte.com.br","telefone":"2296205926","telefoneBruto":"(22) 99620-5926","cpf":"","unidade":"CABO FRIO","plano":"PLANO PRIME - CORTE DE CABELO ( SEGUNDA À QUARTA )","cobranca":"CashPag","vencimento":"2026-08-21","valor":89.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":89.9}],"duplicadoNoArquivo":0},"tel:2288414107":{"chave":"tel:2288414107","nome":"Handerson Pompermaier","email":"handerpomper@gmail.com","telefone":"2288414107","telefoneBruto":"(22) 98841-4107","cpf":"","unidade":"BUZIOS","plano":"PLANO BLACK - CORTE & BARBA (BÚZIOS)","cobranca":"CashPag","vencimento":"2026-08-30","valor":179.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":179.9}],"duplicadoNoArquivo":0},"tel:2171190533":{"chave":"tel:2171190533","nome":"Antônio Wagner Dos Santos Silva","email":"wagner.veluma@gmail.com","telefone":"2171190533","telefoneBruto":"(21) 97119-0533","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO PRIME - CORTE E BARBA (SEGUNDA À QUARTA) - Rio das Ostras","cobranca":"Manual","vencimento":"2026-08-07","valor":179.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":179.99}],"duplicadoNoArquivo":0},"tel:2299962247":{"chave":"tel:2299962247","nome":"Marcos Vinicius Rodrigues","email":"marcosvinir@castelloforte.com.br","telefone":"2299962247","telefoneBruto":"(22) 99996-2247","cpf":"","unidade":"CABO FRIO","plano":"PLANO PRIME - CORTE DE CABELO ( SEGUNDA À QUARTA )","cobranca":"CashPag","vencimento":"2026-08-12","valor":89.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":89.9}],"duplicadoNoArquivo":0},"tel:2298001132":{"chave":"tel:2298001132","nome":"Gabriel Souza Faria","email":"gabrielsouzafaria@castelloforte.com.br","telefone":"2298001132","telefoneBruto":"(22) 99800-1132","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"Manual","vencimento":"2026-08-11","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2297673197":{"chave":"tel:2297673197","nome":"Enzo Cunha muylaert","email":"enzocunhamuylaert@castelloforte.com.br","telefone":"2297673197","telefoneBruto":"(22) 99767-3197","cpf":"","unidade":"CABO FRIO","plano":"PLANO PRIME - CORTE DE CABELO ( SEGUNDA À QUARTA )","cobranca":"Manual","vencimento":"2026-08-24","valor":89.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":89.9}],"duplicadoNoArquivo":0},"tel:2292896312":{"chave":"tel:2292896312","nome":"Kaio Guilherme","email":"kaioguilherme@castelloforte.com.br","telefone":"2292896312","telefoneBruto":"(22) 99289-6312","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"Manual","vencimento":"2026-08-06","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2297583766":{"chave":"tel:2297583766","nome":"Fernando Santana Ramos (art in ouro)","email":"fernandosantanaramos@castelloforte.com.br","telefone":"2297583766","telefoneBruto":"(22) 99758-3766","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"Manual","vencimento":"2026-08-20","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2299272232":{"chave":"tel:2299272232","nome":"Rafael Valadão Da Costa","email":"rafaelvaladaodacosta1989@gmail.com","telefone":"2299272232","telefoneBruto":"(22) 99927-2232","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"CashPag","vencimento":"2026-08-24","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2292564101":{"chave":"tel:2292564101","nome":"Yuri Luiz","email":"yuriluiztraderoficial@gmail.com","telefone":"2292564101","telefoneBruto":"(22) 99256-4101","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"CashPag","vencimento":"2026-08-08","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2292114361":{"chave":"tel:2292114361","nome":"Ygor Assis","email":"ygorassis25@gmail.com","telefone":"2292114361","telefoneBruto":"(22) 99211-4361","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-16","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2172163877":{"chave":"tel:2172163877","nome":"Victor Diniz homem da Costa","email":"victordiiiniz2@gmail.com","telefone":"2172163877","telefoneBruto":"(21) 97216-3877","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO PRIME - CORTE E BARBA (SEGUNDA À QUARTA) - Rio das Ostras","cobranca":"Manual","vencimento":"2026-08-01","valor":179.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":179.99}],"duplicadoNoArquivo":0},"tel:2288012219":{"chave":"tel:2288012219","nome":"Marco Antonio Santana da Silva","email":"marcoantoniosantana@castelloforte.com.br","telefone":"2288012219","telefoneBruto":"(22) 98801-2219","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO PRIME - CORTE DE CABELO ( SEGUNDA À QUARTA )","cobranca":"CashPag","vencimento":"2026-08-25","valor":99.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":99.9}],"duplicadoNoArquivo":0},"tel:2299175349":{"chave":"tel:2299175349","nome":"gabriel ventura","email":"ventura.7gabriel@gmail.com","telefone":"2299175349","telefoneBruto":"(22) 99917-5349","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"CashPag","vencimento":"2026-08-01","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2296170454":{"chave":"tel:2296170454","nome":"CAIO SOUZA SANTIAGO","email":"colyzc@gmail.com","telefone":"2296170454","telefoneBruto":"(22) 99617-0454","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-22","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2297923040":{"chave":"tel:2297923040","nome":"gabriel tavares","email":"gabrieldptavares@gmail.com","telefone":"2297923040","telefoneBruto":"(22) 99792-3040","cpf":"","unidade":"CABO FRIO","plano":"Black +  ( corte de cabelo )","cobranca":"CashPag","vencimento":"2026-08-04","valor":149.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":149.99}],"duplicadoNoArquivo":0},"tel:2297139880":{"chave":"tel:2297139880","nome":"Daniel Martins Porto","email":"marianaeduardamartins@gmail.com","telefone":"2297139880","telefoneBruto":"(22) 99713-9880","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-07","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:1282302318":{"chave":"tel:1282302318","nome":"vinicius danes silva","email":"vini.danes@gmail.com","telefone":"1282302318","telefoneBruto":"(12) 98230-2318","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-11","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2296049039":{"chave":"tel:2296049039","nome":"João Pedro de Oliveira Santos peixoto(ar in ouro)","email":"joaopedrodeoliveirasantospeixo@gmail.com","telefone":"2296049039","telefoneBruto":"(22) 99604-9039","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"Manual","vencimento":"2026-08-31","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2167335115":{"chave":"tel:2167335115","nome":"fabio rocha lacerda leopoldino","email":"fabinhorochaleopoldino@gmail.com","telefone":"2167335115","telefoneBruto":"(21) 96733-5115","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-21","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2298647403":{"chave":"tel:2298647403","nome":"Jonathan Marques de Oliveira","email":"jonathanmarquesrj@gmail.com","telefone":"2298647403","telefoneBruto":"(22) 99864-7403","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-21","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2288007594":{"chave":"tel:2288007594","nome":"Cesar de Mendonça Gonçalves Santo ART IN OURO","email":"demendoncacesar@gmail.com","telefone":"2288007594","telefoneBruto":"(22) 98800-7594","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - BARBA","cobranca":"Manual","vencimento":"2026-08-25","valor":131.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":131.99}],"duplicadoNoArquivo":0},"tel:2274012544":{"chave":"tel:2274012544","nome":"Kleber Magalhaes Nacimento","email":"kleber@lysoawash.com.br","telefone":"2274012544","telefoneBruto":"(22) 97401-2544","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-07","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2481495729":{"chave":"tel:2481495729","nome":"Gabriel Alves Arruda","email":"suporte360.comercial@gmail.com","telefone":"2481495729","telefoneBruto":"(24) 98149-5729","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"Manual","vencimento":"2026-08-07","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2167874025":{"chave":"tel:2167874025","nome":"Everton Santos da Penha","email":"evertonsantos191999@gmail.com","telefone":"2167874025","telefoneBruto":"(21) 96787-4025","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"Manual","vencimento":"2026-08-08","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2297975374":{"chave":"tel:2297975374","nome":"Aristides Ferreira de Carvalho Neto","email":"aristidesferrera82@gmail.com","telefone":"2297975374","telefoneBruto":"(22) 99797-5374","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"CashPag","vencimento":"2026-08-09","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2197776201":{"chave":"tel:2197776201","nome":"Felipe Alves","email":"felipealves42@castelloforte.com.br","telefone":"2197776201","telefoneBruto":"(21) 99777-6201","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-29","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2291047300":{"chave":"tel:2291047300","nome":"THiago Mendonça","email":"thiagomendonca3@castelloforte.com.br","telefone":"2291047300","telefoneBruto":"(22) 99104-7300","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO PRIME - BARBA (SEGUNDA À QUARTA)","cobranca":"Manual","vencimento":"2026-08-05","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:1194147250":{"chave":"tel:1194147250","nome":"Estevan Sezario de Marche","email":"estevansezandode@castelloforte.com.br","telefone":"1194147250","telefoneBruto":"(11) 99414-7250","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-12","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2288209504":{"chave":"tel:2288209504","nome":"Pedro Vieira","email":"pedrovieiracgc@gmail.com","telefone":"2288209504","telefoneBruto":"(22) 98820-9504","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE E BARBA","cobranca":"CashPag","vencimento":"2026-08-07","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2299583155":{"chave":"tel:2299583155","nome":"Joao Gabriel Oliveira","email":"joaogabrieloliveira@castelloforte.com.br","telefone":"2299583155","telefoneBruto":"(22) 99958-3155","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO PRIME - CORTE DE CABELO ( SEGUNDA À QUARTA ) - Rio das Ostras","cobranca":"Manual","vencimento":"2026-08-07","valor":99.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":99.9}],"duplicadoNoArquivo":0},"tel:2292190773":{"chave":"tel:2292190773","nome":"Israel Santos de Castro (art in ouro)","email":"sanntsisraeldcastro44@gmail.com","telefone":"2292190773","telefoneBruto":"(22) 99219-0773","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"Manual","vencimento":"2026-08-08","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2498412982":{"chave":"tel:2498412982","nome":"LAYDA NICOLLY DE LIMA OLIVEIRA","email":"laydalima02@gmail.com","telefone":"2498412982","telefoneBruto":"(24) 99841-2982","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-03","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2171634701":{"chave":"tel:2171634701","nome":"Rodrigo Rosa de Souza","email":"rodrigorosadesouza@gmail.com","telefone":"2171634701","telefoneBruto":"(21) 97163-4701","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-20","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2191297254":{"chave":"tel:2191297254","nome":"Pedro Lucas Barbosa Da silva Reis","email":"pedroreisreis99@gmail.com","telefone":"2191297254","telefoneBruto":"(21) 99129-7254","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"Manual","vencimento":"2026-08-04","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2292143529":{"chave":"tel:2292143529","nome":"Miguel de Abreu","email":"miguelabreuandrade@gmail.com","telefone":"2292143529","telefoneBruto":"(22) 99214-3529","cpf":"","unidade":"CABO FRIO","plano":"PLANO PRIME - CORTE DE CABELO ( SEGUNDA À QUARTA )","cobranca":"CashPag","vencimento":"2026-08-07","valor":99.9,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":99.9}],"duplicadoNoArquivo":0},"tel:2288241552":{"chave":"tel:2288241552","nome":"EDER NASCIMENTO DA SILVA","email":"edern4441@gmail.com","telefone":"2288241552","telefoneBruto":"(22) 98824-1552","cpf":"","unidade":"CABO FRIO","plano":"PLANO BLACK - CORTE DE CABELO","cobranca":"CashPag","vencimento":"2026-08-16","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0},"tel:2297988176":{"chave":"tel:2297988176","nome":"Pedro Felipe Batista","email":"pedrofelipebastista@castelloforte.com.br","telefone":"2297988176","telefoneBruto":"(22) 99798-8176","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE E BARBA (Rio das Ostras)","cobranca":"Manual","vencimento":"2026-08-18","valor":209.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":209.99}],"duplicadoNoArquivo":0},"tel:2298038531":{"chave":"tel:2298038531","nome":"Ruan Pablo Luiz","email":"ruanpabloluiz2@castelloforte.com.br","telefone":"2298038531","telefoneBruto":"(22) 99803-8531","cpf":"","unidade":"RIO DAS OSTRAS","plano":"PLANO BLACK - CORTE DE CABELO (Rio das ostras)","cobranca":"Manual","vencimento":"2026-08-24","valor":119.99,"situacao":"aberto","sugestao":"","contato":"nao_contatado","obs":"","primeiraVez":"2026-08-25","ultimaVez":"2026-08-25","vezesNaLista":1,"reaberturas":0,"baixa":null,"historico":[{"d":"2026-08-25","e":"entrou","t":119.99}],"duplicadoNoArquivo":0}},"unidadeDe":{"tel:2298107860":"CABO FRIO","tel:2298453305":"CABO FRIO","tel:2299139922":"CABO FRIO","tel:2297023929":"BUZIOS","tel:2297813412":"RIO DAS OSTRAS","tel:2299938483":"CABO FRIO","tel:2292522811":"CABO FRIO","tel:2299003252":"RIO DAS OSTRAS","tel:2179548887":"RIO DAS OSTRAS","tel:2192262882":"RIO DAS OSTRAS","tel:2299634214":"CABO FRIO","tel:2182619921":"RIO DAS OSTRAS","tel:2297726547":"CABO FRIO","tel:2181867761":"RIO DAS OSTRAS","tel:2298172603":"RIO DAS OSTRAS","tel:2297144468":"CABO FRIO","tel:2180111033":"RIO DAS OSTRAS","tel:2171971692":"RIO DAS OSTRAS","tel:2298809725":"RIO DAS OSTRAS","tel:2281796557":"RIO DAS OSTRAS","tel:2299822561":"RIO DAS OSTRAS","tel:2299431978":"BUZIOS","tel:2281158599":"CABO FRIO","tel:2297708930":"RIO DAS OSTRAS","tel:2292149245":"BUZIOS","tel:2288498307":"BUZIOS","tel:2281026653":"RIO DAS OSTRAS","tel:1134652571":"CABO FRIO","tel:2292783308":"RIO DAS OSTRAS","tel:2192311134":"CABO FRIO","tel:2170065175":"CABO FRIO","tel:2299461408":"RIO DAS OSTRAS","tel:2274052959":"CABO FRIO","tel:2274023188":"CABO FRIO","tel:2299218134":"CABO FRIO","tel:2298797621":"CABO FRIO","tel:2188340670":"RIO DAS OSTRAS","tel:2296028610":"RIO DAS OSTRAS","tel:2195554535":"CABO FRIO","tel:2297673580":"CABO FRIO","tel:2297632226":"CABO FRIO","tel:2299436052":"BUZIOS","tel:2292867827":"BUZIOS","tel:2297599689":"RIO DAS OSTRAS","tel:5190104708":"BUZIOS","tel:2274036728":"RIO DAS OSTRAS","tel:2274034039":"BUZIOS","tel:2296205926":"CABO FRIO","tel:2288414107":"BUZIOS","tel:2171190533":"RIO DAS OSTRAS","tel:2299962247":"CABO FRIO","tel:2298001132":"RIO DAS OSTRAS","tel:2297673197":"CABO FRIO","tel:2292896312":"RIO DAS OSTRAS","tel:2297583766":"CABO FRIO","tel:2299272232":"CABO FRIO","tel:2292564101":"RIO DAS OSTRAS","tel:2292114361":"RIO DAS OSTRAS","tel:2172163877":"RIO DAS OSTRAS","tel:2288012219":"RIO DAS OSTRAS","tel:2299175349":"RIO DAS OSTRAS","tel:2296170454":"CABO FRIO","tel:2297923040":"CABO FRIO","tel:2297139880":"RIO DAS OSTRAS","tel:1282302318":"CABO FRIO","tel:2296049039":"CABO FRIO","tel:2167335115":"CABO FRIO","tel:2298647403":"CABO FRIO","tel:2288007594":"CABO FRIO","tel:2274012544":"RIO DAS OSTRAS","tel:2481495729":"RIO DAS OSTRAS","tel:2167874025":"CABO FRIO","tel:2297975374":"RIO DAS OSTRAS","tel:2197776201":"RIO DAS OSTRAS","tel:2291047300":"RIO DAS OSTRAS","tel:1194147250":"RIO DAS OSTRAS","tel:2288209504":"CABO FRIO","tel:2299583155":"RIO DAS OSTRAS","tel:2292190773":"CABO FRIO","tel:2498412982":"CABO FRIO","tel:2171634701":"RIO DAS OSTRAS","tel:2191297254":"RIO DAS OSTRAS","tel:2292143529":"CABO FRIO","tel:2288241552":"CABO FRIO","tel:2297988176":"RIO DAS OSTRAS","tel:2298038531":"RIO DAS OSTRAS"},"uploads":[{"data":"2026-08-25","arquivo":"PLANILHA DE INADIMPLENTES CASTELLO FORTE.xlsx","linhas":87,"novos":87,"mantidos":0,"sumiram":0,"reaparecidos":0,"duplicados":0}],"criadoEm":"2026-08-25","atualizadoEm":"2026-08-25","seq":1}</script>
+<script data-mine>
+/* ===== núcleo: leitura de planilha + conciliação ===== */
+
+/* --- ZIP mínimo (xlsx é um zip) --- */
+async function unzip(buf) {
+  const dv = new DataView(buf);
+  const u8 = new Uint8Array(buf);
+  let eocd = -1;
+  for (let i = u8.length - 22; i >= 0 && i > u8.length - 66000; i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('Arquivo .xlsx inválido (não é um zip).');
+  const n = dv.getUint16(eocd + 10, true);
+  let off = dv.getUint32(eocd + 16, true);
+  const out = {};
+  const dec = new TextDecoder();
+  for (let k = 0; k < n; k++) {
+    if (dv.getUint32(off, true) !== 0x02014b50) break;
+    const method = dv.getUint16(off + 10, true);
+    const csize = dv.getUint32(off + 20, true);
+    const nameLen = dv.getUint16(off + 28, true);
+    const extraLen = dv.getUint16(off + 30, true);
+    const cmtLen = dv.getUint16(off + 32, true);
+    const lho = dv.getUint32(off + 42, true);
+    const name = dec.decode(u8.subarray(off + 46, off + 46 + nameLen));
+    const lNameLen = dv.getUint16(lho + 26, true);
+    const lExtraLen = dv.getUint16(lho + 28, true);
+    const start = lho + 30 + lNameLen + lExtraLen;
+    const raw = u8.subarray(start, start + csize);
+    out[name] = { method, raw };
+    off += 46 + nameLen + extraLen + cmtLen;
+  }
+  const files = {};
+  for (const [name, e] of Object.entries(out)) {
+    if (!/\.(xml|rels)$/i.test(name)) continue;
+    if (e.method === 0) { files[name] = dec.decode(e.raw); continue; }
+    const ds = new DecompressionStream('deflate-raw');
+    const blobbed = new Response(new Blob([e.raw]).stream().pipeThrough(ds));
+    files[name] = await blobbed.text();
+  }
+  return files;
+}
+
+/* --- XML helpers --- */
+function unescXml(s) {
+  return s.replace(/&#(\d+);/g, (_, d) => String.fromCharCode(+d))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
+}
+function colToIndex(ref) {
+  const m = /^([A-Z]+)/.exec(ref);
+  if (!m) return 0;
+  let n = 0;
+  for (const ch of m[1]) n = n * 26 + (ch.charCodeAt(0) - 64);
+  return n - 1;
+}
+function serialToDate(n) {
+  const ms = Math.round((n - 25569) * 86400000);
+  const d = new Date(ms);
+  return isNaN(d) ? null : d;
+}
+
+/* --- xlsx -> matriz de valores --- */
+async function lerXlsx(buf) {
+  const files = await unzip(buf);
+  const shared = [];
+  const ss = files['xl/sharedStrings.xml'];
+  if (ss) {
+    for (const si of ss.split('<si>').slice(1)) {
+      const parts = [...si.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(m => unescXml(m[1]));
+      shared.push(parts.join(''));
+    }
+  }
+  const sheetName = Object.keys(files)
+    .filter(f => /^xl\/worksheets\/sheet\d+\.xml$/.test(f))
+    .sort()[0];
+  if (!sheetName) throw new Error('Nenhuma aba encontrada no arquivo.');
+  const xml = files[sheetName];
+
+  // formatos numéricos por estilo, para detectar datas
+  const dateStyles = new Set();
+  const st = files['xl/styles.xml'];
+  if (st) {
+    const custom = {};
+    for (const m of st.matchAll(/<numFmt[^>]*numFmtId="(\d+)"[^>]*formatCode="([^"]*)"/g)) {
+      custom[m[1]] = unescXml(m[2]);
+    }
+    const cellXfsBlock = /<cellXfs[\s\S]*?<\/cellXfs>/.exec(st);
+    if (cellXfsBlock) {
+      const xfs = [...cellXfsBlock[0].matchAll(/<xf\b[^>]*>/g)].map(m => m[0]);
+      xfs.forEach((xf, i) => {
+        const id = /numFmtId="(\d+)"/.exec(xf);
+        if (!id) return;
+        const num = +id[1];
+        const code = custom[id[1]] || '';
+        const builtinDate = (num >= 14 && num <= 22) || (num >= 45 && num <= 47);
+        const looksDate = /[dmyhs]/i.test(code) && !/^"/.test(code) && /(y|d)/i.test(code);
+        if (builtinDate || looksDate) dateStyles.add(i);
+      });
+    }
+  }
+
+  const rows = [];
+  for (const rowM of xml.matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/g)) {
+    const cells = [];
+    for (const c of rowM[1].matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+      const attrs = c[1], inner = c[2] || '';
+      const refM = /r="([A-Z]+\d+)"/.exec(attrs);
+      const idx = refM ? colToIndex(refM[1]) : cells.length;
+      const t = (/t="([^"]+)"/.exec(attrs) || [])[1];
+      const sIdx = (/s="(\d+)"/.exec(attrs) || [])[1];
+      let val = null;
+      if (t === 'inlineStr') {
+        val = [...inner.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(m => unescXml(m[1])).join('');
+      } else {
+        const vM = /<v>([\s\S]*?)<\/v>/.exec(inner);
+        if (vM) {
+          const rawV = unescXml(vM[1]);
+          if (t === 's') val = shared[+rawV] ?? '';
+          else if (t === 'str' || t === 'e') val = rawV;
+          else if (t === 'b') val = rawV === '1';
+          else {
+            const num = parseFloat(rawV);
+            if (sIdx !== undefined && dateStyles.has(+sIdx) && num > 20000 && num < 80000) {
+              val = serialToDate(num);
+            } else val = isNaN(num) ? rawV : num;
+          }
+        }
+      }
+      while (cells.length < idx) cells.push(null);
+      cells[idx] = val;
+    }
+    rows.push(cells);
+  }
+  return rows;
+}
+
+/* --- csv --- */
+function lerCsv(text) {
+  const sep = (text.split('\n')[0].match(/;/g) || []).length >
+    (text.split('\n')[0].match(/,/g) || []).length ? ';' : ',';
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"' && text[i + 1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') q = false;
+      else cur += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === sep) { row.push(cur); cur = ''; }
+    else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+    else if (ch !== '\r') cur += ch;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+/* --- normalização --- */
+const semAcento = s => (s ?? '').toString()
+  .normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+const chaveTexto = s => semAcento(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+const soDigitos = s => (s ?? '').toString().replace(/\D/g, '');
+
+function telNorm(s) {
+  let d = soDigitos(s);
+  if (d.startsWith('55') && d.length > 11) d = d.slice(2);
+  if (d.length > 11) d = d.slice(-11);
+  // celular com/sem o 9: guarda os 8 últimos + DDD para casar variações
+  if (d.length >= 10) return d.slice(0, 2) + d.slice(-8);
+  return d;
+}
+function telE164(s) {
+  let d = soDigitos(s);
+  if (d.startsWith('55')) d = d.slice(2);
+  if (d.length === 10) d = d.slice(0, 2) + '9' + d.slice(2);
+  return d.length >= 10 ? '55' + d : '';
+}
+function emailNorm(s) {
+  const e = (s ?? '').toString().trim().toLowerCase();
+  return /.+@.+\..+/.test(e) ? e : '';
+}
+function valorNum(v) {
+  if (typeof v === 'number') return v;
+  const s = (v ?? '').toString().replace(/\u00a0/g, ' ')
+    .replace(/r\$/i, '').replace(/\s/g, '');
+  if (!s) return 0;
+  const t = s.replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(t);
+  return isNaN(n) ? 0 : n;
+}
+function dataISO(v) {
+  if (v instanceof Date && !isNaN(v)) {
+    return v.getUTCFullYear() + '-' + String(v.getUTCMonth() + 1).padStart(2, '0') +
+      '-' + String(v.getUTCDate()).padStart(2, '0');
+  }
+  if (typeof v === 'number' && v > 20000 && v < 80000) return dataISO(serialToDate(v));
+  const s = (v ?? '').toString().trim();
+  let m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/.exec(s);
+  if (m) {
+    let a = m[3].length === 2 ? '20' + m[3] : m[3];
+    return a + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0');
+  }
+  m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if (m) return m[0];
+  return '';
+}
+
+/* --- unidades --- */
+const UNIDADES = ['CABO FRIO', 'RIO DAS OSTRAS', 'BUZIOS'];
+const APELIDO_UNIDADE = {
+  cabofrio: 'CABO FRIO', cf: 'CABO FRIO',
+  riodasostras: 'RIO DAS OSTRAS', rdo: 'RIO DAS OSTRAS', ostras: 'RIO DAS OSTRAS',
+  buzios: 'BUZIOS', armacaodosbuzios: 'BUZIOS', bz: 'BUZIOS'
+};
+function unidadeCanonica(v) {
+  const k = chaveTexto(v);
+  if (!k) return '';
+  if (APELIDO_UNIDADE[k]) return APELIDO_UNIDADE[k];
+  for (const u of UNIDADES) if (chaveTexto(u) === k) return u;
+  for (const u of UNIDADES) if (k.includes(chaveTexto(u))) return u;
+  return semAcento(v).toUpperCase().trim();
+}
+function unidadePeloPlano(plano) {
+  const k = chaveTexto(plano);
+  if (k.includes('buzios')) return 'BUZIOS';
+  if (k.includes('riodasostras')) return 'RIO DAS OSTRAS';
+  return '';
+}
+
+/* --- mapeamento de colunas --- */
+const CAMPOS = {
+  nome: ['cliente', 'nome', 'nomecliente', 'nomedocliente', 'assinante'],
+  unidade: ['cidadeondeapessoatemoplano', 'unidade', 'cidade', 'loja', 'filial'],
+  email: ['email', 'emaildocliente', 'ee mail'],
+  telefone: ['telefone', 'celular', 'whatsapp', 'fone', 'contato'],
+  plano: ['plano', 'produto', 'contrato', 'assinatura'],
+  cobranca: ['tipodecobranca', 'formadepagamento', 'meiodepagamento', 'gateway', 'tipocobranca'],
+  vencimento: ['vencimento', 'datadevencimento', 'datavencimento', 'venc'],
+  valor: ['valor', 'valordacobranca', 'valorcobranca', 'total'],
+  status: ['status'],
+  cpf: ['cpf', 'cpfcnpj', 'documento'],
+  cancelamento: ['datadecancelamento', 'datacancelamento', 'cancelamento', 'dtcancelamento',
+    'datadecancelamentodoplano', 'datadesativacao', 'desativacao', 'datadesativado', 'canceladoem'],
+  adesao: ['dataadesao', 'datadeadesao', 'adesao', 'datadecompra', 'datacompra', 'inicio',
+    'datadeinicio', 'datainicio', 'clientedesde'],
+  barbeiro: ['barbeiro', 'profissional', 'barbeiropreferido', 'preferencia', 'preferencia debarbeiro', 'atendidopor']
+};
+function mapearColunas(cabecalho) {
+  const map = {};
+  const usadas = new Set();
+  cabecalho.forEach((h, i) => {
+    const k = chaveTexto(h);
+    if (!k) return;
+    for (const [campo, nomes] of Object.entries(CAMPOS)) {
+      if (map[campo] !== undefined || usadas.has(i)) continue;
+      if (nomes.some(n => k === chaveTexto(n))) { map[campo] = i; usadas.add(i); }
+    }
+  });
+  cabecalho.forEach((h, i) => {
+    const k = chaveTexto(h);
+    if (!k || usadas.has(i)) return;
+    for (const [campo, nomes] of Object.entries(CAMPOS)) {
+      if (map[campo] !== undefined) continue;
+      if (nomes.some(n => k.includes(chaveTexto(n)))) { map[campo] = i; usadas.add(i); }
+    }
+  });
+  return map;
+}
+function acharCabecalho(rows) {
+  for (let i = 0; i < Math.min(rows.length, 12); i++) {
+    const map = mapearColunas(rows[i] || []);
+    if (map.nome !== undefined && (map.telefone !== undefined || map.email !== undefined)) {
+      return { linha: i, map };
+    }
+  }
+  return null;
+}
+
+/* --- chave de identidade --- */
+function fazerChave(reg) {
+  if (reg.cpf) return 'cpf:' + reg.cpf;
+  if (reg.telefone) return 'tel:' + reg.telefone;
+  if (reg.email) return 'mail:' + reg.email;
+  return 'nome:' + chaveTexto(reg.nome);
+}
+function chavesAlternativas(reg) {
+  const out = [];
+  if (reg.cpf) out.push('cpf:' + reg.cpf);
+  if (reg.telefone) out.push('tel:' + reg.telefone);
+  if (reg.email) out.push('mail:' + reg.email);
+  if (reg.nome) out.push('nome:' + chaveTexto(reg.nome));
+  return out;
+}
+
+const LIXO = ['totalizado', 'total geral', 'totalgeral', 'soma', 'subtotal'];
+function ehLinhaLixo(nome) {
+  const k = chaveTexto(nome);
+  return !k || LIXO.some(l => k.startsWith(chaveTexto(l)));
+}
+
+/* --- extrai registros da matriz --- */
+function extrairRegistros(rows) {
+  const cab = acharCabecalho(rows);
+  if (!cab) throw new Error('Não achei as colunas de Cliente e Telefone/E-mail nesta planilha.');
+  const { linha, map } = cab;
+  const get = (r, campo) => map[campo] === undefined ? null : r[map[campo]];
+  const regs = [], ignoradas = [];
+  for (let i = linha + 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    const nome = (get(r, 'nome') ?? '').toString().trim();
+    if (ehLinhaLixo(nome)) { if (nome) ignoradas.push(nome); continue; }
+    const temContato = emailNorm(get(r, 'email')) || telNorm(get(r, 'telefone')) || soDigitos(get(r, 'cpf'));
+    if (!temContato) { ignoradas.push(nome); continue; }
+    const reg = {
+      nome,
+      unidade: unidadeCanonica(get(r, 'unidade')),
+      email: emailNorm(get(r, 'email')),
+      telefone: telNorm(get(r, 'telefone')),
+      telefoneBruto: (get(r, 'telefone') ?? '').toString().trim(),
+      cpf: soDigitos(get(r, 'cpf')),
+      plano: (get(r, 'plano') ?? '').toString().trim(),
+      cobranca: (get(r, 'cobranca') ?? '').toString().trim(),
+      vencimento: dataISO(get(r, 'vencimento')),
+      valor: valorNum(get(r, 'valor')),
+      statusOrigem: (get(r, 'status') ?? '').toString().trim(),
+      linha: i + 1
+    };
+    if (!reg.unidade) reg.unidade = unidadePeloPlano(reg.plano);
+    reg.chave = fazerChave(reg);
+    regs.push(reg);
+  }
+  return { registros: regs, colunas: map, cabecalho: rows[linha], ignoradas };
+}
+
+/* --- extrai cancelados --- */
+function extrairCancelados(rows, dataUpload) {
+  const cab = acharCabecalho(rows);
+  if (!cab) throw new Error('Não achei as colunas de Cliente e Telefone/E-mail nesta planilha.');
+  const { linha, map } = cab;
+  const get = (r, campo) => map[campo] === undefined ? null : r[map[campo]];
+  const regs = [], ignoradas = [];
+  for (let i = linha + 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    const nome = (get(r, 'nome') ?? '').toString().trim();
+    if (ehLinhaLixo(nome)) { if (nome) ignoradas.push(nome); continue; }
+    const temContato = emailNorm(get(r, 'email')) || telNorm(get(r, 'telefone')) || soDigitos(get(r, 'cpf'));
+    if (!temContato) { ignoradas.push(nome); continue; }
+    const reg = {
+      nome,
+      unidade: unidadeCanonica(get(r, 'unidade')),
+      email: emailNorm(get(r, 'email')),
+      telefone: telNorm(get(r, 'telefone')),
+      telefoneBruto: (get(r, 'telefone') ?? '').toString().trim(),
+      cpf: soDigitos(get(r, 'cpf')),
+      plano: (get(r, 'plano') ?? '').toString().trim(),
+      valor: valorNum(get(r, 'valor')),
+      barbeiro: (get(r, 'barbeiro') ?? '').toString().trim(),
+      adesao: dataISO(get(r, 'adesao')),
+      cancelamento: dataISO(get(r, 'cancelamento')) || dataUpload,
+      temColunaCancelamento: map.cancelamento !== undefined,
+      linha: i + 1
+    };
+    if (!reg.unidade) reg.unidade = unidadePeloPlano(reg.plano);
+    reg.chave = fazerChave(reg);
+    regs.push(reg);
+  }
+  return { registros: regs, colunas: map, ignoradas };
+}
+
+/* --- régua de resgate: 3 toques --- */
+const REGUA = [2, 10, 25];
+function somarDias(iso, n) {
+  const d = new Date(Date.parse(iso + 'T00:00:00Z') + n * 86400000);
+  return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+}
+function dataDoToque(cancelamento, toqueFeitos) {
+  const i = Math.min(toqueFeitos, REGUA.length - 1);
+  return somarDias(cancelamento, REGUA[i]);
+}
+
+/* --- conciliação de cancelados --- */
+function conciliarCancelados(estado, registros, meta) {
+  const hoje = meta.data;
+  if (!estado.cancelados) estado.cancelados = {};
+  if (!estado.uploadsCanc) estado.uploadsCanc = [];
+  const rel = { data: hoje, arquivo: meta.arquivo, linhas: registros.length,
+    novos: [], mantidos: [], duplicados: [], recancelou: [], semUnidade: [], semData: 0 };
+
+  const indice = {};
+  for (const [k, c] of Object.entries(estado.cancelados)) {
+    for (const alt of chavesAlternativas(c)) if (!indice[alt]) indice[alt] = k;
+  }
+
+  const vistos = {};
+  for (const reg of registros) {
+    let chave = null;
+    for (const alt of chavesAlternativas(reg)) if (indice[alt]) { chave = indice[alt]; break; }
+    if (!chave) chave = reg.chave;
+    if (vistos[chave]) {
+      vistos[chave].linhas.push(reg.linha);
+      rel.duplicados.push({ chave, nome: reg.nome, linhas: vistos[chave].linhas.slice() });
+      continue;
+    }
+    vistos[chave] = { reg, linhas: [reg.linha] };
+    if (!reg.temColunaCancelamento) rel.semData++;
+  }
+
+  for (const [chave, v] of Object.entries(vistos)) {
+    const reg = v.reg;
+    let c = estado.cancelados[chave];
+    const unidade = reg.unidade || (estado.unidadeDe && estado.unidadeDe[chave]) || (c && c.unidade) || '';
+    if (!c) {
+      c = estado.cancelados[chave] = {
+        chave, nome: reg.nome, email: reg.email, telefone: reg.telefone,
+        telefoneBruto: reg.telefoneBruto, cpf: reg.cpf, unidade,
+        plano: reg.plano, valor: reg.valor, barbeiro: reg.barbeiro,
+        adesao: reg.adesao, cancelamento: reg.cancelamento,
+        situacao: 'fila', toque: 0, tentativas: 0,
+        proximoToque: dataDoToque(reg.cancelamento, 0),
+        motivo: '', resultado: '', obs: '',
+        toques: [], recancelou: 0,
+        entrouEm: hoje, ultimaVez: hoje
+      };
+      rel.novos.push(chave);
+    } else {
+      c.nome = reg.nome || c.nome;
+      c.telefoneBruto = reg.telefoneBruto || c.telefoneBruto;
+      c.telefone = reg.telefone || c.telefone;
+      c.email = reg.email || c.email;
+      c.plano = reg.plano || c.plano;
+      c.valor = reg.valor || c.valor;
+      c.barbeiro = reg.barbeiro || c.barbeiro;
+      c.unidade = unidade;
+      c.ultimaVez = hoje;
+      const novaData = reg.temColunaCancelamento && reg.cancelamento && reg.cancelamento !== c.cancelamento;
+      if (c.situacao === 'resgatado' && novaData) {
+        c.situacao = 'fila'; c.toque = 0; c.tentativas = 0;
+        c.cancelamento = reg.cancelamento;
+        c.proximoToque = dataDoToque(reg.cancelamento, 0);
+        c.recancelou = (c.recancelou || 0) + 1;
+        c.toques.push({ n: 0, data: hoje, e: 'recancelou' });
+        rel.recancelou.push(chave);
+      } else {
+        if (novaData) c.cancelamento = reg.cancelamento;
+        rel.mantidos.push(chave);
+      }
+    }
+    if (reg.unidade) { if (!estado.unidadeDe) estado.unidadeDe = {}; estado.unidadeDe[chave] = reg.unidade; }
+    if (!c.unidade) rel.semUnidade.push(chave);
+    if (c.toques.length > 30) c.toques = c.toques.slice(-30);
+  }
+
+  estado.uploadsCanc.unshift({
+    data: hoje, arquivo: meta.arquivo, linhas: registros.length,
+    novos: rel.novos.length, mantidos: rel.mantidos.length,
+    recancelou: rel.recancelou.length, duplicados: rel.duplicados.length
+  });
+  estado.atualizadoEm = hoje;
+  return rel;
+}
+
+/* --- conciliação --- */
+function novoEstado() {
+  return { v: 1, clientes: {}, unidadeDe: {}, uploads: [], criadoEm: null };
+}
+
+function conciliar(estado, registros, meta) {
+  const hoje = meta.data;
+  const rel = {
+    data: hoje, arquivo: meta.arquivo, linhas: registros.length,
+    novos: [], mantidos: [], sumiram: [], reaparecidos: [], duplicados: [], semUnidade: []
+  };
+
+  // índice de chaves alternativas -> chave existente
+  const indice = {};
+  for (const [k, c] of Object.entries(estado.clientes)) {
+    for (const alt of chavesAlternativas(c)) if (!indice[alt]) indice[alt] = k;
+  }
+
+  const vistos = {};
+  for (const reg of registros) {
+    let chave = null;
+    for (const alt of chavesAlternativas(reg)) if (indice[alt]) { chave = indice[alt]; break; }
+    if (!chave) chave = reg.chave;
+
+    if (vistos[chave]) {
+      vistos[chave].vezes++;
+      vistos[chave].linhas.push(reg.linha);
+      rel.duplicados.push({ chave, nome: reg.nome, linhas: vistos[chave].linhas.slice() });
+      continue;
+    }
+    vistos[chave] = { reg, vezes: 1, linhas: [reg.linha] };
+  }
+
+  for (const [chave, v] of Object.entries(vistos)) {
+    const reg = v.reg;
+    let c = estado.clientes[chave];
+    const unidade = reg.unidade || estado.unidadeDe[chave] || (c && c.unidade) || '';
+
+    if (!c) {
+      c = estado.clientes[chave] = {
+        chave, nome: reg.nome, email: reg.email, telefone: reg.telefone,
+        telefoneBruto: reg.telefoneBruto, cpf: reg.cpf, unidade,
+        plano: reg.plano, cobranca: reg.cobranca,
+        vencimento: reg.vencimento, valor: reg.valor,
+        situacao: 'aberto', sugestao: '', contato: 'nao_contatado', obs: '',
+        primeiraVez: hoje, ultimaVez: hoje, vezesNaLista: 1, reaberturas: 0,
+        baixa: null, historico: [{ d: hoje, e: 'entrou', t: reg.valor }],
+        duplicadoNoArquivo: v.vezes > 1 ? v.vezes : 0
+      };
+      rel.novos.push(chave);
+    } else {
+      const eraBaixado = c.situacao === 'baixado';
+      c.nome = reg.nome || c.nome;
+      c.email = reg.email || c.email;
+      c.telefone = reg.telefone || c.telefone;
+      c.telefoneBruto = reg.telefoneBruto || c.telefoneBruto;
+      c.plano = reg.plano || c.plano;
+      c.cobranca = reg.cobranca || c.cobranca;
+      c.vencimento = reg.vencimento || c.vencimento;
+      c.valor = reg.valor || c.valor;
+      c.unidade = unidade;
+      c.ultimaVez = hoje;
+      c.vezesNaLista = (c.vezesNaLista || 0) + 1;
+      c.duplicadoNoArquivo = v.vezes > 1 ? v.vezes : 0;
+      c.sugestao = '';
+      if (eraBaixado) {
+        c.situacao = 'aberto';
+        c.reaberturas = (c.reaberturas || 0) + 1;
+        c.alerta = 'recobranca';
+        const motivo = c.baixa ? c.baixa.motivo : '';
+        c.historico.push({ d: hoje, e: 'reapareceu', t: motivo });
+        c.baixa = null;
+        rel.reaparecidos.push(chave);
+      } else {
+        rel.mantidos.push(chave);
+      }
+    }
+    if (c.historico.length > 40) c.historico = c.historico.slice(-40);
+    if (reg.unidade) estado.unidadeDe[chave] = reg.unidade;
+    if (!c.unidade) rel.semUnidade.push(chave);
+  }
+
+  // quem estava aberto e não veio no arquivo de hoje
+  for (const [chave, c] of Object.entries(estado.clientes)) {
+    if (vistos[chave]) continue;
+    if (c.situacao !== 'aberto') continue;
+    if (c.primeiraVez === hoje) continue;
+    if (c.sugestao !== 'provavel_pagamento') {
+      c.sugestao = 'provavel_pagamento';
+      c.sumiuEm = hoje;
+      c.historico.push({ d: hoje, e: 'sumiu' });
+    }
+    rel.sumiram.push(chave);
+  }
+
+  estado.uploads.unshift({
+    data: hoje, arquivo: meta.arquivo, linhas: registros.length,
+    novos: rel.novos.length, mantidos: rel.mantidos.length,
+    sumiram: rel.sumiram.length, reaparecidos: rel.reaparecidos.length,
+    duplicados: rel.duplicados.length
+  });
+  if (!estado.criadoEm) estado.criadoEm = hoje;
+  estado.atualizadoEm = hoje;
+  return rel;
+}
+
+
+/* ============ fonte canônica da página (template de publicação) ============ */
+const PAGINA_BASE = (function () {
+  var h = document.documentElement.outerHTML;
+  // remove scripts externos injetados pelo runtime do visualizador
+  h = h.replace(/<script\b(?![^>]*data-mine)[^>]*\ssrc=[^>]*>[\s\S]*?<\/script>/gi, '');
+  return '<!doctype html>\n' + h;
+})();
+const MARCA_ESTADO = '<script type="application/json" id="estado">';
+function paginaCom(estado) {
+  const json = JSON.stringify(estado).replace(/</g, '\\u003c');
+  const i = PAGINA_BASE.indexOf(MARCA_ESTADO);
+  const j = PAGINA_BASE.indexOf('<' + '/script>', i);
+  if (i < 0 || j < 0) return null;
+  return PAGINA_BASE.slice(0, i + MARCA_ESTADO.length) + json + PAGINA_BASE.slice(j);
+}
+
+/* ============ estado ============ */
+const MODELO_PADRAO =
+  'Oi {primeiro}, tudo bem? Aqui é da Castello Forte {unidade}.\n' +
+  'Identificamos que a mensalidade do seu {plano} está em aberto: {valor}, com vencimento em {vencimento} ({dias} dias).\n' +
+  'Consegue acertar hoje? Posso te mandar o Pix agora mesmo. Qualquer coisa, é só chamar por aqui.';
+
+let ESTADO;
+try {
+  ESTADO = JSON.parse(document.getElementById('estado').textContent || '{}');
+} catch (e) { ESTADO = {}; }
+if (!ESTADO.clientes) ESTADO = novoEstado();
+if (!ESTADO.modelo) ESTADO.modelo = MODELO_PADRAO;
+if (!ESTADO.seq) ESTADO.seq = 0;
+
+let API = null, MODO_LEITURA = false, USA_ARQUIVOS = true;
+const ARQ_DADOS = 'dados/estado.json';
+
+/* ============ util ============ */
+const $ = s => document.querySelector(s);
+const el = (t, c, txt) => { const n = document.createElement(t); if (c) n.className = c; if (txt != null) n.textContent = txt; return n; };
+const esc = s => (s ?? '').toString().replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+const brl = n => 'R$ ' + (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const dataBr = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(2, 4) : '—';
+function hojeISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function diasEntre(a, b) {
+  if (!a || !b) return 0;
+  return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000);
+}
+const atraso = c => Math.max(0, diasEntre(c.vencimento, hojeISO()));
+const primeiroNome = n => (n || '').trim().split(/\s+/)[0] || '';
+const LABEL_CONTATO = { nao_contatado: 'Não contatado', contatado: 'Contatado', prometeu: 'Prometeu pagar', nao_atende: 'Não atende', negociado: 'Negociado' };
+const LABEL_MOTIVO = { pago: 'Pagou', negociado: 'Negociou', cancelado: 'Cancelou', perda: 'Perda' };
+
+let toastT;
+function toast(msg, tipo) {
+  const t = $('#toast');
+  t.textContent = msg; t.className = 'toast ' + (tipo || '');
+  t.hidden = false; clearTimeout(toastT);
+  toastT = setTimeout(() => { t.hidden = true; }, 4200);
+}
+
+/* ============ persistência ============ */
+let salvarT = null, salvando = false;
+function agendarSalvar() {
+  ESTADO.seq = (ESTADO.seq || 0) + 1;
+  ESTADO.atualizadoEm = hojeISO();
+  clearTimeout(salvarT);
+  salvarT = setTimeout(salvar, 700);
+  marcarPendente(true);
+}
+function marcarPendente(p) {
+  const r = $('#rodape');
+  if (!r) return;
+  if (MODO_LEITURA) { r.textContent = 'Modo leitura — as baixas feitas aqui não são salvas.'; return; }
+  r.textContent = p ? 'Salvando…' : (ESTADO.atualizadoEm ? 'Tudo salvo · última atualização ' + dataBr(ESTADO.atualizadoEm) : 'Tudo salvo');
+}
+async function salvar() {
+  if (MODO_LEITURA) return;
+  if (!API) { localBackup(); marcarPendente(false); return; }
+  if (salvando) { clearTimeout(salvarT); salvarT = setTimeout(salvar, 500); return; }
+  salvando = true;
+  try {
+    if (USA_ARQUIVOS) {
+      const files = {}; files[ARQ_DADOS] = JSON.stringify(ESTADO);
+      await API.publish(files);
+    } else {
+      const html = paginaCom(ESTADO);
+      if (!html) throw { code: 'invalid_content', message: 'template' };
+      await API.publish(html);
+    }
+    localBackup();
+    marcarPendente(false);
+  } catch (err) {
+    const code = (err && err.code) || 'upstream_error';
+    if ((code === 'capability_disabled' || code === 'capability_removed' || code === 'transform_error') && USA_ARQUIVOS) {
+      USA_ARQUIVOS = false; salvando = false; return salvar();
+    }
+    if (code === 'not_writer' || code === 'not_granted' || code === 'not_declared' || code === 'consent_required') {
+      MODO_LEITURA = true; $('#ro-banner').hidden = false; marcarPendente(false); render();
+    } else if (code === 'conflict') {
+      toast('Outra pessoa salvou antes — a tela vai recarregar com a versão dela.');
+    } else if (code === 'rate_limited') {
+      clearTimeout(salvarT); salvarT = setTimeout(salvar, 4000);
+    } else {
+      localBackup();
+      toast('Não consegui salvar agora. Guardei neste navegador e vou tentar de novo.', 'err');
+      clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
+    }
+  } finally { salvando = false; }
+}
+function localBackup() {
+  try { localStorage.setItem('cf-cobranca', JSON.stringify({ seq: ESTADO.seq, estado: ESTADO })); } catch (e) { }
+}
+
+/* ============ métricas ============ */
+function listaBase() { return Object.values(ESTADO.clientes); }
+function daUnidade(lista, u) {
+  if (u === 'REDE') return lista;
+  if (u === 'SEM') return lista.filter(c => !c.unidade);
+  return lista.filter(c => c.unidade === u);
+}
+function abertos(lista) { return lista.filter(c => c.situacao === 'aberto'); }
+
+let UI = { unidade: 'REDE', ordem: 'dias', desc: true, busca: '', situacao: 'aberto', aging: '', contato: '' };
+try {
+  const u = localStorage.getItem('cf-unidade');
+  if (u) UI.unidade = u;
+} catch (e) { }
+
+const UNIS = ['CABO FRIO', 'RIO DAS OSTRAS', 'BUZIOS'];
+function unidadesAtivas() {
+  const set = new Set(UNIS);
+  listaBase().forEach(c => { if (c.unidade) set.add(c.unidade); });
+  Object.values(ESTADO.cancelados || {}).forEach(c => { if (c.unidade) set.add(c.unidade); });
+  return [...set];
+}
+
+/* ============ render ============ */
+function render() {
+  renderModos(); renderTabs();
+  if (MODO === 'resgate') renderResgate(); else renderCobranca();
+  marcarPendente(false);
+}
+function renderCobranca() {
+  renderKpis(); renderAging(); renderAlertas(); renderFila(); renderUploads(); renderTabela();
+}
+
+function contaAba(id) {
+  if (MODO === 'resgate') return daUnidadeC(listaCanc(), id).filter(naFila).length;
+  return abertos(daUnidade(listaBase(), id)).length;
+}
+function renderTabs() {
+  const box = $('#tabs'); box.innerHTML = '';
+  const semUni = listaBase().filter(c => !c.unidade && c.situacao === 'aberto').length +
+    listaCanc().filter(c => !c.unidade && c.situacao === 'fila').length;
+  const itens = [{ id: 'REDE', nome: 'Rede' }].concat(unidadesAtivas().map(u => ({ id: u, nome: nomeBonito(u) })));
+  if (semUni) itens.push({ id: 'SEM', nome: 'Sem unidade' });
+  for (const it of itens) {
+    const n = contaAba(it.id);
+    const b = el('button', 'tab');
+    b.type = 'button'; b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', UI.unidade === it.id ? 'true' : 'false');
+    b.innerHTML = esc(it.nome) + ' <span class="cnt">' + n + '</span>';
+    b.onclick = () => {
+      UI.unidade = it.id;
+      try { localStorage.setItem('cf-unidade', it.id); } catch (e) { }
+      render();
+    };
+    box.appendChild(b);
+  }
+}
+const MINUSC = ['DA', 'DAS', 'DE', 'DO', 'DOS', 'E'];
+function nomeBonito(u) {
+  if (u === 'BUZIOS') return 'Búzios';
+  return u.split(' ').map((p, i) => (i > 0 && MINUSC.includes(p)) ? p.toLowerCase() : p[0] + p.slice(1).toLowerCase()).join(' ');
+}
+
+function renderKpis() {
+  const lista = daUnidade(listaBase(), UI.unidade);
+  const ab = abertos(lista);
+  const total = ab.reduce((a, c) => a + (c.valor || 0), 0);
+  const vencidos60 = ab.filter(c => atraso(c) > 60);
+  const fila = ab.filter(c => c.sugestao === 'provavel_pagamento');
+  const mes = hojeISO().slice(0, 7);
+  const recuperado = lista.filter(c => c.situacao === 'baixado' && c.baixa && c.baixa.motivo === 'pago' && (c.baixa.data || '').slice(0, 7) === mes);
+  const recValor = recuperado.reduce((a, c) => a + (c.valor || 0), 0);
+  const recob = ab.filter(c => c.alerta === 'recobranca');
+
+  const cards = [
+    { lab: 'Em aberto', val: brl(total), foot: ab.length + ' cliente' + (ab.length === 1 ? '' : 's'), cls: '' },
+    { lab: 'A confirmar', val: String(fila.length), foot: fila.length ? 'sumiram da última planilha' : 'nenhum pendente', cls: fila.length ? 'is-ok' : '' },
+    { lab: 'Mais de 60 dias', val: String(vencidos60.length), foot: brl(vencidos60.reduce((a, c) => a + c.valor, 0)), cls: vencidos60.length ? 'is-bad' : '' },
+    { lab: 'Voltaram a cobrar', val: String(recob.length), foot: recob.length ? 'baixa dada mas ainda não pagou' : 'nenhuma recobrança', cls: recob.length ? 'is-warn' : '' },
+    { lab: 'Recuperado no mês', val: brl(recValor), foot: recuperado.length + ' baixa' + (recuperado.length === 1 ? '' : 's') + ' por pagamento', cls: recValor ? 'is-ok' : '' }
+  ];
+  const box = $('#kpis'); box.innerHTML = '';
+  for (const c of cards) {
+    const d = el('div', 'kpi ' + c.cls);
+    d.innerHTML = '<span class="lab">' + esc(c.lab) + '</span><span class="val num">' + esc(c.val) + '</span><span class="foot">' + esc(c.foot) + '</span>';
+    box.appendChild(d);
+  }
+}
+
+const FAIXAS = [
+  { id: 'a', lb: '1–15 d', cor: 'var(--ink3)', teste: d => d <= 15 },
+  { id: 'b', lb: '16–30 d', cor: 'var(--info)', teste: d => d > 15 && d <= 30 },
+  { id: 'c', lb: '31–60 d', cor: 'var(--warn)', teste: d => d > 30 && d <= 60 },
+  { id: 'd', lb: '60+ d', cor: 'var(--bad)', teste: d => d > 60 }
+];
+function renderAging() {
+  const ab = abertos(daUnidade(listaBase(), UI.unidade));
+  const box = $('#aging'); box.innerHTML = '';
+  const max = Math.max(1, ...FAIXAS.map(f => ab.filter(c => f.teste(atraso(c))).length));
+  for (const f of FAIXAS) {
+    const g = ab.filter(c => f.teste(atraso(c)));
+    const v = g.reduce((a, c) => a + c.valor, 0);
+    const row = el('div', 'aging-row');
+    row.innerHTML = '<span class="lb">' + f.lb + '</span>' +
+      '<span class="bar"><i style="width:' + (g.length / max * 100).toFixed(1) + '%;background:' + f.cor + '"></i></span>' +
+      '<span class="vl num">' + g.length + ' · ' + brl(v).replace('R$ ', '') + '</span>';
+    box.appendChild(row);
+  }
+  $('#aging-hint').textContent = ab.length + ' em aberto';
+}
+
+function renderAlertas() {
+  const lista = daUnidade(listaBase(), UI.unidade);
+  const ab = abertos(lista);
+  const box = $('#alertas'); box.innerHTML = '';
+  const itens = [];
+
+  const recob = ab.filter(c => c.alerta === 'recobranca');
+  if (recob.length) itens.push({ t: 'bad', ico: '!', h: recob.length + (recob.length === 1 ? ' cliente voltou' : ' clientes voltaram') + ' a aparecer depois da baixa', p: 'Quer dizer que ainda não pagou. Confira antes de cobrar de novo: ' + recob.slice(0, 3).map(c => c.nome).join(', ') + (recob.length > 3 ? ' e mais ' + (recob.length - 3) : '') + '.', f: 'recobranca' });
+
+  const dup = ab.filter(c => c.duplicadoNoArquivo);
+  if (dup.length) itens.push({ t: 'warn', ico: '⧉', h: dup.length + ' linha' + (dup.length === 1 ? '' : 's') + ' duplicada' + (dup.length === 1 ? '' : 's') + ' na última planilha', p: 'Juntei numa cobrança só para não cobrar duas vezes: ' + dup.slice(0, 3).map(c => c.nome).join(', ') + '.' });
+
+  const semU = lista.filter(c => !c.unidade && c.situacao === 'aberto');
+  if (semU.length && UI.unidade !== 'SEM') itens.push({ t: 'info', ico: '?', h: semU.length + ' cliente' + (semU.length === 1 ? '' : 's') + ' sem unidade', p: 'Abra a aba "Sem unidade" e diga de qual loja é — depois disso eu lembro sozinho.' });
+
+  if (!itens.length) itens.push({ t: 'ok', ico: '✓', h: 'Nada travado por aqui', p: 'Sem recobrança, sem duplicidade e todo mundo com unidade definida.' });
+
+  for (const a of itens) {
+    const d = el('div', 'alert ' + a.t);
+    d.innerHTML = '<span class="ico">' + a.ico + '</span><span><b>' + esc(a.h) + '</b><br>' + esc(a.p) + '</span>';
+    if (a.f) { d.style.cursor = 'pointer'; d.onclick = () => { UI.situacao = a.f; $('#f-situacao').value = a.f; renderTabela(); }; }
+    box.appendChild(d);
+  }
+  $('#p-alertas').hidden = false;
+}
+
+function renderFila() {
+  const fila = abertos(daUnidade(listaBase(), UI.unidade)).filter(c => c.sugestao === 'provavel_pagamento');
+  const p = $('#p-fila'); const box = $('#fila');
+  p.hidden = fila.length === 0;
+  box.innerHTML = '';
+  fila.slice(0, 40).forEach(c => {
+    const d = el('div', 'fila-item');
+    const info = el('div', 'info');
+    info.innerHTML = '<div class="n">' + esc(c.nome) + '</div><div class="m num">' + brl(c.valor) + ' · sumiu em ' + dataBr(c.sumiuEm) + '</div>';
+    const ok = el('button', 'btn btn-sm btn-primary', 'Pagou');
+    ok.type = 'button';
+    ok.onclick = () => { darBaixa(c.chave, { motivo: 'pago', data: hojeISO(), por: '', obs: 'confirmado na fila' }); };
+    const no = el('button', 'btn btn-sm', 'Devendo');
+    no.type = 'button';
+    no.onclick = () => { c.sugestao = ''; c.historico.push({ d: hojeISO(), e: 'mantido em aberto' }); agendarSalvar(); render(); };
+    d.append(info, ok, no);
+    box.appendChild(d);
+  });
+}
+
+function renderUploads() {
+  const box = $('#uploads'); box.innerHTML = '';
+  const ups = (ESTADO.uploads || []).slice(0, 12);
+  if (!ups.length) { box.innerHTML = '<span style="color:var(--ink3)">Nenhuma planilha subida ainda.</span>'; return; }
+  ups.forEach(u => {
+    const d = el('div', 'h');
+    const partes = [];
+    if (u.novos) partes.push(u.novos + ' novo' + (u.novos === 1 ? '' : 's'));
+    if (u.sumiram) partes.push(u.sumiram + ' sumiu/sumiram');
+    if (u.reaparecidos) partes.push(u.reaparecidos + ' voltou/voltaram');
+    if (u.duplicados) partes.push(u.duplicados + ' duplicada' + (u.duplicados === 1 ? '' : 's'));
+    if (!partes.length) partes.push('sem mudanças');
+    d.innerHTML = '<span class="d mono">' + dataBr(u.data) + '</span><span class="t">' + esc(partes.join(' · ')) + '</span>';
+    box.appendChild(d);
+  });
+}
+
+function chipAtraso(d) {
+  const cls = d > 60 ? 'd2' : d > 30 ? 'd1' : 'd0';
+  return '<span class="chip ' + cls + ' num">' + d + ' d</span>';
+}
+
+function renderTabela() {
+  let lista = daUnidade(listaBase(), UI.unidade);
+  if (UI.situacao === 'aberto') lista = lista.filter(c => c.situacao === 'aberto');
+  else if (UI.situacao === 'baixado') lista = lista.filter(c => c.situacao === 'baixado');
+  else if (UI.situacao === 'recobranca') lista = lista.filter(c => c.situacao === 'aberto' && c.alerta === 'recobranca');
+  else if (UI.situacao === 'sugerido') lista = lista.filter(c => c.sugestao === 'provavel_pagamento');
+
+  if (UI.aging) { const f = FAIXAS.find(x => x.id === UI.aging); lista = lista.filter(c => f.teste(atraso(c))); }
+  if (UI.contato) lista = lista.filter(c => (c.contato || 'nao_contatado') === UI.contato);
+  if (UI.busca) {
+    const q = UI.busca.toLowerCase();
+    lista = lista.filter(c => (c.nome + ' ' + c.plano + ' ' + c.telefoneBruto + ' ' + (c.email || '')).toLowerCase().includes(q));
+  }
+  const chave = c => ({
+    nome: c.nome.toLowerCase(), unidade: c.unidade || 'zzz', vencimento: c.vencimento || '',
+    dias: atraso(c), valor: c.valor || 0, cobranca: c.cobranca || '', contato: c.contato || ''
+  }[UI.ordem]);
+  lista.sort((a, b) => {
+    const x = chave(a), y = chave(b);
+    const r = x > y ? 1 : x < y ? -1 : 0;
+    return UI.desc ? -r : r;
+  });
+
+  const tb = $('#corpo'); tb.innerHTML = '';
+  $('#contagem').textContent = lista.length + ' de ' + daUnidade(listaBase(), UI.unidade).length +
+    ' · ' + brl(lista.reduce((a, c) => a + (c.situacao === 'aberto' ? c.valor : 0), 0));
+
+  if (!lista.length) {
+    const tr = el('tr'); const td = el('td'); td.colSpan = 8;
+    td.className = 'empty'; td.textContent = 'Nada por aqui com esses filtros.';
+    tr.appendChild(td); tb.appendChild(tr); return;
+  }
+
+  for (const c of lista) {
+    const d = atraso(c);
+    const tr = el('tr');
+    tr.className = c.situacao === 'baixado' ? 'baixado' : c.alerta === 'recobranca' ? 'recobranca' : c.sugestao === 'provavel_pagamento' ? 'sugerido' : '';
+
+    const tdN = el('td');
+    const nome = el('div', 'cli');
+    let selo = '';
+    if (c.alerta === 'recobranca' && c.situacao === 'aberto') selo = ' <span class="chip bad">voltou ' + c.reaberturas + 'x</span>';
+    else if (c.sugestao === 'provavel_pagamento') selo = ' <span class="chip ok">sumiu da lista</span>';
+    else if (c.situacao === 'baixado') selo = ' <span class="chip info">' + esc(LABEL_MOTIVO[c.baixa && c.baixa.motivo] || 'baixado') + '</span>';
+    nome.innerHTML = '<span class="n">' + esc(c.nome) + selo + '</span><span class="p">' + esc(c.plano || '—') + '</span>';
+    nome.style.cursor = 'pointer';
+    nome.onclick = () => abrirCliente(c.chave);
+    tdN.appendChild(nome);
+
+    const tdU = el('td');
+    if (!c.unidade) {
+      const s = el('select', 'sel-contato');
+      s.innerHTML = '<option value="">definir…</option>' + unidadesAtivas().map(u => '<option value="' + esc(u) + '">' + esc(nomeBonito(u)) + '</option>').join('');
+      s.onchange = () => { if (!s.value) return; c.unidade = s.value; ESTADO.unidadeDe[c.chave] = s.value; agendarSalvar(); render(); };
+      tdU.appendChild(s);
+    } else tdU.textContent = nomeBonito(c.unidade);
+
+    const tdV = el('td', 'num', dataBr(c.vencimento));
+    const tdD = el('td'); tdD.innerHTML = c.situacao === 'aberto' ? chipAtraso(d) : '<span class="chip d0 num">—</span>';
+    const tdVal = el('td', 'num', brl(c.valor)); tdVal.style.textAlign = 'right';
+    const tdC = el('td', '', c.cobranca || '—'); tdC.style.color = 'var(--ink2)';
+
+    const tdCt = el('td');
+    if (c.situacao === 'aberto') {
+      const s = el('select', 'sel-contato');
+      s.innerHTML = Object.entries(LABEL_CONTATO).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
+      s.value = c.contato || 'nao_contatado';
+      s.disabled = MODO_LEITURA;
+      s.onchange = () => { c.contato = s.value; c.historico.push({ d: hojeISO(), e: 'contato', t: LABEL_CONTATO[s.value] }); agendarSalvar(); };
+      tdCt.appendChild(s);
+    } else {
+      tdCt.innerHTML = '<span style="color:var(--ink3);font-size:11.5px">' + esc(c.baixa ? dataBr(c.baixa.data) + (c.baixa.por ? ' · ' + c.baixa.por : '') : '—') + '</span>';
+    }
+
+    const tdA = el('td');
+    const acts = el('div', 'acts');
+    const tel = telE164(c.telefoneBruto || c.telefone);
+    if (tel) {
+      const a = el('a', 'zap', 'Zap');
+      a.href = 'https://wa.me/' + tel + '?text=' + encodeURIComponent(mensagemPara(c));
+      a.target = '_blank'; a.rel = 'noopener';
+      a.onclick = () => { if (!MODO_LEITURA && (c.contato || 'nao_contatado') === 'nao_contatado') { c.contato = 'contatado'; c.historico.push({ d: hojeISO(), e: 'contato', t: 'WhatsApp aberto' }); agendarSalvar(); setTimeout(renderTabela, 60); } };
+      acts.appendChild(a);
+    }
+    if (c.situacao === 'aberto') {
+      const b = el('button', 'btn btn-sm', 'Baixa');
+      b.type = 'button'; b.disabled = MODO_LEITURA;
+      b.onclick = () => abrirBaixa(c.chave);
+      acts.appendChild(b);
+    } else {
+      const b = el('button', 'btn btn-sm btn-ghost', 'Reabrir');
+      b.type = 'button'; b.disabled = MODO_LEITURA;
+      b.onclick = () => { c.situacao = 'aberto'; c.baixa = null; c.historico.push({ d: hojeISO(), e: 'reaberto manualmente' }); agendarSalvar(); render(); };
+      acts.appendChild(b);
+    }
+    tdA.appendChild(acts); tdA.style.textAlign = 'right';
+
+    tr.append(tdN, tdU, tdV, tdD, tdVal, tdC, tdCt, tdA);
+    tb.appendChild(tr);
+  }
+}
+
+function mensagemPara(c) {
+  const m = ESTADO.modelo || MODELO_PADRAO;
+  return m.replace(/\{nome\}/g, c.nome)
+    .replace(/\{primeiro\}/g, primeiroNome(c.nome))
+    .replace(/\{plano\}/g, c.plano || 'plano')
+    .replace(/\{valor\}/g, brl(c.valor))
+    .replace(/\{vencimento\}/g, dataBr(c.vencimento))
+    .replace(/\{dias\}/g, String(atraso(c)))
+    .replace(/\{unidade\}/g, c.unidade ? nomeBonito(c.unidade) : '')
+    .replace(/ +([.,!?])/g, '$1').replace(/[ \t]{2,}/g, ' ');
+}
+
+/* ============ baixa ============ */
+let chaveBaixa = null;
+function abrirBaixa(chave) {
+  chaveBaixa = chave;
+  const c = ESTADO.clientes[chave];
+  $('#baixa-quem').innerHTML = '<b>' + esc(c.nome) + '</b><br><span style="color:var(--ink2)">' + esc(c.plano || '') + ' · ' + brl(c.valor) + ' · venceu em ' + dataBr(c.vencimento) + '</span>';
+  $('#baixa-data').value = hojeISO();
+  $('#baixa-motivo').value = 'pago';
+  $('#baixa-obs').value = '';
+  try { $('#baixa-por').value = localStorage.getItem('cf-quem') || ''; } catch (e) { }
+  abrirModal('#m-baixa');
+}
+function darBaixa(chave, info) {
+  const c = ESTADO.clientes[chave];
+  if (!c) return;
+  c.situacao = 'baixado';
+  c.sugestao = '';
+  c.alerta = '';
+  c.baixa = info;
+  if (info.obs) c.obs = info.obs;
+  c.historico.push({ d: info.data, e: 'baixa', t: LABEL_MOTIVO[info.motivo] + (info.por ? ' · ' + info.por : '') });
+  agendarSalvar();
+  render();
+  toast('Baixa registrada: ' + c.nome + ' — ' + LABEL_MOTIVO[info.motivo], 'ok');
+}
+
+/* ============ detalhe ============ */
+function abrirCliente(chave) {
+  const c = ESTADO.clientes[chave];
+  const b = $('#cliente-b');
+  const linhas = (c.historico || []).slice().reverse().map(h =>
+    '<div class="h"><span class="d mono">' + dataBr(h.d) + '</span><span class="t">' + esc(rotuloEvento(h)) + '</span></div>').join('');
+  b.innerHTML =
+    '<div><div style="font-size:16px;font-weight:600">' + esc(c.nome) + '</div>' +
+    '<div style="color:var(--ink2);font-size:12.5px">' + esc(c.plano || '—') + '</div></div>' +
+    '<div class="resumo">' +
+    '<div class="rz"><div class="v num">' + brl(c.valor) + '</div><div class="l">Valor</div></div>' +
+    '<div class="rz"><div class="v num">' + atraso(c) + '</div><div class="l">Dias de atraso</div></div>' +
+    '<div class="rz"><div class="v num">' + (c.vezesNaLista || 1) + '</div><div class="l">Planilhas</div></div>' +
+    '<div class="rz"><div class="v num">' + (c.reaberturas || 0) + '</div><div class="l">Recobranças</div></div>' +
+    '</div>' +
+    '<div style="font-size:12.5px;color:var(--ink2)">' +
+    'Unidade: <b style="color:var(--ink)">' + esc(c.unidade ? nomeBonito(c.unidade) : 'não definida') + '</b><br>' +
+    'Telefone: <span class="mono">' + esc(c.telefoneBruto || '—') + '</span><br>' +
+    'E-mail: <span class="mono">' + esc(c.email || '—') + '</span><br>' +
+    'Cobrança: ' + esc(c.cobranca || '—') + ' · Vencimento ' + dataBr(c.vencimento) + '<br>' +
+    'Entrou na régua em ' + dataBr(c.primeiraVez) + ' · visto pela última vez em ' + dataBr(c.ultimaVez) +
+    '</div>' +
+    '<label class="lb">Observação da recepção<textarea class="field" id="obs-cli" rows="2" style="resize:vertical">' + esc(c.obs || '') + '</textarea></label>' +
+    '<div><div class="l" style="font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);font-weight:600;margin-bottom:7px">Histórico</div><div class="hist">' + linhas + '</div></div>';
+  const ta = $('#obs-cli');
+  ta.disabled = MODO_LEITURA;
+  ta.onchange = () => { c.obs = ta.value; agendarSalvar(); };
+  abrirModal('#m-cliente');
+}
+function rotuloEvento(h) {
+  const map = {
+    entrou: 'Entrou na lista de inadimplentes',
+    segue: 'Continua na planilha',
+    sumiu: 'Sumiu da planilha — provável pagamento',
+    reapareceu: 'Voltou a aparecer depois da baixa' + (h.t ? ' (' + LABEL_MOTIVO[h.t] + ')' : ''),
+    baixa: 'Baixa: ' + (h.t || ''),
+    contato: 'Contato: ' + (h.t || ''),
+    'mantido em aberto': 'Confirmado que ainda deve',
+    'reaberto manualmente': 'Reaberto manualmente'
+  };
+  return map[h.e] || h.e + (h.t ? ' · ' + h.t : '');
+}
+
+/* ============ modais ============ */
+function abrirModal(sel) { $(sel).hidden = false; }
+function fecharModais() { document.querySelectorAll('.modal').forEach(m => m.hidden = true); }
+document.addEventListener('click', e => {
+  if (e.target.matches('[data-fechar]')) fecharModais();
+  if (e.target.classList && e.target.classList.contains('modal')) fecharModais();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModais(); });
+
+/* ============ upload ============ */
+let previa = null;
+function abrirUpload() {
+  previa = null;
+  $('#preview').innerHTML = '';
+  $('#btn-aplicar').disabled = true;
+  $('#data-lista').value = hojeISO();
+  abrirModal('#m-upload');
+}
+async function lerArquivo(file) {
+  const nome = file.name.toLowerCase();
+  let rows;
+  if (nome.endsWith('.csv') || nome.endsWith('.txt')) {
+    rows = lerCsv(await file.text());
+  } else {
+    rows = await lerXlsx(await file.arrayBuffer());
+  }
+  return rows;
+}
+async function processarArquivo(file) {
+  const box = $('#preview');
+  box.innerHTML = '<div class="alert info"><span class="ico">…</span><span>Lendo <b>' + esc(file.name) + '</b></span></div>';
+  try {
+    const rows = await lerArquivo(file);
+    const ex = extrairRegistros(rows);
+    const data = $('#data-lista').value || hojeISO();
+    const copia = JSON.parse(JSON.stringify(ESTADO));
+    const rel = conciliar(copia, ex.registros, { data, arquivo: file.name });
+    previa = { estado: copia, rel, nome: file.name };
+    mostrarPrevia(rel, ex);
+    $('#btn-aplicar').disabled = MODO_LEITURA;
+  } catch (err) {
+    box.innerHTML = '<div class="alert bad"><span class="ico">!</span><span><b>Não consegui ler o arquivo.</b><br>' + esc(err.message || String(err)) + '</span></div>';
+    $('#btn-aplicar').disabled = true;
+  }
+}
+function mostrarPrevia(rel, ex) {
+  const box = $('#preview');
+  const cards = [
+    ['Linhas lidas', rel.linhas],
+    ['Novos', rel.novos.length],
+    ['Continuam', rel.mantidos.length],
+    ['Sumiram', rel.sumiram.length],
+    ['Voltaram', rel.reaparecidos.length],
+    ['Duplicadas', rel.duplicados.length]
+  ];
+  let html = '<div class="resumo">' + cards.map(c =>
+    '<div class="rz"><div class="v num">' + c[1] + '</div><div class="l">' + c[0] + '</div></div>').join('') + '</div>';
+
+  if (rel.reaparecidos.length) {
+    html += '<div class="alert bad"><span class="ico">!</span><span><b>' + rel.reaparecidos.length +
+      ' já tinha(m) recebido baixa e voltou/voltaram a aparecer — ainda não pagou.</b><br>' +
+      esc(rel.reaparecidos.map(k => previa.estado.clientes[k].nome).join(', ')) + '</span></div>';
+  }
+  if (rel.duplicados.length) {
+    html += '<div class="alert warn"><span class="ico">⧉</span><span><b>Linha repetida no arquivo</b> — juntei numa cobrança só:<br>' +
+      esc(rel.duplicados.map(d => d.nome + ' (linhas ' + d.linhas.join(', ') + ')').join('; ')) + '</span></div>';
+  }
+  if (rel.sumiram.length) {
+    html += '<div class="alert ok"><span class="ico">✓</span><span><b>' + rel.sumiram.length +
+      ' sumiu/sumiram da planilha</b> — vão para a fila "Sumiram da planilha" esperando você confirmar a baixa.</span></div>';
+  }
+  const semU = rel.semUnidade.length;
+  if (semU) html += '<div class="alert info"><span class="ico">?</span><span><b>' + semU + ' sem unidade na planilha</b> — vou perguntar uma vez e depois lembro sozinho.</span></div>';
+  if (ex && ex.ignoradas && ex.ignoradas.length) {
+    html += '<div class="alert info"><span class="ico">–</span><span>Ignorei ' + ex.ignoradas.length +
+      ' linha(s) que não são cliente (totalizadores).</span></div>';
+  }
+  box.innerHTML = html;
+}
+function aplicarPrevia() {
+  if (!previa) return;
+  const modelo = ESTADO.modelo, seq = ESTADO.seq;
+  ESTADO = previa.estado;
+  ESTADO.modelo = modelo; ESTADO.seq = seq;
+  normalizarEstado();
+  agendarSalvar();
+  fecharModais();
+  render();
+  const r = previa.rel;
+  toast('Planilha de ' + dataBr(r.data) + ' aplicada · ' + r.novos.length + ' novos, ' + r.sumiram.length + ' para confirmar', 'ok');
+  previa = null;
+}
+
+/* ============ exportar ============ */
+async function exportar() {
+  const lista = daUnidade(listaBase(), UI.unidade);
+  const cab = ['Cliente', 'Unidade', 'Telefone', 'Email', 'Plano', 'Cobranca', 'Vencimento', 'DiasAtraso', 'Valor', 'Situacao', 'Contato', 'MotivoBaixa', 'DataBaixa', 'QuemBaixou', 'Recobrancas', 'Observacao'];
+  const linhas = lista.map(c => [
+    c.nome, c.unidade, c.telefoneBruto, c.email, c.plano, c.cobranca, dataBr(c.vencimento),
+    c.situacao === 'aberto' ? atraso(c) : '', (c.valor || 0).toFixed(2).replace('.', ','),
+    c.situacao === 'aberto' ? 'Em aberto' : 'Baixado', LABEL_CONTATO[c.contato || 'nao_contatado'],
+    c.baixa ? LABEL_MOTIVO[c.baixa.motivo] : '', c.baixa ? dataBr(c.baixa.data) : '', c.baixa ? c.baixa.por : '',
+    c.reaberturas || 0, c.obs || ''
+  ]);
+  const csv = '﻿' + [cab].concat(linhas)
+    .map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(';')).join('\r\n');
+  const base = 'cobranca-' + (UI.unidade === 'REDE' ? 'rede' : UI.unidade.toLowerCase().replace(/ /g, '-')) + '-' + hojeISO();
+  const dl = window.claude ? await window.claude.use('downloads').catch(() => null) : null;
+  if (!dl) { toast('Exportação não disponível nesta visualização.', 'err'); return; }
+  try {
+    await dl.save({ filename: base + '.csv', data: csv });
+    toast('Arquivo salvo.', 'ok');
+  } catch (err) {
+    if (err && err.code === 'extension_not_enabled') {
+      try { await dl.save({ filename: base + '.txt', data: csv }); toast('Arquivo salvo como .txt (abre no Excel).', 'ok'); return; } catch (e2) { }
+    }
+    if (!err || err.code !== 'declined') toast('Não consegui gerar o arquivo agora.', 'err');
+  }
+}
+
+/* ============ eventos ============ */
+$('#btn-upload').onclick = abrirUpload;
+$('#btn-exportar').onclick = exportar;
+$('#btn-escolher').onclick = () => $('#arquivo').click();
+$('#arquivo').onchange = e => { if (e.target.files[0]) processarArquivo(e.target.files[0]); };
+$('#btn-aplicar').onclick = aplicarPrevia;
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) processarArquivo(f); });
+
+$('#btn-confirmar-baixa').onclick = () => {
+  const por = $('#baixa-por').value.trim();
+  try { localStorage.setItem('cf-quem', por); } catch (e) { }
+  darBaixa(chaveBaixa, {
+    motivo: $('#baixa-motivo').value, data: $('#baixa-data').value || hojeISO(),
+    por, obs: $('#baixa-obs').value.trim()
+  });
+  fecharModais();
+};
+
+$('#busca').oninput = e => { UI.busca = e.target.value.trim(); renderTabela(); };
+$('#f-situacao').onchange = e => { UI.situacao = e.target.value; renderTabela(); };
+$('#f-aging').onchange = e => { UI.aging = e.target.value; renderTabela(); };
+$('#f-contato').onchange = e => { UI.contato = e.target.value; renderTabela(); };
+document.querySelectorAll('thead th[data-sort]').forEach(th => {
+  th.onclick = () => {
+    const s = th.dataset.sort;
+    if (UI.ordem === s) UI.desc = !UI.desc; else { UI.ordem = s; UI.desc = s === 'dias' || s === 'valor'; }
+    renderTabela();
+  };
+});
+
+$('#btn-modelo').onclick = () => {
+  $('#modelo-txt').value = ESTADO.modelo || MODELO_PADRAO;
+  atualizarPreviewModelo();
+  abrirModal('#m-modelo');
+};
+$('#modelo-txt').oninput = atualizarPreviewModelo;
+function atualizarPreviewModelo() {
+  const exemplo = abertos(listaBase())[0];
+  if (!exemplo) { $('#modelo-preview').textContent = 'Suba uma planilha para ver o exemplo.'; return; }
+  const antigo = ESTADO.modelo;
+  ESTADO.modelo = $('#modelo-txt').value;
+  $('#modelo-preview').textContent = mensagemPara(exemplo);
+  ESTADO.modelo = antigo;
+}
+$('#btn-salvar-modelo').onclick = () => {
+  ESTADO.modelo = $('#modelo-txt').value;
+  agendarSalvar(); fecharModais(); toast('Modelo salvo.', 'ok');
+};
+
+/* ============ boot ============ */
+function iniciar() {
+render();
+
+(async () => {
+  // dados mais recentes salvos como arquivo do artifact
+  try {
+    const r = await fetch(ARQ_DADOS, { cache: 'no-store' });
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d.clientes && (d.seq || 0) >= (ESTADO.seq || 0)) { ESTADO = d; normalizarEstado(); render(); }
+    }
+  } catch (e) { }
+  // backup local, se for mais novo
+  try {
+    const raw = localStorage.getItem('cf-cobranca');
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d && d.estado && d.estado.clientes && (d.seq || 0) > (ESTADO.seq || 0)) { ESTADO = d.estado; normalizarEstado(); render(); }
+    }
+  } catch (e) { }
+
+  API = window.claude ? await window.claude.use('artifact').catch(() => null) : null;
+  if (!API) {
+    MODO_LEITURA = false;
+    $('#rodape').textContent = 'Salvando apenas neste navegador — abra pelo link do painel para salvar para todo mundo.';
+  } else {
+    marcarPendente(false);
+  }
+})();
+}
+
+/* ================= RESGATE ================= */
+const MOTIVOS = {
+  preco: 'Achou caro',
+  financeiro: 'Aperto financeiro',
+  mudou: 'Mudou de cidade',
+  atendimento: 'Insatisfeito com o atendimento',
+  corte: 'Insatisfeito com o corte',
+  tempo: 'Falta de tempo / não usava',
+  agenda: 'Não conseguia horário',
+  barbeiro: 'O barbeiro dele saiu',
+  outro: 'Outro'
+};
+const LABEL_RESULTADO = {
+  voltou: 'Voltou', vai_pensar: 'Vai pensar', nao_quer: 'Não quer',
+  nao_atende: 'Não atendeu', numero_errado: 'Número errado'
+};
+const ROTEIRO = [
+  'Toque 1 — ouvir. Ligue para entender, não para vender. Pergunte o que fez ele sair e deixe falar até o fim. Só ofereça alguma coisa se ele abrir a porta.',
+  'Toque 2 — responder. Volte com a solução do motivo que ele deu no primeiro toque: se foi horário, ofereça horário; se foi o barbeiro, ofereça outro. Convide para uma visita sem compromisso.',
+  'Toque 3 — fechar. Último toque da régua. Traga uma condição concreta com prazo. Se disser não, agradeça e encerre — ele sai da fila e volta só numa campanha futura.'
+];
+const MODELOS_RESGATE_PADRAO = [
+  'Oi {primeiro}, aqui é da Castello Forte {unidade}. Vi que você encerrou o {plano} e não quis deixar passar sem falar com você.\nMe conta com sinceridade: o que faltou da nossa parte? Sua resposta ajuda a gente a melhorar de verdade.',
+  'Oi {primeiro}, sou da Castello Forte {unidade}. Voltei aqui porque a gente cuidou do ponto que você comentou.\nQueria te convidar para uma visita e mostrar como ficou — sem compromisso nenhum de voltar para o plano. Topa marcar essa semana?',
+  'Oi {primeiro}, aqui é da Castello Forte {unidade}, meu último contato sobre isso.\nSeparei uma condição de retorno especial pra você, válida até o fim da semana. Se fizer sentido eu te mando os detalhes; se não fizer, sem problema — a porta fica aberta quando quiser voltar.'
+];
+const META_PADRAO = 8;
+
+function normalizarEstado() {
+  if (!ESTADO.clientes) ESTADO.clientes = {};
+  if (!ESTADO.unidadeDe) ESTADO.unidadeDe = {};
+  if (!ESTADO.uploads) ESTADO.uploads = [];
+  if (!ESTADO.cancelados) ESTADO.cancelados = {};
+  if (!ESTADO.uploadsCanc) ESTADO.uploadsCanc = [];
+  if (!ESTADO.modelo) ESTADO.modelo = MODELO_PADRAO;
+  if (!ESTADO.modelosResgate || ESTADO.modelosResgate.length !== 3) ESTADO.modelosResgate = MODELOS_RESGATE_PADRAO.slice();
+  if (!ESTADO.metas) ESTADO.metas = {};
+  if (!ESTADO.seq) ESTADO.seq = 0;
+}
+normalizarEstado();
+
+let MODO = 'cobranca';
+try { MODO = localStorage.getItem('cf-modo') || 'cobranca'; } catch (e) { }
+let RUI = { ordem: 'proximoToque', desc: false, busca: '', situacao: 'hoje', toque: '', motivo: '' };
+
+function listaCanc() { return Object.values(ESTADO.cancelados || {}); }
+function metaDa(u) {
+  if (u === 'REDE') return unidadesAtivas().reduce((a, x) => a + (ESTADO.metas[x] || META_PADRAO), 0);
+  return ESTADO.metas[u] || META_PADRAO;
+}
+function naFila(c) { return c.situacao === 'fila'; }
+function paraHoje(c) { return c.situacao === 'fila' && (c.proximoToque || '') <= hojeISO(); }
+function diasDesdeCanc(c) { return Math.max(0, diasEntre(c.cancelamento, hojeISO())); }
+function toquesDoMes(c, mes) { return (c.toques || []).filter(t => t.data && t.data.slice(0, 7) === mes && t.resultado); }
+
+/* ---------- alternador de modo ---------- */
+function trocarModo(m) {
+  MODO = m;
+  try { localStorage.setItem('cf-modo', m); } catch (e) { }
+  render();
+}
+document.querySelectorAll('#modos .modo').forEach(b => { b.onclick = () => trocarModo(b.dataset.modo); });
+
+function renderModos() {
+  const emAberto = abertos(daUnidade(listaBase(), UI.unidade)).length;
+  const hoje = daUnidadeC(listaCanc(), UI.unidade).filter(paraHoje).length;
+  $('#cnt-cob').textContent = emAberto;
+  $('#cnt-res').textContent = hoje;
+  document.querySelectorAll('#modos .modo').forEach(b =>
+    b.setAttribute('aria-selected', b.dataset.modo === MODO ? 'true' : 'false'));
+  $('#view-cobranca').hidden = MODO !== 'cobranca';
+  $('#view-resgate').hidden = MODO !== 'resgate';
+  $('#acoes-cob').hidden = MODO !== 'cobranca';
+  $('#acoes-res').hidden = MODO !== 'resgate';
+  $('#brand-sub').textContent = MODO === 'cobranca' ? 'Régua de cobrança' : 'Régua de resgate';
+}
+function daUnidadeC(lista, u) {
+  if (u === 'REDE') return lista;
+  if (u === 'SEM') return lista.filter(c => !c.unidade);
+  return lista.filter(c => c.unidade === u);
+}
+
+/* ---------- KPIs ---------- */
+function renderKpisResgate() {
+  const lista = daUnidadeC(listaCanc(), UI.unidade);
+  const mes = hojeISO().slice(0, 7);
+  const fila = lista.filter(naFila);
+  const hoje = fila.filter(paraHoje);
+  const atrasados = fila.filter(c => (c.proximoToque || '') < hojeISO());
+  const resgatados = lista.filter(c => c.situacao === 'resgatado' && (c.resgatadoEm || '').slice(0, 7) === mes);
+  const perdidos = lista.filter(c => c.situacao === 'perdido' && (c.encerradoEm || '').slice(0, 7) === mes);
+  const fechados = resgatados.length + perdidos.length;
+  const taxa = fechados ? Math.round(resgatados.length / fechados * 100) : 0;
+  const recuperado = resgatados.reduce((a, c) => a + (c.valor || 0), 0);
+  const meta = metaDa(UI.unidade);
+
+  const cards = [
+    { lab: 'Ligar hoje', val: String(hoje.length), foot: atrasados.length ? atrasados.length + ' já passou da data' : 'fila em dia', cls: hoje.length ? 'is-warn' : '' },
+    { lab: 'Na fila', val: String(fila.length), foot: 'cancelados em trabalho', cls: '' },
+    { lab: 'Resgatados no mês', val: resgatados.length + ' / ' + meta, foot: 'meta da ' + (UI.unidade === 'REDE' ? 'rede' : 'unidade'), cls: resgatados.length >= meta ? 'is-ok' : '' },
+    { lab: 'Taxa de resgate', val: fechados ? taxa + '%' : '—', foot: fechados ? resgatados.length + ' de ' + fechados + ' encerrados' : 'nenhum caso fechado ainda', cls: fechados ? (taxa >= 30 ? 'is-ok' : taxa >= 15 ? 'is-warn' : 'is-bad') : '' },
+    { lab: 'De volta no mês', val: brl(recuperado), foot: 'mensalidade recuperada', cls: recuperado ? 'is-ok' : '' }
+  ];
+  const box = $('#kpis'); box.innerHTML = '';
+  for (const c of cards) {
+    const d = el('div', 'kpi ' + c.cls);
+    d.innerHTML = '<span class="lab">' + esc(c.lab) + '</span><span class="val num">' + esc(c.val) + '</span><span class="foot">' + esc(c.foot) + '</span>';
+    box.appendChild(d);
+  }
+}
+
+/* ---------- placar ---------- */
+function renderPlacar() {
+  const lista = daUnidadeC(listaCanc(), UI.unidade);
+  const mes = hojeISO().slice(0, 7);
+  const resgatados = lista.filter(c => c.situacao === 'resgatado' && (c.resgatadoEm || '').slice(0, 7) === mes);
+  const meta = metaDa(UI.unidade);
+  const pct = Math.min(100, Math.round(resgatados.length / Math.max(1, meta) * 100));
+  const contatos = lista.reduce((a, c) => a + toquesDoMes(c, mes).length, 0);
+  const trabalhados = lista.filter(c => toquesDoMes(c, mes).length).length;
+  const novos = lista.filter(c => (c.cancelamento || '').slice(0, 7) === mes).length;
+  const recuperado = resgatados.reduce((a, c) => a + (c.valor || 0), 0);
+  const nivel = pct >= 80 ? '' : pct >= 40 ? 'medio' : 'baixo';
+
+  $('#placar').innerHTML =
+    '<div class="placar-meta">' +
+    '<div class="top"><span class="big num">' + resgatados.length + '</span><span class="of">de ' + meta + ' resgates</span>' +
+    '<span class="lb">' + pct + '% da meta</span></div>' +
+    '<div class="meter ' + nivel + '"><i style="width:' + pct + '%"></i></div>' +
+    '</div>' +
+    '<div class="placar-grid">' +
+    '<div class="pg"><div class="v num">' + contatos + '</div><div class="l">Contatos feitos</div></div>' +
+    '<div class="pg"><div class="v num">' + trabalhados + '</div><div class="l">Clientes trabalhados</div></div>' +
+    '<div class="pg"><div class="v num">' + novos + '</div><div class="l">Cancelaram no mês</div></div>' +
+    '<div class="pg"><div class="v num">' + brl(recuperado).replace('R$ ', '') + '</div><div class="l">R$ de volta</div></div>' +
+    '</div>';
+}
+
+function renderRanking() {
+  const lista = daUnidadeC(listaCanc(), UI.unidade);
+  const mes = hojeISO().slice(0, 7);
+  const por = {};
+  for (const c of lista) {
+    for (const t of toquesDoMes(c, mes)) {
+      const nome = (t.por || '').trim() || 'sem nome';
+      if (!por[nome]) por[nome] = { contatos: 0, resgates: 0 };
+      por[nome].contatos++;
+      if (t.resultado === 'voltou') por[nome].resgates++;
+    }
+  }
+  const linhas = Object.entries(por).sort((a, b) => b[1].resgates - a[1].resgates || b[1].contatos - a[1].contatos);
+  const box = $('#ranking');
+  if (!linhas.length) {
+    box.innerHTML = '<span style="color:var(--ink3);font-size:12.5px">Nenhum contato registrado este mês. Assim que a recepção registrar a primeira ligação, o nome dela aparece aqui.</span>';
+    return;
+  }
+  box.innerHTML = '<div class="rank">' + linhas.map(([nome, v]) =>
+    '<div class="rank-row' + (v.resgates ? '' : ' zero') + '">' +
+    '<span class="nm">' + esc(nome) + '</span>' +
+    '<span class="a">' + v.contatos + ' contato' + (v.contatos === 1 ? '' : 's') + '</span>' +
+    '<span class="b">' + v.resgates + ' de volta</span></div>').join('') + '</div>';
+}
+
+function renderMotivos() {
+  const lista = daUnidadeC(listaCanc(), UI.unidade).filter(c => c.motivo);
+  const cont = {};
+  lista.forEach(c => { cont[c.motivo] = (cont[c.motivo] || 0) + 1; });
+  const linhas = Object.entries(cont).sort((a, b) => b[1] - a[1]);
+  const box = $('#motivos');
+  $('#motivos-hint').textContent = lista.length ? lista.length + ' respostas' : '';
+  if (!linhas.length) {
+    box.innerHTML = '<span style="color:var(--ink3);font-size:12.5px">Ainda sem motivo registrado. Ele é preenchido na tela de contato, e é daqui que sai o relatório do que está fazendo cliente sair.</span>';
+    return;
+  }
+  const max = linhas[0][1];
+  box.innerHTML = linhas.map(([k, v]) =>
+    '<div class="aging-row" style="grid-template-columns:132px 1fr 34px">' +
+    '<span class="lb" title="' + esc(MOTIVOS[k] || k) + '">' + esc(MOTIVOS[k] || k) + '</span>' +
+    '<span class="bar"><i style="width:' + (v / max * 100).toFixed(1) + '%;background:var(--brass)"></i></span>' +
+    '<span class="vl num">' + v + '</span></div>').join('');
+}
+
+function renderUploadsRes() {
+  const box = $('#r-uploads'); box.innerHTML = '';
+  const ups = (ESTADO.uploadsCanc || []).slice(0, 12);
+  if (!ups.length) { box.innerHTML = '<span style="color:var(--ink3)">Nenhuma planilha de cancelados subida ainda.</span>'; return; }
+  ups.forEach(u => {
+    const p = [];
+    if (u.novos) p.push(u.novos + ' novo' + (u.novos === 1 ? '' : 's'));
+    if (u.recancelou) p.push(u.recancelou + ' cancelou de novo');
+    if (u.duplicados) p.push(u.duplicados + ' duplicada' + (u.duplicados === 1 ? '' : 's'));
+    if (!p.length) p.push('sem mudanças');
+    const d = el('div', 'h');
+    d.innerHTML = '<span class="d mono">' + dataBr(u.data) + '</span><span class="t">' + esc(p.join(' · ')) + '</span>';
+    box.appendChild(d);
+  });
+}
+
+/* ---------- tabela ---------- */
+function chipContato(c) {
+  if (c.situacao === 'resgatado') return '<span class="chip ok">voltou' + (c.recancelou ? ' · saiu ' + (c.recancelou + 1) + 'x' : '') + '</span>';
+  if (c.situacao === 'perdido') return '<span class="chip d0">encerrado</span>';
+  const d = diasEntre(hojeISO(), c.proximoToque || hojeISO());
+  if (d < 0) return '<span class="chip atrasado num">' + dataBr(c.proximoToque) + ' · ' + (-d) + 'd atrás</span>';
+  if (d === 0) return '<span class="chip hoje">hoje</span>';
+  return '<span class="chip agendado num">' + dataBr(c.proximoToque) + '</span>';
+}
+
+function renderTabelaResgate() {
+  let lista = daUnidadeC(listaCanc(), UI.unidade);
+  if (RUI.situacao === 'hoje') lista = lista.filter(paraHoje);
+  else if (RUI.situacao === 'fila') lista = lista.filter(naFila);
+  else if (RUI.situacao === 'resgatado') lista = lista.filter(c => c.situacao === 'resgatado');
+  else if (RUI.situacao === 'perdido') lista = lista.filter(c => c.situacao === 'perdido');
+  if (RUI.toque !== '') lista = lista.filter(c => String(c.toque || 0) === RUI.toque);
+  if (RUI.motivo) lista = lista.filter(c => c.motivo === RUI.motivo);
+  if (RUI.busca) {
+    const q = RUI.busca.toLowerCase();
+    lista = lista.filter(c => (c.nome + ' ' + (c.plano || '') + ' ' + (c.telefoneBruto || '') + ' ' + (c.barbeiro || '')).toLowerCase().includes(q));
+  }
+  const chave = c => ({
+    nome: c.nome.toLowerCase(), unidade: c.unidade || 'zzz', cancelamento: c.cancelamento || '',
+    barbeiro: (c.barbeiro || 'zzz').toLowerCase(), toque: c.toque || 0,
+    proximoToque: c.proximoToque || '9999', resultado: c.situacao + (c.resultado || '')
+  }[RUI.ordem]);
+  lista.sort((a, b) => { const x = chave(a), y = chave(b); const r = x > y ? 1 : x < y ? -1 : 0; return RUI.desc ? -r : r; });
+
+  const tb = $('#r-corpo'); tb.innerHTML = '';
+  const total = daUnidadeC(listaCanc(), UI.unidade).length;
+  $('#r-contagem').textContent = lista.length + ' de ' + total + ' cancelados';
+
+  if (!lista.length) {
+    const tr = el('tr'); const td = el('td'); td.colSpan = 8; td.className = 'empty';
+    td.textContent = RUI.situacao === 'hoje'
+      ? 'Nenhuma ligação marcada para hoje. Fila em dia.'
+      : 'Nada por aqui com esses filtros.';
+    tr.appendChild(td); tb.appendChild(tr); return;
+  }
+
+  for (const c of lista) {
+    const tr = el('tr');
+    tr.className = c.situacao === 'resgatado' ? 'resgatado' : c.situacao === 'perdido' ? 'perdido' : '';
+
+    const tdN = el('td');
+    const nome = el('div', 'cli');
+    nome.innerHTML = '<span class="n">' + esc(c.nome) + '</span><span class="p">' + esc(c.plano || '—') +
+      (c.valor ? ' · ' + brl(c.valor) : '') + '</span>';
+    nome.style.cursor = 'pointer';
+    nome.onclick = () => abrirCancelado(c.chave);
+    tdN.appendChild(nome);
+
+    const tdU = el('td');
+    if (!c.unidade) {
+      const s = el('select', 'sel-contato');
+      s.innerHTML = '<option value="">definir…</option>' + unidadesAtivas().map(u => '<option value="' + esc(u) + '">' + esc(nomeBonito(u)) + '</option>').join('');
+      s.disabled = MODO_LEITURA;
+      s.onchange = () => { if (!s.value) return; c.unidade = s.value; ESTADO.unidadeDe[c.chave] = s.value; agendarSalvar(); render(); };
+      tdU.appendChild(s);
+    } else tdU.textContent = nomeBonito(c.unidade);
+
+    const tdC = el('td', 'num');
+    tdC.innerHTML = dataBr(c.cancelamento) + ' <span style="color:var(--ink3)">· ' + diasDesdeCanc(c) + 'd</span>';
+    const tdB = el('td', 'nowrap', c.barbeiro || '—');
+    if (!c.barbeiro) tdB.style.color = 'var(--ink3)';
+
+    const tdT = el('td');
+    const n = Math.min((c.toque || 0) + 1, 3);
+    tdT.innerHTML = c.situacao === 'fila'
+      ? '<span class="chip toque">' + n + ' de 3</span>'
+      : '<span class="chip toque">' + (c.toque || 0) + ' feito' + ((c.toque || 0) === 1 ? '' : 's') + '</span>';
+
+    const tdP = el('td'); tdP.innerHTML = chipContato(c);
+
+    const tdR = el('td');
+    const partes = [];
+    if (c.resultado) partes.push(LABEL_RESULTADO[c.resultado] || c.resultado);
+    if (c.motivo) partes.push(MOTIVOS[c.motivo] || c.motivo);
+    tdR.className = 'nowrap';
+    tdR.innerHTML = partes.length
+      ? '<span style="font-size:11.5px;color:var(--ink2)">' + esc(partes.join(' · ')) + '</span>'
+      : '<span style="font-size:11.5px;color:var(--ink3)">sem contato</span>';
+
+    const tdA = el('td'); tdA.style.textAlign = 'right';
+    const acts = el('div', 'acts');
+    const tel = telE164(c.telefoneBruto || c.telefone);
+    if (tel && c.situacao === 'fila') {
+      const a = el('a', 'zap', 'Zap');
+      a.href = 'https://wa.me/' + tel + '?text=' + encodeURIComponent(mensagemResgate(c));
+      a.target = '_blank'; a.rel = 'noopener';
+      acts.appendChild(a);
+    }
+    if (c.situacao === 'fila') {
+      const b = el('button', 'btn btn-sm btn-primary', 'Registrar');
+      b.type = 'button'; b.disabled = MODO_LEITURA;
+      b.onclick = () => abrirToque(c.chave);
+      acts.appendChild(b);
+    } else {
+      const b = el('button', 'btn btn-sm btn-ghost', 'Reabrir');
+      b.type = 'button'; b.disabled = MODO_LEITURA;
+      b.onclick = () => {
+        c.situacao = 'fila'; c.proximoToque = hojeISO();
+        c.toques.push({ n: c.toque || 0, data: hojeISO(), e: 'reaberto' });
+        agendarSalvar(); render();
+      };
+      acts.appendChild(b);
+    }
+    tdA.appendChild(acts);
+
+    tr.append(tdN, tdU, tdC, tdB, tdT, tdP, tdR, tdA);
+    tb.appendChild(tr);
+  }
+}
+
+function mensagemResgate(c) {
+  const i = Math.min(c.toque || 0, 2);
+  const m = (ESTADO.modelosResgate && ESTADO.modelosResgate[i]) || MODELOS_RESGATE_PADRAO[i];
+  return limparTexto(m.replace(/\{nome\}/g, c.nome)
+    .replace(/\{primeiro\}/g, primeiroNome(c.nome))
+    .replace(/\{plano\}/g, c.plano || 'plano')
+    .replace(/\{unidade\}/g, c.unidade ? nomeBonito(c.unidade) : '')
+    .replace(/\{barbeiro\}/g, c.barbeiro || '')
+    .replace(/\{dias\}/g, String(diasDesdeCanc(c)))
+    .replace(/\{motivo\}/g, MOTIVOS[c.motivo] || ''));
+}
+
+function limparTexto(t) {
+  return t.replace(/ +([.,!?])/g, '$1').replace(/[ \t]{2,}/g, ' ').replace(/ +\n/g, '\n');
+}
+
+/* ---------- registrar contato ---------- */
+let chaveToque = null;
+function abrirToque(chave) {
+  chaveToque = chave;
+  const c = ESTADO.cancelados[chave];
+  const n = Math.min((c.toque || 0), 2);
+  $('#toque-quem').innerHTML = '<b>' + esc(c.nome) + '</b><br><span style="color:var(--ink2)">' +
+    esc(c.plano || '') + ' · cancelou em ' + dataBr(c.cancelamento) + ' (' + diasDesdeCanc(c) + ' dias)' +
+    (c.barbeiro ? ' · atendia com ' + esc(c.barbeiro) : '') + '</span>';
+  $('#toque-roteiro').querySelector('span:last-child').textContent = ROTEIRO[n];
+  $('#toque-resultado').value = 'voltou';
+  $('#toque-motivo').innerHTML = '<option value="">— escolha —</option>' +
+    Object.entries(MOTIVOS).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
+  $('#toque-motivo').value = c.motivo || '';
+  $('#toque-barbeiro').value = c.barbeiro || '';
+  $('#toque-obs').value = '';
+  try { $('#toque-por').value = localStorage.getItem('cf-quem-res') || localStorage.getItem('cf-quem') || ''; } catch (e) { }
+  const dl = $('#lista-barbeiros');
+  const nomes = [...new Set(listaCanc().map(x => x.barbeiro).filter(Boolean))].sort();
+  dl.innerHTML = nomes.map(x => '<option value="' + esc(x) + '"></option>').join('');
+  ajustarCamposToque();
+  abrirModal('#m-toque');
+}
+function ajustarCamposToque() {
+  const r = $('#toque-resultado').value;
+  const precisa = r === 'voltou' || r === 'vai_pensar' || r === 'nao_quer';
+  $('#wrap-motivo').style.display = precisa ? '' : 'none';
+}
+$('#toque-resultado').onchange = ajustarCamposToque;
+
+function salvarToque() {
+  const c = ESTADO.cancelados[chaveToque];
+  if (!c) return;
+  const resultado = $('#toque-resultado').value;
+  const motivo = $('#toque-motivo').value;
+  const por = $('#toque-por').value.trim();
+  const barbeiro = $('#toque-barbeiro').value.trim();
+  const obs = $('#toque-obs').value.trim();
+  const hoje = hojeISO();
+
+  if ((resultado === 'voltou' || resultado === 'vai_pensar' || resultado === 'nao_quer') && !motivo) {
+    toast('Escolha o motivo do cancelamento antes de salvar — é isso que vira relatório depois.', 'err');
+    return;
+  }
+  try { localStorage.setItem('cf-quem-res', por); } catch (e) { }
+
+  if (motivo) c.motivo = motivo;
+  if (barbeiro) c.barbeiro = barbeiro;
+  if (obs) c.obs = obs;
+  c.resultado = resultado;
+
+  if (resultado === 'nao_atende') {
+    c.tentativas = (c.tentativas || 0) + 1;
+    if (c.tentativas >= 5) {
+      c.situacao = 'perdido'; c.encerradoEm = hoje; c.motivo = c.motivo || 'outro';
+      c.encerradoPorque = 'não atendeu 5 vezes';
+    } else {
+      c.proximoToque = somarDias(hoje, 2);
+    }
+  } else if (resultado === 'numero_errado') {
+    c.situacao = 'perdido'; c.encerradoEm = hoje; c.dadoInvalido = true;
+    c.encerradoPorque = 'número errado';
+  } else {
+    c.toque = (c.toque || 0) + 1;
+    c.tentativas = 0;
+    if (resultado === 'voltou') {
+      c.situacao = 'resgatado'; c.resgatadoEm = hoje; c.resgatadoPor = por;
+    } else if (resultado === 'nao_quer') {
+      c.situacao = 'perdido'; c.encerradoEm = hoje; c.encerradoPorque = 'disse que não quer voltar';
+    } else {
+      if (c.toque >= 3) {
+        c.proximoToque = somarDias(hoje, 7);
+        c.retornoExtra = true;
+      } else {
+        let prox = dataDoToque(c.cancelamento, c.toque);
+        if (prox <= hoje) prox = somarDias(hoje, 3);
+        c.proximoToque = prox;
+      }
+    }
+  }
+
+  c.toques.push({ n: c.toque || 0, data: hoje, por, resultado, motivo: motivo || '', barbeiro, obs });
+  if (c.toques.length > 30) c.toques = c.toques.slice(-30);
+  agendarSalvar();
+  fecharModais();
+  render();
+  const msg = {
+    voltou: 'Resgatado! ' + c.nome + ' voltou.',
+    vai_pensar: 'Contato registrado. Próximo toque em ' + dataBr(c.proximoToque) + '.',
+    nao_quer: c.nome + ' saiu da fila — encerrado.',
+    nao_atende: c.situacao === 'perdido' ? c.nome + ' encerrado após 5 tentativas.' : 'Não atendeu. Volta pra fila em ' + dataBr(c.proximoToque) + '.',
+    numero_errado: 'Número marcado como inválido — ' + c.nome + ' saiu da fila.'
+  }[resultado];
+  toast(msg, resultado === 'voltou' ? 'ok' : '');
+}
+$('#btn-salvar-toque').onclick = salvarToque;
+
+/* ---------- detalhe ---------- */
+function abrirCancelado(chave) {
+  const c = ESTADO.cancelados[chave];
+  const hist = (c.toques || []).slice().reverse().map(t => {
+    if (t.e) return '<div class="h"><span class="d mono">' + dataBr(t.data) + '</span><span class="t">' +
+      (t.e === 'recancelou' ? 'Cancelou de novo — voltou para a fila' : 'Reaberto manualmente') + '</span></div>';
+    const partes = ['Toque ' + t.n + ': ' + (LABEL_RESULTADO[t.resultado] || t.resultado)];
+    if (t.motivo) partes.push(MOTIVOS[t.motivo] || t.motivo);
+    if (t.por) partes.push('por ' + t.por);
+    let linha = '<div class="h"><span class="d mono">' + dataBr(t.data) + '</span><span class="t">' + esc(partes.join(' · ')) +
+      (t.obs ? '<br><i style="color:var(--ink3)">“' + esc(t.obs) + '”</i>' : '') + '</span></div>';
+    return linha;
+  }).join('');
+
+  $('#cancelado-b').innerHTML =
+    '<div><div style="font-size:16px;font-weight:600">' + esc(c.nome) + '</div>' +
+    '<div style="color:var(--ink2);font-size:12.5px">' + esc(c.plano || '—') + '</div></div>' +
+    '<div class="resumo">' +
+    '<div class="rz"><div class="v num">' + diasDesdeCanc(c) + '</div><div class="l">Dias fora</div></div>' +
+    '<div class="rz"><div class="v num">' + (c.toque || 0) + '</div><div class="l">Toques dados</div></div>' +
+    '<div class="rz"><div class="v num">' + brl(c.valor).replace('R$ ', '') + '</div><div class="l">Mensalidade</div></div>' +
+    '<div class="rz"><div class="v num">' + ((c.recancelou || 0) + 1) + '</div><div class="l">Vezes que saiu</div></div>' +
+    '</div>' +
+    '<div style="font-size:12.5px;color:var(--ink2)">' +
+    'Unidade: <b style="color:var(--ink)">' + esc(c.unidade ? nomeBonito(c.unidade) : 'não definida') + '</b><br>' +
+    'Barbeiro: <b style="color:var(--ink)">' + esc(c.barbeiro || 'não informado') + '</b><br>' +
+    'Telefone: <span class="mono">' + esc(c.telefoneBruto || '—') + '</span><br>' +
+    'Cancelou em ' + dataBr(c.cancelamento) + (c.adesao ? ' · era cliente desde ' + dataBr(c.adesao) : '') + '<br>' +
+    'Motivo: <b style="color:var(--ink)">' + esc(c.motivo ? (MOTIVOS[c.motivo] || c.motivo) : 'ainda não perguntado') + '</b>' +
+    (c.encerradoPorque ? '<br>Encerrado: ' + esc(c.encerradoPorque) : '') +
+    '</div>' +
+    '<div><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);font-weight:600;margin-bottom:7px">Ligações</div>' +
+    '<div class="hist">' + (hist || '<span style="color:var(--ink3)">Nenhuma ligação registrada ainda.</span>') + '</div></div>';
+  abrirModal('#m-cancelado');
+}
+
+/* ---------- upload de cancelados ---------- */
+let previaRes = null;
+function abrirUploadRes() {
+  previaRes = null;
+  $('#r-preview').innerHTML = '';
+  $('#r-btn-aplicar').disabled = true;
+  $('#r-data-lista').value = hojeISO();
+  abrirModal('#m-upload-res');
+}
+async function processarArquivoRes(file) {
+  const box = $('#r-preview');
+  box.innerHTML = '<div class="alert info"><span class="ico">…</span><span>Lendo <b>' + esc(file.name) + '</b></span></div>';
+  try {
+    const rows = await lerArquivo(file);
+    const data = $('#r-data-lista').value || hojeISO();
+    const ex = extrairCancelados(rows, data);
+    const copia = JSON.parse(JSON.stringify(ESTADO));
+    const rel = conciliarCancelados(copia, ex.registros, { data, arquivo: file.name });
+    previaRes = { estado: copia, rel };
+    let html = '<div class="resumo">' + [
+      ['Linhas lidas', rel.linhas], ['Novos na fila', rel.novos.length],
+      ['Já estavam', rel.mantidos.length], ['Cancelou de novo', rel.recancelou.length],
+      ['Duplicadas', rel.duplicados.length]
+    ].map(c => '<div class="rz"><div class="v num">' + c[1] + '</div><div class="l">' + c[0] + '</div></div>').join('') + '</div>';
+
+    if (rel.novos.length) {
+      const hoje = rel.novos.filter(k => paraHojeEm(copia.cancelados[k])).length;
+      html += '<div class="alert ok"><span class="ico">✓</span><span><b>' + rel.novos.length +
+        ' cliente(s) entram na régua de 3 toques</b> — 2, 10 e 25 dias depois do cancelamento. ' +
+        (hoje ? hoje + ' já cai(em) na fila de hoje.' : 'O primeiro contato já fica agendado.') + '</span></div>';
+    }
+    if (rel.recancelou.length) {
+      html += '<div class="alert warn"><span class="ico">↺</span><span><b>' + rel.recancelou.length +
+        ' já tinha(m) sido resgatado(s) e cancelou/cancelaram de novo:</b><br>' +
+        esc(rel.recancelou.map(k => copia.cancelados[k].nome).join(', ')) +
+        '<br>A régua reinicia do toque 1 — vale entender o que não se sustentou.</span></div>';
+    }
+    if (rel.duplicados.length) {
+      html += '<div class="alert warn"><span class="ico">⧉</span><span><b>Linha repetida no arquivo</b> — juntei numa ficha só:<br>' +
+        esc(rel.duplicados.map(d => d.nome + ' (linhas ' + d.linhas.join(', ') + ')').join('; ')) + '</span></div>';
+    }
+    if (rel.semData) {
+      html += '<div class="alert info"><span class="ico">?</span><span>A planilha não tem coluna de <b>data de cancelamento</b>. Usei a data desta lista como referência, então a régua conta a partir de hoje. Se der pra incluir essa coluna no export, os prazos ficam certos.</span></div>';
+    }
+    if (rel.semUnidade.length) {
+      html += '<div class="alert info"><span class="ico">?</span><span><b>' + rel.semUnidade.length +
+        ' sem unidade</b> — define na aba "Sem unidade" e eu guardo.</span></div>';
+    }
+    if (ex.ignoradas.length) {
+      html += '<div class="alert info"><span class="ico">–</span><span>Ignorei ' + ex.ignoradas.length + ' linha(s) que não são cliente.</span></div>';
+    }
+    box.innerHTML = html;
+    $('#r-btn-aplicar').disabled = MODO_LEITURA;
+  } catch (err) {
+    box.innerHTML = '<div class="alert bad"><span class="ico">!</span><span><b>Não consegui ler o arquivo.</b><br>' + esc(err.message || String(err)) + '</span></div>';
+    $('#r-btn-aplicar').disabled = true;
+  }
+}
+function paraHojeEm(c) { return c && c.situacao === 'fila' && (c.proximoToque || '') <= hojeISO(); }
+
+function aplicarPreviaRes() {
+  if (!previaRes) return;
+  const modelo = ESTADO.modelo, modelos = ESTADO.modelosResgate, seq = ESTADO.seq, metas = ESTADO.metas;
+  ESTADO = previaRes.estado;
+  ESTADO.modelo = modelo; ESTADO.modelosResgate = modelos; ESTADO.seq = seq; ESTADO.metas = metas;
+  normalizarEstado();
+  agendarSalvar();
+  fecharModais();
+  MODO = 'resgate';
+  render();
+  toast(previaRes.rel.novos.length + ' cancelado(s) na fila de resgate.', 'ok');
+  previaRes = null;
+}
+
+/* ---------- meta ---------- */
+$('#btn-meta').onclick = () => {
+  $('#meta-campos').innerHTML = unidadesAtivas().map(u =>
+    '<label class="lb">' + esc(nomeBonito(u)) +
+    '<input class="field meta-in" type="number" min="0" data-u="' + esc(u) + '" value="' + (ESTADO.metas[u] || META_PADRAO) + '"></label>').join('');
+  abrirModal('#m-meta');
+};
+$('#btn-salvar-meta').onclick = () => {
+  document.querySelectorAll('.meta-in').forEach(i => { ESTADO.metas[i.dataset.u] = Math.max(0, parseInt(i.value, 10) || 0); });
+  agendarSalvar(); fecharModais(); render(); toast('Meta atualizada.', 'ok');
+};
+
+/* ---------- modelos ---------- */
+$('#btn-modelo-res').onclick = () => {
+  const m = ESTADO.modelosResgate || MODELOS_RESGATE_PADRAO;
+  $('#mr1').value = m[0]; $('#mr2').value = m[1]; $('#mr3').value = m[2];
+  abrirModal('#m-modelo-res');
+};
+$('#btn-salvar-modelo-res').onclick = () => {
+  ESTADO.modelosResgate = [$('#mr1').value, $('#mr2').value, $('#mr3').value];
+  agendarSalvar(); fecharModais(); toast('Mensagens salvas.', 'ok');
+};
+
+/* ---------- exportar ---------- */
+async function exportarResgate() {
+  const lista = daUnidadeC(listaCanc(), UI.unidade);
+  const cab = ['Cliente', 'Unidade', 'Telefone', 'Plano', 'Mensalidade', 'Barbeiro', 'Cancelou', 'DiasFora',
+    'Situacao', 'ToquesDados', 'ProximoContato', 'UltimoResultado', 'Motivo', 'ResgatadoEm', 'ResgatadoPor', 'VezesQueSaiu', 'Observacao'];
+  const LS = { fila: 'Na fila', resgatado: 'Resgatado', perdido: 'Encerrado' };
+  const linhas = lista.map(c => [
+    c.nome, c.unidade, c.telefoneBruto, c.plano, (c.valor || 0).toFixed(2).replace('.', ','),
+    c.barbeiro, dataBr(c.cancelamento), diasDesdeCanc(c), LS[c.situacao] || c.situacao,
+    c.toque || 0, c.situacao === 'fila' ? dataBr(c.proximoToque) : '',
+    LABEL_RESULTADO[c.resultado] || '', MOTIVOS[c.motivo] || '',
+    c.resgatadoEm ? dataBr(c.resgatadoEm) : '', c.resgatadoPor || '', (c.recancelou || 0) + 1, c.obs || ''
+  ]);
+  const csv = '﻿' + [cab].concat(linhas).map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(';')).join('\r\n');
+  const base = 'resgate-' + (UI.unidade === 'REDE' ? 'rede' : UI.unidade.toLowerCase().replace(/ /g, '-')) + '-' + hojeISO();
+  const dl = window.claude ? await window.claude.use('downloads').catch(() => null) : null;
+  if (!dl) { toast('Exportação não disponível nesta visualização.', 'err'); return; }
+  try { await dl.save({ filename: base + '.csv', data: csv }); toast('Arquivo salvo.', 'ok'); }
+  catch (err) {
+    if (err && err.code === 'extension_not_enabled') {
+      try { await dl.save({ filename: base + '.txt', data: csv }); toast('Arquivo salvo como .txt (abre no Excel).', 'ok'); return; } catch (e) { }
+    }
+    if (!err || err.code !== 'declined') toast('Não consegui gerar o arquivo agora.', 'err');
+  }
+}
+
+/* ---------- eventos ---------- */
+$('#btn-upload-res').onclick = abrirUploadRes;
+$('#btn-exportar-res').onclick = exportarResgate;
+$('#r-btn-escolher').onclick = () => $('#r-arquivo').click();
+$('#r-arquivo').onchange = e => { if (e.target.files[0]) processarArquivoRes(e.target.files[0]); };
+$('#r-btn-aplicar').onclick = aplicarPreviaRes;
+const dropR = $('#r-drop');
+['dragenter', 'dragover'].forEach(ev => dropR.addEventListener(ev, e => { e.preventDefault(); dropR.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => dropR.addEventListener(ev, e => { e.preventDefault(); dropR.classList.remove('over'); }));
+dropR.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) processarArquivoRes(f); });
+
+$('#r-busca').oninput = e => { RUI.busca = e.target.value.trim(); renderTabelaResgate(); };
+$('#r-situacao').onchange = e => { RUI.situacao = e.target.value; renderTabelaResgate(); };
+$('#r-toque').onchange = e => { RUI.toque = e.target.value; renderTabelaResgate(); };
+$('#r-motivo').onchange = e => { RUI.motivo = e.target.value; renderTabelaResgate(); };
+document.querySelectorAll('thead th[data-rsort]').forEach(th => {
+  th.onclick = () => {
+    const s = th.dataset.rsort;
+    if (RUI.ordem === s) RUI.desc = !RUI.desc; else { RUI.ordem = s; RUI.desc = false; }
+    renderTabelaResgate();
+  };
+});
+$('#r-motivo').innerHTML = '<option value="">Qualquer motivo</option>' +
+  Object.entries(MOTIVOS).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
+
+function renderResgate() {
+  renderKpisResgate(); renderTabelaResgate(); renderPlacar(); renderRanking(); renderMotivos(); renderUploadsRes();
+}
+
+iniciar();
+</script>
+
+</body>
+</html>
