@@ -1428,36 +1428,20 @@ function marcarPendente(p) {
 }
 async function salvar() {
   if (MODO_LEITURA) return;
-  if (!API) { localBackup(); marcarPendente(false); return; }
   if (salvando) { clearTimeout(salvarT); salvarT = setTimeout(salvar, 500); return; }
   salvando = true;
+  localBackup();
   try {
-    if (USA_ARQUIVOS) {
-      const files = {}; files[ARQ_DADOS] = JSON.stringify(ESTADO);
-      await API.publish(files);
-    } else {
-      const html = paginaCom(ESTADO);
-      if (!html) throw { code: 'invalid_content', message: 'template' };
-      await API.publish(html);
-    }
-    localBackup();
-    marcarPendente(false);
-  } catch (err) {
-    const code = (err && err.code) || 'upstream_error';
-    if ((code === 'capability_disabled' || code === 'capability_removed' || code === 'transform_error') && USA_ARQUIVOS) {
-      USA_ARQUIVOS = false; salvando = false; return salvar();
-    }
-    if (code === 'not_writer' || code === 'not_granted' || code === 'not_declared' || code === 'consent_required') {
-      MODO_LEITURA = true; $('#ro-banner').hidden = false; marcarPendente(false); render();
-    } else if (code === 'conflict') {
-      toast('Outra pessoa salvou antes — a tela vai recarregar com a versão dela.');
-    } else if (code === 'rate_limited') {
-      clearTimeout(salvarT); salvarT = setTimeout(salvar, 4000);
-    } else {
-      localBackup();
-      toast('Não consegui salvar agora. Guardei neste navegador e vou tentar de novo.', 'err');
+    const r = await apiReq('/api/data', 'POST', { estado: ESTADO, por: (SESSAO && SESSAO.nome) || 'sistema' });
+    if (r && r.erro) {
+      marcarPendente(false);
       clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
+    } else {
+      marcarPendente(false);
     }
+  } catch (err) {
+    marcarPendente(false);
+    clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
   } finally { salvando = false; }
 }
 function localBackup() {
@@ -2011,15 +1995,14 @@ function iniciar() {
 render();
 
 (async () => {
-  // dados mais recentes salvos como arquivo do artifact
+  // dados mais recentes no servidor (Vercel KV)
   try {
-    const r = await fetch(ARQ_DADOS, { cache: 'no-store' });
-    if (r.ok) {
-      const d = await r.json();
-      if (d && d.clientes && (d.seq || 0) >= (ESTADO.seq || 0)) { ESTADO = d; normalizarEstado(); render(); }
+    const r = await apiReq('/api/data', 'GET');
+    if (r && !r.erro && r.clientes && (r.seq || 0) >= (ESTADO.seq || 0)) {
+      ESTADO = r; normalizarEstado(); render();
     }
   } catch (e) { }
-  // backup local, se for mais novo
+  // backup local, se for mais novo (e servidor indisponível)
   try {
     const raw = localStorage.getItem('cf-cobranca');
     if (raw) {
@@ -2028,13 +2011,9 @@ render();
     }
   } catch (e) { }
 
-  API = window.claude ? await window.claude.use('artifact').catch(() => null) : null;
-  if (!API) {
-    MODO_LEITURA = false;
-    $('#rodape').textContent = 'Salvando apenas neste navegador — abra pelo link do painel para salvar para todo mundo.';
-  } else {
-    marcarPendente(false);
-  }
+  MODO_LEITURA = false;
+  $('#rodape').textContent = 'Conectado à base compartilhada (Vercel KV). Tudo salvo sincroniza entre os computadores.';
+  marcarPendente(false);
 })();
 }
 
@@ -2657,25 +2636,45 @@ iniciar();
 </script>
 
 <script>
-/* ===================== ACESSO / SESSÃO ===================== */
+/* ===================== ACESSO / SESSÃO (Vercel KV) ===================== */
 const LS_USUARIOS = 'cf-usuarios';
 const LS_SESSAO = 'cf-sessao';
 const LS_TEMA = 'cf-theme';
+const SEED_ADMIN = { savio: { nome: 'Sávio', senha: '123456', unidade: 'todas', perfil: 'admin' } };
 
-function carregarUsuarios() {
+async function apiReq(path, method, body) {
   try {
-    const u = JSON.parse(localStorage.getItem(LS_USUARIOS));
-    if (u && Object.keys(u).length) return u;
-  } catch (e) {}
-  const seed = { savio: { nome: 'Sávio', senha: '123456', unidade: 'todas', perfil: 'admin' } };
-  localStorage.setItem(LS_USUARIOS, JSON.stringify(seed));
-  return seed;
+    const r = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    if (!r.ok) return { erro: r.status };
+    return await r.json();
+  } catch (e) { return { erro: 'network' }; }
 }
-function salvarUsuarios(u) { localStorage.setItem(LS_USUARIOS, JSON.stringify(u)); }
+
+async function carregarUsuarios() {
+  const r = await apiReq('/api/users', 'GET');
+  if (r && !r.erro && typeof r === 'object') {
+    try { localStorage.setItem(LS_USUARIOS, JSON.stringify(r)); } catch (e) {}
+    return r;
+  }
+  try { const u = JSON.parse(localStorage.getItem(LS_USUARIOS)); if (u && Object.keys(u).length) return u; } catch (e) {}
+  try { localStorage.setItem(LS_USUARIOS, JSON.stringify(SEED_ADMIN)); } catch (e) {}
+  return SEED_ADMIN;
+}
+async function salvarUsuarios(u) {
+  try { localStorage.setItem(LS_USUARIOS, JSON.stringify(u)); } catch (e) {}
+  const r = await apiReq('/api/users', 'POST', { op: 'replace', usuarios: u, pedidoPor: 'admin' });
+  return !r.erro;
+}
 function sessaoAtual() { try { return JSON.parse(localStorage.getItem(LS_SESSAO)); } catch (e) { return null; } }
 
-function fazerLogin(nome, unidade, senha) {
-  const usuarios = carregarUsuarios();
+async function fazerLogin(nome, unidade, senha) {
+  const r = await apiReq('/api/auth', 'POST', { nome, unidade, senha });
+  if (r && r.nome) {
+    const s = { chave: r.chave || '', nome: r.nome, unidade: r.unidade, perfil: r.perfil };
+    try { localStorage.setItem(LS_SESSAO, JSON.stringify(s)); } catch (e) {}
+    return s;
+  }
+  const usuarios = await carregarUsuarios();
   const key = Object.keys(usuarios).find(k => {
     const u = usuarios[k];
     return u.nome.toLowerCase() === nome.trim().toLowerCase() &&
@@ -2684,11 +2683,11 @@ function fazerLogin(nome, unidade, senha) {
   });
   if (!key) return null;
   const u = usuarios[key];
-  const sessao = { chave: key, nome: u.nome, unidade: u.unidade, perfil: u.perfil };
-  localStorage.setItem(LS_SESSAO, JSON.stringify(sessao));
-  return sessao;
+  const s = { chave: key, nome: u.nome, unidade: u.unidade, perfil: u.perfil };
+  try { localStorage.setItem(LS_SESSAO, JSON.stringify(s)); } catch (e) {}
+  return s;
 }
-function fazerLogout() { localStorage.removeItem(LS_SESSAO); }
+function fazerLogout() { try { localStorage.removeItem(LS_SESSAO); } catch (e) {} }
 
 let SESSAO = sessaoAtual();
 
@@ -2732,8 +2731,8 @@ function mostrarLogin() {
 }
 
 /* ---------- admin: gerenciar usuários ---------- */
-function abrirAdmin() {
-  const usuarios = carregarUsuarios();
+async function abrirAdmin() {
+  const usuarios = await carregarUsuarios();
   const box = document.getElementById('admin-lista');
   box.innerHTML = '';
   Object.entries(usuarios).forEach(([k, u]) => {
@@ -2745,9 +2744,9 @@ function abrirAdmin() {
     if (u.perfil !== 'admin') {
       const del = document.createElement('button');
       del.className = 'btn btn-sm btn-ghost'; del.textContent = 'Excluir';
-      del.onclick = () => {
+      del.onclick = async () => {
         if (confirm('Excluir o acesso de ' + u.nome + '?')) {
-          const us = carregarUsuarios(); delete us[k]; salvarUsuarios(us);
+          const us = await carregarUsuarios(); delete us[k]; await salvarUsuarios(us);
           abrirAdmin(); toast('Usuário excluído.', 'ok');
         }
       };
@@ -2761,26 +2760,26 @@ function abrirAdmin() {
   abrirModal('#m-admin');
 }
 document.getElementById('btn-admin').onclick = abrirAdmin;
-document.getElementById('btn-add-user').onclick = () => {
+document.getElementById('btn-add-user').onclick = async () => {
   const nome = document.getElementById('nu-nome').value.trim();
   const senha = document.getElementById('nu-senha').value;
   const unidade = document.getElementById('nu-unidade').value;
   if (!nome || !senha) { toast('Preencha nome e senha.', 'err'); return; }
-  const usuarios = carregarUsuarios();
+  const usuarios = await carregarUsuarios();
   usuarios['u' + Date.now()] = { nome, senha, unidade, perfil: 'recepcionista' };
-  salvarUsuarios(usuarios);
+  await salvarUsuarios(usuarios);
   document.getElementById('nu-nome').value = '';
   document.getElementById('nu-senha').value = '';
   abrirAdmin(); toast('Recepcionista "' + nome + '" adicionado à ' + nomeBonito(unidade) + '.', 'ok');
 };
 
 /* ---------- eventos de acesso ---------- */
-document.getElementById('login-form').onsubmit = (e) => {
+document.getElementById('login-form').onsubmit = async (e) => {
   e.preventDefault();
   const nome = document.getElementById('login-nome').value.trim();
   const unidade = document.getElementById('login-unidade').value;
   const senha = document.getElementById('login-senha').value;
-  const s = fazerLogin(nome, unidade, senha);
+  const s = await fazerLogin(nome, unidade, senha);
   if (!s) {
     const er = document.getElementById('login-erro');
     er.textContent = 'Nome, unidade ou senha incorretos.';
