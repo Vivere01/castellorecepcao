@@ -1564,20 +1564,24 @@ async function salvar() {
   if (typeof ESTADO.seq !== 'number') ESTADO.seq = 0;
   ESTADO.seq++;
   localBackup();
+  var enviadas = Object.keys(ESTADO.vendas || {}).length;
   try {
     const r = await apiReq('/api/data', 'POST', { estado: ESTADO, por: (SESSAO && SESSAO.nome) || 'sistema' });
     if (r && r.erro) {
       KV_ONLINE = false; atualizarRodape();
       if (!window.__avisoKV) { toast('Vercel KV não conectado: os dados ficam salvos SÓ neste navegador.', 'err'); window.__avisoKV = true; }
       marcarPendente(false);
+      if (window.atualizarHud) atualizarHud('salvar->ERRO ' + JSON.stringify(r) + ' (enviadas=' + enviadas + ')');
       clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
     } else {
       KV_ONLINE = true; atualizarRodape();
       marcarPendente(false);
+      if (window.atualizarHud) atualizarHud('salvar->OK enviadas=' + enviadas);
     }
   } catch (err) {
     KV_ONLINE = false; atualizarRodape();
     marcarPendente(false);
+    if (window.atualizarHud) atualizarHud('salvar->EXCECAO ' + (err && err.message));
     clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
   } finally { salvando = false; }
 }
@@ -1615,6 +1619,7 @@ function render() {
   else if (MODO === 'vendas') renderVendas();
   else renderCobranca();
   marcarPendente(false);
+  if (window.atualizarHud) atualizarHud();
 }
 function renderCobranca() {
   renderKpis(); renderAging(); renderAlertas(); renderFila(); renderUploads(); renderTabela();
@@ -2893,24 +2898,30 @@ document.getElementById('v-plano').onchange = () => {
   if (v) document.getElementById('v-valor').value = v.toFixed(2);
 };
 document.getElementById('v-add').onclick = () => {
-  const nome = document.getElementById('v-nome').value.trim();
-  const plano = document.getElementById('v-plano').value;
-  const valor = parseFloat(document.getElementById('v-valor').value);
-  const venc = document.getElementById('v-venc').value;
-  const unidade = document.getElementById('v-unidade').value;
-  if (!nome) { toast('Informe o nome do cliente.', 'err'); return; }
-  if (!plano) { toast('Escolha o plano de assinatura.', 'err'); return; }
-  if (!(valor >= 0)) { toast('Informe o valor do plano.', 'err'); return; }
-  if (!venc) { toast('Informe o vencimento.', 'err'); return; }
-  if (!unidade) { toast('Escolha a unidade.', 'err'); return; }
-  const chave = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  ESTADO.vendas[chave] = { chave, nome, plano, valor, vencimento: venc, unidade, por: (SESSAO && SESSAO.nome) || '', data: hojeISO() };
-  agendarSalvar();
-  document.getElementById('v-nome').value = '';
-  document.getElementById('v-valor').value = '';
-  document.getElementById('v-venc').value = '';
-  renderVendas();
-  toast('Venda de ' + nome + ' registrada.', 'ok');
+  try {
+    const nome = document.getElementById('v-nome').value.trim();
+    const plano = document.getElementById('v-plano').value;
+    const valor = parseFloat(document.getElementById('v-valor').value);
+    const venc = document.getElementById('v-venc').value;
+    const unidade = document.getElementById('v-unidade').value;
+    if (!nome) { toast('Informe o nome do cliente.', 'err'); return; }
+    if (!plano) { toast('Escolha o plano de assinatura.', 'err'); return; }
+    if (!(valor >= 0)) { toast('Informe o valor do plano.', 'err'); return; }
+    if (!venc) { toast('Informe o vencimento.', 'err'); return; }
+    if (!unidade) { toast('Escolha a unidade.', 'err'); return; }
+    const chave = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    ESTADO.vendas[chave] = { chave, nome, plano, valor, vencimento: venc, unidade, por: (SESSAO && SESSAO.nome) || '', data: hojeISO() };
+    if (window.atualizarHud) atualizarHud('ADD venda na memoria (total=' + Object.keys(ESTADO.vendas).length + ')');
+    agendarSalvar();
+    document.getElementById('v-nome').value = '';
+    document.getElementById('v-valor').value = '';
+    document.getElementById('v-venc').value = '';
+    renderVendas();
+    toast('Venda de ' + nome + ' registrada.', 'ok');
+  } catch (e) {
+    if (window.atualizarHud) atualizarHud('ERRO no add: ' + (e && e.message));
+    toast('Erro ao adicionar venda: ' + (e && e.message), 'err');
+  }
 };
 
 iniciar();
@@ -3304,6 +3315,22 @@ document.querySelectorAll('#theme-btn, #login-theme').forEach(b => { if (b) b.on
 /* ---------- boot ---------- */
 aplicarTema((function () { try { return localStorage.getItem(LS_TEMA); } catch (e) { return 'dark'; } })() || 'dark');
 if (SESSAO) mostrarApp(); else mostrarLogin();
+
+<div id="hud" style="position:fixed;left:8px;bottom:8px;z-index:9999;background:#000c;color:#6f6;font:11px/1.4 monospace;padding:8px 10px;border-radius:6px;max-width:340px;white-space:pre-wrap;pointer-events:none"></div>
+<script>
+  function atualizarHud(extra) {
+    var h = document.getElementById('hud'); if (!h) return;
+    var loc = 0;
+    try { var d = JSON.parse(localStorage.getItem('cf-cobranca') || '{}'); loc = Object.keys((d.estado && d.estado.vendas) || {}).length; } catch (e) {}
+    var mem = Object.keys(ESTADO.vendas || {}).length;
+    h.textContent = 'DEBUG HUD' + (location.search.indexOf('debug') >= 0 ? '' : ' (adicione ?debug na URL)') +
+      '\nKV_ONLINE=' + KV_ONLINE +
+      '\nvendas memoria=' + mem +
+      '\nvendas backup local=' + loc +
+      (extra ? '\n' + extra : '');
+  }
+  window.atualizarHud = atualizarHud;
+</script>
 </script>
 
 </body>
