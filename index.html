@@ -2170,6 +2170,7 @@ render();
   normalizarEstado();
   KV_ONLINE = serverSeq >= 0;
   atualizarRodape();
+  render();
   // sobe o estado mesclado para a nuvem (inclui dados que estavam só no navegador)
   if (serverSeq >= 0) agendarSalvar();
   marcarPendente(false);
