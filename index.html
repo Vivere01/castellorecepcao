@@ -2934,30 +2934,40 @@ async function renderPerformance() {
   Object.keys(c.baixas).forEach(n => { if (n) nomes.set(n, true); });
   Object.keys(c.resgates).forEach(n => { if (n) nomes.set(n, true); });
   Object.keys(c.contatos).forEach(n => { if (n) nomes.set(n, true); });
-  const linhas = [...nomes.keys()].map(nome => ({
-    nome,
-    baixas: (c.baixas[nome] || {}).baixas || 0,
-    vBaixas: (c.baixas[nome] || {}).valor || 0,
-    resgates: (c.resgates[nome] || {}).resgates || 0,
-    vResgates: (c.resgates[nome] || {}).valor || 0,
-    contatos: (c.contatos[nome] || {}).contatos || 0,
-    voltou: (c.contatos[nome] || {}).voltou || 0
-  })).filter(l => l.nome).sort((a, b) => b.baixas - a.baixas || b.resgates - a.resgates || b.contatos - a.contatos);
-  const maxB = Math.max(1, ...linhas.map(l => l.baixas));
+  const linhas = [...nomes.keys()].map(nome => {
+    const vb = (c.baixas[nome] || {}).valor || 0;
+    const vr = (c.resgates[nome] || {}).valor || 0;
+    return {
+      nome,
+      baixas: (c.baixas[nome] || {}).baixas || 0,
+      vBaixas: vb,
+      resgates: (c.resgates[nome] || {}).resgates || 0,
+      vResgates: vr,
+      total: vb + vr,
+      contatos: (c.contatos[nome] || {}).contatos || 0,
+      voltou: (c.contatos[nome] || {}).voltou || 0
+    };
+  }).filter(l => l.nome).sort((a, b) => b.total - a.total || b.baixas - a.baixas || b.resgates - a.resgates);
+  const maxVB = Math.max(1, ...linhas.map(l => l.vBaixas));
+  const maxVR = Math.max(1, ...linhas.map(l => l.vResgates));
+  const maxT = Math.max(1, ...linhas.map(l => l.total));
   const rank = document.getElementById('perf-ranking');
   if (!linhas.length) {
     rank.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Nenhuma ação registrada no período.</td></tr></tbody>';
   } else {
-    rank.innerHTML = '<thead><tr><th>Recepcionista</th><th class="num">Baixas</th><th class="num">R$ baixas</th><th class="num">Resgates</th><th class="num">R$ resgates</th><th class="num">Contatos</th></tr></thead><tbody>' +
+    rank.innerHTML = '<thead><tr><th>Recepcionista</th><th class="num">Baixas</th><th>R$ baixas<br><span class="hint">recuperado</span></th><th class="num">Resgates</th><th>R$ resgates<br><span class="hint">recuperado</span></th><th>Total recuperado</th><th class="num">Contatos</th></tr></thead><tbody>' +
       linhas.map((l, i) => {
-        const top = i === 0 && l.baixas > 0 ? ' perf-top' : '';
-        const bw = Math.round(l.baixas / maxB * 100);
+        const top = i === 0 && l.total > 0 ? ' perf-top' : '';
+        const pb = Math.max(2, Math.round(l.vBaixas / maxVB * 100));
+        const pr = Math.max(2, Math.round(l.vResgates / maxVR * 100));
+        const pt = Math.max(2, Math.round(l.total / maxT * 100));
         return '<tr class="' + top.trim() + '">' +
-          '<td class="nm">' + esc(l.nome) + (i === 0 && l.baixas > 0 ? ' 🏆' : '') + '</td>' +
-          '<td class="num">' + l.baixas + (l.baixas ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
-          '<td class="num">' + brl(l.vBaixas) + '</td>' +
-          '<td class="num">' + l.resgates + (l.resgates ? '<span class="perf-bar r" style="width:' + Math.min(60, l.resgates * 12) + 'px"></span>' : '') + '</td>' +
-          '<td class="num">' + brl(l.vResgates) + '</td>' +
+          '<td class="nm">' + esc(l.nome) + (i === 0 && l.total > 0 ? ' 🏆' : '') + '</td>' +
+          '<td class="num">' + l.baixas + '</td>' +
+          '<td><div class="num">' + brl(l.vBaixas) + '</div><span class="perf-bar" style="width:' + pb + '%" title="R$ recuperado em baixas de inadimplentes"></span></td>' +
+          '<td class="num">' + l.resgates + '</td>' +
+          '<td><div class="num">' + brl(l.vResgates) + '</div><span class="perf-bar r" style="width:' + pr + '%" title="R$ recuperado em resgates de cancelados"></span></td>' +
+          '<td><div class="num" style="font-weight:600">' + brl(l.total) + '</div><span class="perf-bar" style="width:' + pt + '%;background:linear-gradient(90deg,var(--brass),var(--ok))" title="Total recuperado"></span></td>' +
           '<td class="num' + (l.contatos ? '' : ' badge-zero') + '">' + l.contatos + '</td>' +
           '</tr>';
       }).join('') + '</tbody>';
