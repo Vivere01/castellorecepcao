@@ -410,12 +410,10 @@ tr.perdido{opacity:.45}
     </div>
     <div class="tabs" id="tabs" role="tablist"></div>
     <span id="acoes-cob" class="acoes">
-      <button class="btn" id="btn-modelo" type="button">Mensagem</button>
       <button class="btn" id="btn-exportar" type="button">Exportar</button>
       <button class="btn btn-primary" id="btn-upload" type="button">Subir inadimplentes</button>
     </span>
     <span id="acoes-res" class="acoes" hidden>
-      <button class="btn" id="btn-modelo-res" type="button">Mensagens</button>
       <button class="btn" id="btn-exportar-res" type="button">Exportar</button>
       <button class="btn btn-primary" id="btn-upload-res" type="button">Subir cancelados</button>
     </span>
@@ -2109,11 +2107,6 @@ document.querySelectorAll('thead th[data-sort]').forEach(th => {
   };
 });
 
-$('#btn-modelo').onclick = () => {
-  $('#modelo-txt').value = ESTADO.modelo || MODELO_PADRAO;
-  atualizarPreviewModelo();
-  abrirModal('#m-modelo');
-};
 $('#modelo-txt').oninput = atualizarPreviewModelo;
 function atualizarPreviewModelo() {
   const exemplo = abertos(listaBase())[0];
@@ -2740,11 +2733,6 @@ $('#btn-salvar-meta').onclick = () => {
 };
 
 /* ---------- modelos ---------- */
-$('#btn-modelo-res').onclick = () => {
-  const m = ESTADO.modelosResgate || MODELOS_RESGATE_PADRAO;
-  $('#mr1').value = m[0]; $('#mr2').value = m[1]; $('#mr3').value = m[2];
-  abrirModal('#m-modelo-res');
-};
 $('#btn-salvar-modelo-res').onclick = () => {
   ESTADO.modelosResgate = [$('#mr1').value, $('#mr2').value, $('#mr3').value];
   agendarSalvar(); fecharModais(); toast('Mensagens salvas.', 'ok');
