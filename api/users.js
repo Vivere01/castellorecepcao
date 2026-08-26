@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method === 'GET') {
-    if (!kvDisponivel()) return res.status(200).json(SEED);
+    if (!kvDisponivel()) return res.status(503).json({ error: 'KV indisponível' });
     let usuarios = await kvGet('usuarios', null);
     if (!usuarios) { usuarios = SEED; await kvSet('usuarios', SEED); }
     return res.status(200).json(usuarios);

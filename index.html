@@ -1426,6 +1426,19 @@ function marcarPendente(p) {
   if (MODO_LEITURA) { r.textContent = 'Modo leitura — as baixas feitas aqui não são salvas.'; return; }
   r.textContent = p ? 'Salvando…' : (ESTADO.atualizadoEm ? 'Tudo salvo · última atualização ' + dataBr(ESTADO.atualizadoEm) : 'Tudo salvo');
 }
+let KV_ONLINE = null;
+function atualizarRodape() {
+  const el = document.getElementById('rodape');
+  if (!el) return;
+  if (KV_ONLINE === false) {
+    el.textContent = 'Modo local: dados e usuários ficam salvos SÓ neste navegador (Vercel KV não conectado). Para sincronizar entre computadores, conecte o KV.';
+  } else if (KV_ONLINE === true) {
+    el.textContent = 'Conectado à base compartilhada (Vercel KV). Tudo salvo sincroniza entre os computadores.';
+  } else {
+    el.textContent = 'Verificando conexão com a base compartilhada...';
+  }
+}
+
 async function salvar() {
   if (MODO_LEITURA) return;
   if (salvando) { clearTimeout(salvarT); salvarT = setTimeout(salvar, 500); return; }
@@ -1434,12 +1447,15 @@ async function salvar() {
   try {
     const r = await apiReq('/api/data', 'POST', { estado: ESTADO, por: (SESSAO && SESSAO.nome) || 'sistema' });
     if (r && r.erro) {
+      KV_ONLINE = false; atualizarRodape();
       marcarPendente(false);
       clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
     } else {
+      KV_ONLINE = true; atualizarRodape();
       marcarPendente(false);
     }
   } catch (err) {
+    KV_ONLINE = false; atualizarRodape();
     marcarPendente(false);
     clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
   } finally { salvando = false; }
@@ -2012,7 +2028,8 @@ render();
   } catch (e) { }
 
   MODO_LEITURA = false;
-  $('#rodape').textContent = 'Conectado à base compartilhada (Vercel KV). Tudo salvo sincroniza entre os computadores.';
+  if (d && d.estado) { KV_ONLINE = true; } else { KV_ONLINE = false; }
+  atualizarRodape();
   marcarPendente(false);
 })();
 }
@@ -2653,8 +2670,15 @@ async function apiReq(path, method, body) {
 async function carregarUsuarios() {
   const r = await apiReq('/api/users', 'GET');
   if (r && !r.erro && typeof r === 'object') {
-    try { localStorage.setItem(LS_USUARIOS, JSON.stringify(r)); } catch (e) {}
-    return r;
+    let local = {};
+    try { local = JSON.parse(localStorage.getItem(LS_USUARIOS)) || {}; } catch (e) {}
+    const extrasLocais = Object.keys(local).filter(k => !r[k]);
+    const merged = Object.assign({}, r, local);
+    try { localStorage.setItem(LS_USUARIOS, JSON.stringify(merged)); } catch (e) {}
+    if (extrasLocais.length) {
+      await apiReq('/api/users', 'POST', { op: 'replace', usuarios: merged, pedidoPor: 'admin' });
+    }
+    return merged;
   }
   try { const u = JSON.parse(localStorage.getItem(LS_USUARIOS)); if (u && Object.keys(u).length) return u; } catch (e) {}
   try { localStorage.setItem(LS_USUARIOS, JSON.stringify(SEED_ADMIN)); } catch (e) {}

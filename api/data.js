@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method === 'GET') {
-    if (!kvDisponivel()) return res.status(200).json(VAZIO);
+    if (!kvDisponivel()) return res.status(503).json({ error: 'KV indisponível' });
     const estado = await kvGet('estado', null);
     return res.status(200).json(estado || VAZIO);
   }
@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const body = req.body || {};
     if (!body.estado) return res.status(400).json({ error: 'Sem estado' });
-    if (!kvDisponivel()) return res.status(200).json({ ok: true });
+    if (!kvDisponivel()) return res.status(503).json({ error: 'KV indisponível' });
     await kvSet('estado', body.estado);
     return res.status(200).json({ ok: true });
   }
