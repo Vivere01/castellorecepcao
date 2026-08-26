@@ -2933,7 +2933,7 @@ document.getElementById('v-add').onclick = () => {
   }
 };
 
-iniciar();
+
 </script>
 
 <script>
@@ -3324,6 +3324,7 @@ document.querySelectorAll('#theme-btn, #login-theme').forEach(b => { if (b) b.on
 /* ---------- boot ---------- */
 aplicarTema((function () { try { return localStorage.getItem(LS_TEMA); } catch (e) { return 'dark'; } })() || 'dark');
 if (SESSAO) mostrarApp(); else mostrarLogin();
+iniciar();
 </script>
 
 <div id="hud" style="position:fixed;left:8px;bottom:8px;z-index:9999;background:#000c;color:#6f6;font:11px/1.4 monospace;padding:8px 10px;border-radius:6px;max-width:340px;white-space:pre-wrap;pointer-events:none"></div>
