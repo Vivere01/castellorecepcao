@@ -358,6 +358,8 @@ tr.perdido{opacity:.45}
 .perf-bar.r{background:var(--ok)}
 .perf-scroll{max-height:340px; overflow:auto}
 .badge-zero{color:var(--ink3)}
+.perf-comissao-filtro{display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap}
+.perf-comissao-filtro .field{width:84px}
 </style>
 
 </head>
@@ -577,6 +579,18 @@ tr.perdido{opacity:.45}
         <div class="panel-h"><h2>Ranking da recepção</h2><span class="hint" id="perf-periodo-label"></span></div>
         <div class="panel-b perf-scroll"><table class="perf-table" id="perf-ranking"></table></div>
       </div>
+      <section class="panel" style="margin-top:16px">
+        <div class="panel-h"><h2>Comissão sobre resgates</h2><span class="hint">% sobre o valor dos clientes que voltaram</span></div>
+        <div class="panel-b">
+          <div class="perf-comissao-filtro">
+            <label>Comissão por resgate
+              <input type="number" id="perf-comissao" class="field" min="0" max="100" step="0.5" value="8"> %
+            </label>
+            <span class="hint" id="perf-comissao-total"></span>
+          </div>
+          <table class="perf-table" id="perf-comissao-tbl"></table>
+        </div>
+      </section>
     </main>
     <aside class="rail">
       <section class="panel">
@@ -2135,6 +2149,7 @@ let MODO = 'cobranca';
 let TELA_PERF = false;
 let TELA_PERF_UNI = 'REDE';
 let PERF_PER = 'mes';
+let PERF_COMISSAO = 8;
 try { MODO = localStorage.getItem('cf-modo') || 'cobranca'; } catch (e) { }
 let RUI = { ordem: 'proximoToque', desc: false, busca: '', situacao: 'hoje', toque: '', motivo: '' };
 
@@ -2973,6 +2988,25 @@ async function renderPerformance() {
       }).join('') + '</tbody>';
   }
 
+  const pct = parseFloat(document.getElementById('perf-comissao').value);
+  PERF_COMISSAO = isNaN(pct) ? 0 : pct;
+  const comTbl = document.getElementById('perf-comissao-tbl');
+  const comLinhas = linhas.filter(l => l.resgates > 0 || l.vResgates > 0);
+  if (!comLinhas.length) {
+    comTbl.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Nenhum resgate no período para calcular comissão.</td></tr></tbody>';
+    document.getElementById('perf-comissao-total').textContent = '';
+  } else {
+    let totResg = 0, totCom = 0;
+    comLinhas.forEach(l => { totResg += l.vResgates; totCom += l.vResgates * PERF_COMISSAO / 100; });
+    comTbl.innerHTML = '<thead><tr><th>Recepcionista</th><th class="num">Clientes resgatados</th><th class="num">R$ resgatado</th><th class="num">Comissão (' + PERF_COMISSAO + '%)</th></tr></thead><tbody>' +
+      comLinhas.map(l => '<tr><td class="nm">' + esc(l.nome) + '</td><td class="num">' + l.resgates + '</td><td class="num">' +
+        brl(l.vResgates) + '</td><td class="num" style="font-weight:600">' + brl(l.vResgates * PERF_COMISSAO / 100) + '</td></tr>').join('') +
+      '</tbody><tfoot><tr style="border-top:2px solid var(--line)"><td class="nm"><b>Total</b></td><td class="num"><b>' +
+      comLinhas.reduce((a, l) => a + l.resgates, 0) + '</b></td><td class="num"><b>' + brl(totResg) + '</b></td><td class="num" style="font-weight:600"><b>' +
+      brl(totCom) + '</b></td></tr></tfoot>';
+    document.getElementById('perf-comissao-total').textContent = 'Total a pagar em comissões: ' + brl(totCom);
+  }
+
   const series = document.getElementById('perf-series');
   const dias = [];
   let d = de; let guard = 0;
@@ -3016,6 +3050,7 @@ document.getElementById('perf-atualizar').onclick = () => renderPerformance();
 document.getElementById('perf-de').onchange = () => { PERF_PER = 'custom'; document.querySelectorAll('#seg-perf button').forEach(b => b.classList.toggle('on', b.dataset.per === 'custom')); renderPerformance(); };
 document.getElementById('perf-ate').onchange = () => { PERF_PER = 'custom'; document.querySelectorAll('#seg-perf button').forEach(b => b.classList.toggle('on', b.dataset.per === 'custom')); renderPerformance(); };
 document.getElementById('perf-uni').onchange = () => { TELA_PERF_UNI = document.getElementById('perf-uni').value; renderPerformance(); };
+document.getElementById('perf-comissao').oninput = () => renderPerformance();
 
 /* ---------- admin: gerenciar usuários ---------- */
 async function abrirAdmin() {
