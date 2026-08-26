@@ -1533,6 +1533,7 @@ let salvarT = null, salvando = false;
 function agendarSalvar() {
   ESTADO.seq = (ESTADO.seq || 0) + 1;
   ESTADO.atualizadoEm = hojeISO();
+  localBackup();
   clearTimeout(salvarT);
   salvarT = setTimeout(salvar, 700);
   marcarPendente(true);
