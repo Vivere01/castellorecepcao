@@ -29,13 +29,18 @@ jobs:
             vercel link --yes --token="$VERCEL_TOKEN" --project=castellorecepcao
           fi
 
-      - name: Criar e vincular Vercel KV (idempotente)
+      - name: Criar e vincular Vercel KV
         run: |
-          if [ -n "$VERCEL_SCOPE" ]; then
-            vercel kv create castello-kv --token="$VERCEL_TOKEN" --scope="$VERCEL_SCOPE" || true
+          if ! vercel kv list --token="$VERCEL_TOKEN" ${VERCEL_SCOPE:+--scope="$VERCEL_SCOPE"} 2>/dev/null | grep -q castello-kv; then
+            vercel kv create castello-kv --yes --token="$VERCEL_TOKEN" ${VERCEL_SCOPE:+--scope="$VERCEL_SCOPE"}
           else
-            vercel kv create castello-kv --token="$VERCEL_TOKEN" || true
+            echo "Store castello-kv ja existe."
           fi
+
+      - name: Verificar vinculo do KV no projeto
+        run: |
+          echo "Variaveis de ambiente do projeto (devem conter KV_REST_API_URL e KV_REST_API_TOKEN):"
+          vercel env ls --token="$VERCEL_TOKEN" ${VERCEL_SCOPE:+--scope="$VERCEL_SCOPE"} || true
 
       - name: Deploy em produção
         run: |

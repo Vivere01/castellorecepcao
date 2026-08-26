@@ -1565,6 +1565,7 @@ async function salvar() {
     const r = await apiReq('/api/data', 'POST', { estado: ESTADO, por: (SESSAO && SESSAO.nome) || 'sistema' });
     if (r && r.erro) {
       KV_ONLINE = false; atualizarRodape();
+      if (!window.__avisoKV) { toast('Vercel KV não conectado: os dados ficam salvos SÓ neste navegador.', 'err'); window.__avisoKV = true; }
       marcarPendente(false);
       clearTimeout(salvarT); salvarT = setTimeout(salvar, 6000);
     } else {
@@ -2127,24 +2128,32 @@ render();
 
 (async () => {
   // dados mais recentes no servidor (Vercel KV)
+  let serverSeq = -1;
   try {
     const r = await apiReq('/api/data', 'GET');
-    if (r && !r.erro && r.clientes && (r.seq || 0) >= (ESTADO.seq || 0)) {
-      ESTADO = r; normalizarEstado(); render();
+    if (r && !r.erro && r.clientes) {
+      serverSeq = r.seq || 0;
+      if (serverSeq >= (ESTADO.seq || 0)) { ESTADO = r; normalizarEstado(); render(); }
     }
   } catch (e) { }
-  // backup local, se for mais novo (e servidor indisponível)
+  // backup local, se for mais novo (ou servidor indisponível)
+  let localSeq = -1;
   try {
     const raw = localStorage.getItem('cf-cobranca');
     if (raw) {
       const d = JSON.parse(raw);
-      if (d && d.estado && d.estado.clientes && (d.seq || 0) > (ESTADO.seq || 0)) { ESTADO = d.estado; normalizarEstado(); render(); }
+      if (d && d.estado && d.estado.clientes) {
+        localSeq = d.estado.seq || 0;
+        if (localSeq > (ESTADO.seq || 0)) { ESTADO = d.estado; normalizarEstado(); render(); }
+      }
     }
   } catch (e) { }
 
   MODO_LEITURA = false;
-  if (d && d.estado) { KV_ONLINE = true; } else { KV_ONLINE = false; }
+  KV_ONLINE = serverSeq >= 0;
   atualizarRodape();
+  // se o KV está online e temos dados mais novos no navegador, sobe para o KV
+  if (serverSeq >= 0 && localSeq > serverSeq) agendarSalvar();
   marcarPendente(false);
 })();
 }
