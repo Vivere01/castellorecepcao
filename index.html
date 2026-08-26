@@ -2238,6 +2238,10 @@ let RUI = { ordem: 'proximoToque', desc: false, busca: '', situacao: 'hoje', toq
 
 function listaCanc() { return Object.values(ESTADO.cancelados || {}); }
 function listaVendas() { return Object.values(ESTADO.vendas || {}); }
+function vendasVisiveis() {
+  if (SESSAO && SESSAO.perfil === 'admin') return listaVendas();
+  return daUnidade(listaVendas(), UI.unidade);
+}
 function metaDa(u) {
   if (u === 'REDE') return unidadesAtivas().reduce((a, x) => a + (ESTADO.metas[x] || META_PADRAO), 0);
   return ESTADO.metas[u] || META_PADRAO;
@@ -2258,7 +2262,7 @@ document.querySelectorAll('#modos .modo').forEach(b => { b.onclick = () => troca
 function renderModos() {
   const emAberto = abertos(daUnidade(listaBase(), UI.unidade)).length;
   const hoje = daUnidadeC(listaCanc(), UI.unidade).filter(paraHoje).length;
-  const ven = daUnidade(listaVendas(), UI.unidade).length;
+  const ven = vendasVisiveis().length;
   $('#cnt-cob').textContent = emAberto;
   $('#cnt-res').textContent = hoje;
   $('#cnt-ven').textContent = ven;
@@ -2825,7 +2829,7 @@ function renderResgate() {
 function renderVendas() {
   if (document.getElementById('v-plano').options.length <= 1) popularPlanosVenda();
   if (document.getElementById('v-unidade').options.length === 0) popularUnidadesVenda();
-  const lista = daUnidade(listaVendas(), UI.unidade);
+  const lista = vendasVisiveis();
   const busca = (UI.vBusca || '').toLowerCase();
   const pf = UI.vPlano || '';
   const filt = lista.filter(c => (!busca || (c.nome || '').toLowerCase().includes(busca) || (c.plano || '').toLowerCase().includes(busca)) && (!pf || c.plano === pf));
