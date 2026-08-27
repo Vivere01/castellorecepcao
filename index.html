@@ -2384,6 +2384,7 @@ function toquesDoMes(c, mes) { return (c.toques || []).filter(t => t.data && t.d
 /* ---------- alternador de modo ---------- */
 function trocarModo(m) {
   MODO = m;
+  if (m === 'assinantes') UI.unidade = 'REDE';
   try { localStorage.setItem('cf-modo', m); } catch (e) { }
   render();
 }
@@ -3057,9 +3058,10 @@ let AUI = { busca: '', metodo: '', situacao: '' };
 
 function assinantesVisiveis() {
   const lista = Object.values(ESTADO.assinantes || {});
-  const s = (SESSAO && SESSAO.unidade) || UI.unidade;
-  if (SESSAO && SESSAO.perfil !== 'admin') return lista.filter(a => !a.unidade || a.unidade === s);
+  if (MODO !== 'assinantes') return [];
+  const s = UI.unidade;
   if (s && s !== 'REDE' && s !== 'SEM') return lista.filter(a => a.unidade === s);
+  if (s === 'SEM') return lista.filter(a => !a.unidade);
   return lista;
 }
 
@@ -3222,6 +3224,7 @@ function aplicarPreviaAss() {
   agendarSalvar();
   fecharModais();
   MODO = 'assinantes';
+  UI.unidade = 'REDE';
   render();
   toast(previaAss.novos + ' novos, ' + previaAss.baixados + ' baixados. Total: ' + previaAss.total, 'ok');
   previaAss = null;
