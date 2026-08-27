@@ -1077,39 +1077,123 @@ async function lerXlsx(buf) {
     }
   }
 
-  const rows = [];
-  for (const rowM of xml.matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/g)) {
-    const cells = [];
-    for (const c of rowM[1].matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
-      const attrs = c[1], inner = c[2] || '';
-      const refM = /r="([A-Z]+\d+)"/.exec(attrs);
-      const idx = refM ? colToIndex(refM[1]) : cells.length;
-      const t = (/t="([^"]+)"/.exec(attrs) || [])[1];
-      const sIdx = (/s="(\d+)"/.exec(attrs) || [])[1];
-      let val = null;
-      if (t === 'inlineStr') {
-        val = [...inner.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(m => unescXml(m[1])).join('');
-      } else {
-        const vM = /<v>([\s\S]*?)<\/v>/.exec(inner);
-        if (vM) {
-          const rawV = unescXml(vM[1]);
-          if (t === 's') val = shared[+rawV] ?? '';
-          else if (t === 'str' || t === 'e') val = rawV;
-          else if (t === 'b') val = rawV === '1';
-          else {
-            const num = parseFloat(rawV);
-            if (sIdx !== undefined && dateStyles.has(+sIdx) && num > 20000 && num < 80000) {
-              val = serialToDate(num);
-            } else val = isNaN(num) ? rawV : num;
+  function parseXml(xmlStr, sharedStrings, dateStyleSet) {
+    const rows = [];
+    for (const rowM of xmlStr.matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/g)) {
+      const cells = [];
+      for (const c of rowM[1].matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+        const attrs = c[1], inner = c[2] || '';
+        const refM = /r="([A-Z]+\d+)"/.exec(attrs);
+        const idx = refM ? colToIndex(refM[1]) : cells.length;
+        const t = (/t="([^"]+)"/.exec(attrs) || [])[1];
+        const sIdx = (/s="(\d+)"/.exec(attrs) || [])[1];
+        let val = null;
+        if (t === 'inlineStr') {
+          val = [...inner.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(m => unescXml(m[1])).join('');
+        } else {
+          const vM = /<v>([\s\S]*?)<\/v>/.exec(inner);
+          if (vM) {
+            const rawV = unescXml(vM[1]);
+            if (t === 's') val = sharedStrings[+rawV] ?? '';
+            else if (t === 'str' || t === 'e') val = rawV;
+            else if (t === 'b') val = rawV === '1';
+            else {
+              const num = parseFloat(rawV);
+              if (sIdx !== undefined && dateStyleSet.has(+sIdx) && num > 20000 && num < 80000) {
+                val = serialToDate(num);
+              } else val = isNaN(num) ? rawV : num;
+            }
           }
         }
+        while (cells.length < idx) cells.push(null);
+        cells[idx] = val;
       }
-      while (cells.length < idx) cells.push(null);
-      cells[idx] = val;
+      rows.push(cells);
     }
-    rows.push(cells);
+    return rows;
   }
-  return rows;
+
+  return parseXml(xml, shared, dateStyles);
+}
+
+async function lerXlsxTodas(buf) {
+  const files = await unzip(buf);
+  const shared = [];
+  const ss = files['xl/sharedStrings.xml'];
+  if (ss) {
+    for (const si of ss.split('<si>').slice(1)) {
+      const parts = [...si.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(m => unescXml(m[1]));
+      shared.push(parts.join(''));
+    }
+  }
+  const sheetNames = Object.keys(files)
+    .filter(f => /^xl\/worksheets\/sheet\d+\.xml$/.test(f))
+    .sort();
+  if (!sheetNames.length) throw new Error('Nenhuma aba encontrada no arquivo.');
+
+  const dateStyles = new Set();
+  const st = files['xl/styles.xml'];
+  if (st) {
+    const custom = {};
+    for (const m of st.matchAll(/<numFmt[^>]*numFmtId="(\d+)"[^>]*formatCode="([^"]*)"/g)) {
+      custom[m[1]] = unescXml(m[2]);
+    }
+    const cellXfsBlock = /<cellXfs[\s\S]*?<\/cellXfs>/.exec(st);
+    if (cellXfsBlock) {
+      const xfs = [...cellXfsBlock[0].matchAll(/<xf\b[^>]*>/g)].map(m => m[0]);
+      xfs.forEach((xf, i) => {
+        const id = /numFmtId="(\d+)"/.exec(xf);
+        if (!id) return;
+        const num = +id[1];
+        const code = custom[id[1]] || '';
+        const builtinDate = (num >= 14 && num <= 22) || (num >= 45 && num <= 47);
+        const looksDate = /[dmyhs]/i.test(code) && !/^"/.test(code) && /(y|d)/i.test(code);
+        if (builtinDate || looksDate) dateStyles.add(i);
+      });
+    }
+  }
+
+  function parseXml(xmlStr) {
+    const rows = [];
+    for (const rowM of xmlStr.matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/g)) {
+      const cells = [];
+      for (const c of rowM[1].matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+        const attrs = c[1], inner = c[2] || '';
+        const refM = /r="([A-Z]+\d+)"/.exec(attrs);
+        const idx = refM ? colToIndex(refM[1]) : cells.length;
+        const t = (/t="([^"]+)"/.exec(attrs) || [])[1];
+        const sIdx = (/s="(\d+)"/.exec(attrs) || [])[1];
+        let val = null;
+        if (t === 'inlineStr') {
+          val = [...inner.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(m => unescXml(m[1])).join('');
+        } else {
+          const vM = /<v>([\s\S]*?)<\/v>/.exec(inner);
+          if (vM) {
+            const rawV = unescXml(vM[1]);
+            if (t === 's') val = shared[+rawV] ?? '';
+            else if (t === 'str' || t === 'e') val = rawV;
+            else if (t === 'b') val = rawV === '1';
+            else {
+              const num = parseFloat(rawV);
+              if (sIdx !== undefined && dateStyles.has(+sIdx) && num > 20000 && num < 80000) {
+                val = serialToDate(num);
+              } else val = isNaN(num) ? rawV : num;
+            }
+          }
+        }
+        while (cells.length < idx) cells.push(null);
+        cells[idx] = val;
+      }
+      rows.push(cells);
+    }
+    return rows;
+  }
+
+  const allRows = [];
+  for (const sn of sheetNames) {
+    allRows.push(...parseXml(files[sn]));
+  }
+  return allRows;
 }
 
 /* --- csv --- */
@@ -2110,6 +2194,13 @@ async function lerArquivo(file) {
   }
   return rows;
 }
+async function lerArquivoTodas(file) {
+  const nome = file.name.toLowerCase();
+  if (nome.endsWith('.csv') || nome.endsWith('.txt')) {
+    return lerCsv(await file.text());
+  }
+  return await lerXlsxTodas(await file.arrayBuffer());
+}
 async function processarArquivo(file) {
   const box = $('#preview');
   box.innerHTML = '<div class="alert info"><span class="ico">…</span><span>Lendo <b>' + esc(file.name) + '</b></span></div>';
@@ -3101,7 +3192,7 @@ async function processarArquivosAss(files) {
 
     for (const file of files) {
       try {
-        const rows = await lerArquivo(file);
+        const rows = await lerArquivoTodas(file);
         const ex = extrairAssinantes(rows);
         let novos = 0, atualizados = 0, baixados = 0, duplicados = 0;
 
