@@ -1275,6 +1275,47 @@ function ehLinhaLixo(nome) {
   return !k || LIXO.some(l => k.startsWith(chaveTexto(l)));
 }
 
+/* --- cabecalho flexivel (só exige nome) --- */
+function acharCabecalhoAss(rows) {
+  for (let i = 0; i < Math.min(rows.length, 12); i++) {
+    const map = mapearColunas(rows[i] || []);
+    if (map.nome !== undefined) return { linha: i, map };
+  }
+  return null;
+}
+
+/* --- extrai assinantes (aceita sem telefone/email) --- */
+function extrairAssinantes(rows) {
+  const cab = acharCabecalhoAss(rows);
+  if (!cab) throw new Error('Não achei a coluna de Cliente nesta planilha.');
+  const { linha, map } = cab;
+  const get = (r, campo) => map[campo] === undefined ? null : r[map[campo]];
+  const regs = [], ignoradas = [];
+  for (let i = linha + 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    const nome = (get(r, 'nome') ?? '').toString().trim();
+    if (ehLinhaLixo(nome)) { if (nome) ignoradas.push(nome); continue; }
+    if (!nome) continue;
+    const reg = {
+      nome,
+      unidade: unidadeCanonica(get(r, 'unidade')),
+      email: emailNorm(get(r, 'email')),
+      telefone: telNorm(get(r, 'telefone')),
+      telefoneBruto: (get(r, 'telefone') ?? '').toString().trim(),
+      cpf: soDigitos(get(r, 'cpf')),
+      plano: (get(r, 'plano') ?? '').toString().trim(),
+      cobranca: (get(r, 'cobranca') ?? '').toString().trim(),
+      vencimento: dataISO(get(r, 'vencimento')),
+      valor: valorNum(get(r, 'valor')),
+      linha: i + 1
+    };
+    if (!reg.unidade) reg.unidade = unidadePeloPlano(reg.plano);
+    reg.chave = fazerChave(reg);
+    regs.push(reg);
+  }
+  return { registros: regs, colunas: map, cabecalho: rows[linha], ignoradas };
+}
+
 /* --- extrai registros da matriz --- */
 function extrairRegistros(rows) {
   const cab = acharCabecalho(rows);
@@ -3048,7 +3089,7 @@ async function processarArquivoAss(file) {
   box.innerHTML = '<div class="alert info"><span class="ico">…</span><span>Lendo <b>' + esc(file.name) + '</b></span></div>';
   try {
     const rows = await lerArquivo(file);
-    const ex = extrairRegistros(rows);
+    const ex = extrairAssinantes(rows);
     const copia = JSON.parse(JSON.stringify(ESTADO));
     if (!copia.assinantes) copia.assinantes = {};
     if (!copia.uploadsAss) copia.uploadsAss = [];
