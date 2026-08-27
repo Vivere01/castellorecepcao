@@ -764,10 +764,10 @@ tr.perdido{opacity:.45}
     <div class="sheet-b">
       <p style="font-size:12px;color:var(--ink3);margin-bottom:10px">Na <b>importação semanal</b>, assinantes que já venceram serão dados baixa automaticamente.</p>
       <div class="drop" id="a-drop">
-        <strong style="font-size:13.5px">Arraste o arquivo aqui</strong>
+        <strong style="font-size:13.5px">Arraste os arquivos aqui</strong>
         <p>ou <button class="btn btn-sm" id="a-btn-escolher" type="button">escolher no computador</button></p>
-        <p style="font-size:11px;color:var(--ink3)">Aceita .xlsx e .csv</p>
-        <input type="file" id="a-arquivo" accept=".xlsx,.csv,.txt" hidden>
+        <p style="font-size:11px;color:var(--ink3)">Aceita .xlsx e .csv — pode selecionar vários de uma vez (PIX, Cashpag, Célcash)</p>
+        <input type="file" id="a-arquivo" accept=".xlsx,.csv,.txt" multiple hidden>
       </div>
       <div id="a-preview"></div>
     </div>
@@ -3084,74 +3084,92 @@ function abrirUploadAss() {
   abrirModal('#m-upload-ass');
 }
 
-async function processarArquivoAss(file) {
+async function processarArquivosAss(files) {
   const box = $('#a-preview');
-  box.innerHTML = '<div class="alert info"><span class="ico">…</span><span>Lendo <b>' + esc(file.name) + '</b></span></div>';
+  box.innerHTML = '<div class="alert info"><span class="ico">…</span><span>Lendo ' + files.length + ' arquivo(s)…</span></div>';
   try {
-    const rows = await lerArquivo(file);
-    const ex = extrairAssinantes(rows);
     const copia = JSON.parse(JSON.stringify(ESTADO));
     if (!copia.assinantes) copia.assinantes = {};
     if (!copia.uploadsAss) copia.uploadsAss = [];
     const hoje = hojeISO();
-    let novos = 0, atualizados = 0, baixados = 0, duplicados = 0;
-    const vistos = {};
-    const ignoradas = [];
+    let totalNovos = 0, totalAtualizados = 0, totalBaixados = 0, totalDuplicados = 0;
+    const todosVistos = {};
+    const arquivosProcessados = [];
+    const erros = [];
 
-    for (const reg of ex.registros) {
-      const chave = reg.chave;
-      if (vistos[chave]) { duplicados++; continue; }
-      vistos[chave] = true;
-      const existente = copia.assinantes[chave];
-      if (existente) {
-        existente.nome = reg.nome || existente.nome;
-        existente.email = reg.email || existente.email;
-        existente.telefone = reg.telefone || existente.telefone;
-        existente.telefoneBruto = reg.telefoneBruto || existente.telefoneBruto;
-        existente.cpf = reg.cpf || existente.cpf;
-        existente.plano = reg.plano || existente.plano;
-        existente.cobranca = reg.cobranca || existente.cobranca;
-        existente.vencimento = reg.vencimento || existente.vencimento;
-        existente.valor = reg.valor || existente.valor;
-        existente.unidade = reg.unidade || existente.unidade;
-        existente.ultimaImportacao = hoje;
-        atualizados++;
-        const dv = diasRestantes(existente);
-        if (dv < 0 && existente.situacao !== 'baixado') {
-          existente.situacao = 'baixado';
-          existente.baixadoEm = hoje;
-          existente.baixadoMotivo = 'vencido_na_semana';
-          existente.historico = existente.historico || [];
-          existente.historico.push({ d: hoje, e: 'baixa_automatica' });
-          baixados++;
+    for (const file of files) {
+      try {
+        const rows = await lerArquivo(file);
+        const ex = extrairAssinantes(rows);
+        let novos = 0, atualizados = 0, baixados = 0, duplicados = 0;
+
+        for (const reg of ex.registros) {
+          const chave = reg.chave;
+          if (todosVistos[chave]) { duplicados++; continue; }
+          todosVistos[chave] = true;
+          const existente = copia.assinantes[chave];
+          if (existente) {
+            existente.nome = reg.nome || existente.nome;
+            existente.email = reg.email || existente.email;
+            existente.telefone = reg.telefone || existente.telefone;
+            existente.telefoneBruto = reg.telefoneBruto || existente.telefoneBruto;
+            existente.cpf = reg.cpf || existente.cpf;
+            existente.plano = reg.plano || existente.plano;
+            existente.cobranca = reg.cobranca || existente.cobranca;
+            existente.vencimento = reg.vencimento || existente.vencimento;
+            existente.valor = reg.valor || existente.valor;
+            existente.unidade = reg.unidade || existente.unidade;
+            existente.ultimaImportacao = hoje;
+            atualizados++;
+            const dv = diasRestantes(existente);
+            if (dv < 0 && existente.situacao !== 'baixado') {
+              existente.situacao = 'baixado';
+              existente.baixadoEm = hoje;
+              existente.baixadoMotivo = 'vencido_na_semana';
+              existente.historico = existente.historico || [];
+              existente.historico.push({ d: hoje, e: 'baixa_automatica' });
+              baixados++;
+            }
+          } else {
+            copia.assinantes[chave] = {
+              chave,
+              nome: reg.nome,
+              email: reg.email,
+              telefone: reg.telefone,
+              telefoneBruto: reg.telefoneBruto,
+              cpf: reg.cpf,
+              plano: reg.plano,
+              cobranca: reg.cobranca,
+              vencimento: reg.vencimento,
+              valor: reg.valor,
+              unidade: reg.unidade,
+              situacao: 'ativo',
+              primeiraImportacao: hoje,
+              ultimaImportacao: hoje,
+              historico: [{ d: hoje, e: 'importado' }]
+            };
+            novos++;
+          }
         }
-      } else {
-        copia.assinantes[chave] = {
-          chave,
-          nome: reg.nome,
-          email: reg.email,
-          telefone: reg.telefone,
-          telefoneBruto: reg.telefoneBruto,
-          cpf: reg.cpf,
-          plano: reg.plano,
-          cobranca: reg.cobranca,
-          vencimento: reg.vencimento,
-          valor: reg.valor,
-          unidade: reg.unidade,
-          situacao: 'ativo',
-          primeiraImportacao: hoje,
-          ultimaImportacao: hoje,
-          historico: [{ d: hoje, e: 'importado' }]
-        };
-        novos++;
+
+        copia.uploadsAss.unshift({
+          id: 'ass-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          data: hoje, arquivo: file.name,
+          linhas: ex.registros.length, novos, atualizados, baixados, duplicados
+        });
+
+        arquivosProcessados.push({ nome: file.name, linhas: ex.registros.length, novos, atualizados, duplicados });
+        totalNovos += novos; totalAtualizados += atualizados; totalBaixados += baixados; totalDuplicados += duplicados;
+      } catch (err) {
+        erros.push(file.name + ': ' + (err.message || String(err)));
       }
     }
 
-    // baixa automática: quem não veio na planilha mas era ativo
+    // baixa automática: quem não veio em nenhum arquivo mas era ativo
     const todasChaves = Object.keys(copia.assinantes);
     for (const k of todasChaves) {
       const a = copia.assinantes[k];
-      if (a.situacao !== 'baixado' && !vistos[k]) {
+      if (a.situacao !== 'baixado' && !todosVistos[k]) {
         const dv = diasRestantes(a);
         if (dv < 0) {
           a.situacao = 'baixado';
@@ -3159,37 +3177,34 @@ async function processarArquivoAss(file) {
           a.baixadoMotivo = 'ausente_na_importacao';
           a.historico = a.historico || [];
           a.historico.push({ d: hoje, e: 'baixa_automatica' });
-          baixados++;
+          totalBaixados++;
         }
       }
     }
 
-    copia.uploadsAss.unshift({
-      id: 'ass-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      data: hoje,
-      arquivo: file.name,
-      linhas: ex.registros.length,
-      novos,
-      atualizados,
-      baixados,
-      duplicados
-    });
+    previaAss = { estado: copia, novos: totalNovos, atualizados: totalAtualizados, baixados: totalBaixados, duplicados: totalDuplicados, total: Object.keys(copia.assinantes).length };
 
-    previaAss = { estado: copia, novos, atualizados, baixados, duplicados, total: Object.keys(copia.assinantes).length };
     let html = '<div class="resumo">' +
-      [['Novos', novos], ['Atualizados', atualizados], ['Baixados (vencidos)', baixados], ['Duplicados', duplicados], ['Total na base', Object.keys(copia.assinantes).length]]
+      [['Arquivos', arquivosProcessados.length], ['Novos', totalNovos], ['Atualizados', totalAtualizados], ['Baixados', totalBaixados], ['Total na base', Object.keys(copia.assinantes).length]]
         .map(c => '<div class="rz"><div class="v num">' + c[1] + '</div><div class="l">' + c[0] + '</div></div>').join('') + '</div>';
-    if (baixados) {
-      html += '<div class="alert warn"><span class="ico">!</span><span><b>' + baixados +
+
+    for (const a of arquivosProcessados) {
+      html += '<div style="font-size:12px;color:var(--ink2);margin-top:4px">' + esc(a.nome) + ': <b>' + a.linhas + '</b> linhas → <b>' + a.novos + '</b> novos, <b>' + a.atualizados + '</b> atualizados</div>';
+    }
+    if (totalBaixados) {
+      html += '<div class="alert warn"><span class="ico">!</span><span><b>' + totalBaixados +
         ' assinante(s) com vencimento expirado</b> — dados como baixados automaticamente.</span></div>';
     }
-    if (novos) {
-      html += '<div class="alert ok"><span class="ico">✓</span><span><b>' + novos + ' novo(s) assinante(s)</b> adicionado(s) à base.</span></div>';
+    if (totalNovos) {
+      html += '<div class="alert ok"><span class="ico">✓</span><span><b>' + totalNovos + ' novo(s) assinante(s)</b> adicionado(s) à base.</span></div>';
+    }
+    if (erros.length) {
+      html += '<div class="alert bad"><span class="ico">!</span><span><b>Erro em ' + erros.length + ' arquivo(s):</b><br>' + esc(erros.join('<br>')) + '</span></div>';
     }
     box.innerHTML = html;
     $('#a-btn-aplicar').disabled = MODO_LEITURA;
   } catch (err) {
-    box.innerHTML = '<div class="alert bad"><span class="ico">!</span><span><b>Não consegui ler o arquivo.</b><br>' + esc(err.message || String(err)) + '</span></div>';
+    box.innerHTML = '<div class="alert bad"><span class="ico">!</span><span><b>Não consegui ler os arquivos.</b><br>' + esc(err.message || String(err)) + '</span></div>';
     $('#a-btn-aplicar').disabled = true;
   }
 }
@@ -3272,12 +3287,12 @@ function renderAssinantes() {
 
 document.getElementById('btn-upload-ass').onclick = abrirUploadAss;
 document.getElementById('a-btn-escolher').onclick = () => $('#a-arquivo').click();
-document.getElementById('a-arquivo').onchange = e => { if (e.target.files[0]) processarArquivoAss(e.target.files[0]); };
+document.getElementById('a-arquivo').onchange = e => { if (e.target.files.length) processarArquivosAss(Array.from(e.target.files)); };
 document.getElementById('a-btn-aplicar').onclick = aplicarPreviaAss;
 const dropA = document.getElementById('a-drop');
 ['dragenter', 'dragover'].forEach(ev => dropA.addEventListener(ev, e => { e.preventDefault(); dropA.classList.add('over'); }));
 ['dragleave', 'drop'].forEach(ev => dropA.addEventListener(ev, e => { e.preventDefault(); dropA.classList.remove('over'); }));
-dropA.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) processarArquivoAss(f); });
+dropA.addEventListener('drop', e => { if (e.dataTransfer.files.length) processarArquivosAss(Array.from(e.dataTransfer.files)); });
 
 document.getElementById('a-busca').oninput = e => { AUI.busca = e.target.value.trim(); renderAssinantes(); };
 document.getElementById('a-filtro-metodo').onchange = e => { AUI.metodo = e.target.value; renderAssinantes(); };
