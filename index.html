@@ -363,6 +363,18 @@ tr.perdido{opacity:.45}
 .v-form label{display:block; margin-bottom:10px; font-size:12px; color:var(--ink2)}
 .v-form .field{width:100%}
 .v-form .btn{width:100%; margin-top:4px}
+.ass-row-vencido td{background:rgba(214,48,49,.1)}
+.ass-row-vencido td:last-child{border-right:3px solid #d63031}
+.ass-row-atrasado td{background:rgba(253,203,110,.15)}
+.ass-row-atrasado td:last-child{border-right:3px solid #fdcb6e}
+.ass-badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:10.5px;font-weight:600;line-height:1.4}
+.ass-badge-ok{background:rgba(0,184,148,.12);color:#00b894}
+.ass-badge-vencido{background:rgba(214,48,49,.12);color:#d63031}
+.ass-badge-atrasado{background:rgba(253,203,110,.2);color:#e17055}
+.ass-badge-baixa{background:rgba(99,110,114,.1);color:#636e72}
+.ass-dias{font-family:"IBM Plex Mono",monospace;text-align:right;font-size:12px}
+.ass-zap{background:rgba(37,211,102,.1);color:#25d366;border:1px solid rgba(37,211,102,.25);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;text-decoration:none;display:inline-block}
+.ass-zap:hover{background:rgba(37,211,102,.2)}
 </style>
 
 </head>
@@ -407,6 +419,7 @@ tr.perdido{opacity:.45}
       <button class="modo" type="button" data-modo="cobranca" aria-selected="true">Cobrança<span class="cnt" id="cnt-cob"></span></button>
       <button class="modo" type="button" data-modo="resgate" aria-selected="false">Resgate<span class="cnt" id="cnt-res"></span></button>
       <button class="modo" type="button" data-modo="vendas" aria-selected="false">Novas vendas<span class="cnt" id="cnt-ven"></span></button>
+      <button class="modo" type="button" data-modo="assinantes" aria-selected="false">Assinantes<span class="cnt" id="cnt-ass"></span></button>
     </div>
     <div class="tabs" id="tabs" role="tablist"></div>
     <span id="acoes-cob" class="acoes">
@@ -416,6 +429,9 @@ tr.perdido{opacity:.45}
     <span id="acoes-res" class="acoes" hidden>
       <button class="btn" id="btn-exportar-res" type="button">Exportar</button>
       <button class="btn btn-primary" id="btn-upload-res" type="button">Subir cancelados</button>
+    </span>
+    <span id="acoes-ass" class="acoes" hidden>
+      <button class="btn btn-primary" id="btn-upload-ass" type="button">Importar assinantes</button>
     </span>
     <div class="user-chip" id="user-chip" hidden>
       <span class="nm" id="user-nome"></span>
@@ -604,6 +620,42 @@ tr.perdido{opacity:.45}
     </aside>
   </div>
 
+  <!-- ============ TODOS ASSINANTES ============ -->
+  <div class="cols" id="view-assinantes" hidden>
+    <main class="panel">
+      <div class="toolbar">
+        <input class="field" id="a-busca" type="search" placeholder="Buscar cliente…">
+        <select class="field" id="a-filtro-metodo"><option value="">Todos os pagamentos</option><option value="PIX">PIX</option><option value="CELCASH">Célcash</option><option value="CASHPAG">Cashpag</option></select>
+        <select class="field" id="a-filtro-situacao"><option value="">Todas as situações</option><option value="ativo">Ativos</option><option value="inadimplente">Inadimplentes</option><option value="vencido">Vencidos</option><option value="baixa">Baixados</option></select>
+        <span class="hint mono" id="a-contagem"></span>
+      </div>
+      <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Plano</th>
+              <th class="num">Valor</th>
+              <th>Vencimento</th>
+              <th>Dias</th>
+              <th>Pagamento</th>
+              <th>Unidade</th>
+              <th>Situação</th>
+              <th class="no"></th>
+            </tr>
+          </thead>
+          <tbody id="a-corpo"></tbody>
+        </table>
+      </div>
+    </main>
+    <aside class="rail">
+      <section class="panel">
+        <div class="panel-h"><h2>Resumo</h2></div>
+        <div class="panel-b" id="a-resumo"></div>
+      </section>
+    </aside>
+  </div>
+
   <!-- ============ DESEMPENHO ============ -->
   <div class="cols" id="view-performance" hidden>
     <main class="panel">
@@ -698,6 +750,30 @@ tr.perdido{opacity:.45}
     <div class="sheet-f">
       <button class="btn" data-fechar type="button">Cancelar</button>
       <button class="btn btn-primary" id="r-btn-aplicar" type="button" disabled>Colocar na fila de resgate</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal upload assinantes -->
+<div class="modal" id="m-upload-ass" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="t-upload-ass">
+    <div class="sheet-h">
+      <h2 id="t-upload-ass">Importar planilha de assinantes</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <p style="font-size:12px;color:var(--ink3);margin-bottom:10px">Na <b>importação semanal</b>, assinantes que já venceram serão dados baixa automaticamente.</p>
+      <div class="drop" id="a-drop">
+        <strong style="font-size:13.5px">Arraste o arquivo aqui</strong>
+        <p>ou <button class="btn btn-sm" id="a-btn-escolher" type="button">escolher no computador</button></p>
+        <p style="font-size:11px;color:var(--ink3)">Aceita .xlsx e .csv</p>
+        <input type="file" id="a-arquivo" accept=".xlsx,.csv,.txt" hidden>
+      </div>
+      <div id="a-preview"></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Cancelar</button>
+      <button class="btn btn-primary" id="a-btn-aplicar" type="button" disabled>Aplicar importação</button>
     </div>
   </div>
 </div>
@@ -1613,6 +1689,7 @@ function render() {
   renderModos(); renderTabs();
   if (MODO === 'resgate') renderResgate();
   else if (MODO === 'vendas') renderVendas();
+  else if (MODO === 'assinantes') renderAssinantes();
   else renderCobranca();
   marcarPendente(false);
 }
@@ -1623,6 +1700,12 @@ function renderCobranca() {
 function contaAba(id) {
   if (MODO === 'resgate') return daUnidadeC(listaCanc(), id).filter(naFila).length;
   if (MODO === 'vendas') return daUnidade(listaVendas(), id).length;
+  if (MODO === 'assinantes') {
+    const todos = Object.values(ESTADO.assinantes || {});
+    if (id === 'REDE') return todos.length;
+    if (id === 'SEM') return todos.filter(a => !a.unidade).length;
+    return todos.filter(a => a.unidade === id).length;
+  }
   return abertos(daUnidade(listaBase(), id)).length;
 }
 function renderTabs() {
@@ -2127,7 +2210,7 @@ $('#btn-salvar-modelo').onclick = () => {
 
 /* ============ boot ============ */
 function mesclar(sv, lv) {
-  const out = sv ? JSON.parse(JSON.stringify(sv)) : { clientes: {}, cancelados: {}, vendas: {}, uploads: [], uploadsCanc: [], modelo: '', modelosResgate: [], metas: {}, seq: 0 };
+  const out = sv ? JSON.parse(JSON.stringify(sv)) : { clientes: {}, cancelados: {}, vendas: {}, assinantes: {}, uploads: [], uploadsCanc: [], uploadsAss: [], modelo: '', modelosResgate: [], metas: {}, seq: 0 };
   normalizarEstado(out);
   const L = lv || {};
   const porChave = (col) => {
@@ -2139,11 +2222,13 @@ function mesclar(sv, lv) {
       if (ta >= tb) out[col][k] = a;
     });
   };
-  porChave('clientes'); porChave('vendas'); porChave('cancelados');
+  porChave('clientes'); porChave('vendas'); porChave('cancelados'); porChave('assinantes');
   const ids = new Set((out.uploads || []).map(u => u && u.id));
   (L.uploads || []).forEach(u => { if (u && u.id && !ids.has(u.id)) { out.uploads.push(u); ids.add(u.id); } });
   const idsC = new Set((out.uploadsCanc || []).map(u => u && u.id));
   (L.uploadsCanc || []).forEach(u => { if (u && u.id && !idsC.has(u.id)) { out.uploadsCanc.push(u); idsC.add(u.id); } });
+  const idsA = new Set((out.uploadsAss || []).map(u => u && u.id));
+  (L.uploadsAss || []).forEach(u => { if (u && u.id && !idsA.has(u.id)) { out.uploadsAss.push(u); idsA.add(u.id); } });
   out.seq = Math.max(out.seq || 0, L.seq || 0);
   return out;
 }
@@ -2222,6 +2307,8 @@ function normalizarEstado(e) {
   if (!e.cancelados) e.cancelados = {};
   if (!e.vendas) e.vendas = {};
   if (!e.uploadsCanc) e.uploadsCanc = [];
+  if (!e.assinantes) e.assinantes = {};
+  if (!e.uploadsAss) e.uploadsAss = [];
   if (!e.modelo) e.modelo = MODELO_PADRAO;
   if (!e.modelosResgate || e.modelosResgate.length !== 3) e.modelosResgate = MODELOS_RESGATE_PADRAO.slice();
   if (!e.metas) e.metas = {};
@@ -2265,25 +2352,31 @@ function renderModos() {
   const emAberto = abertos(daUnidade(listaBase(), UI.unidade)).length;
   const hoje = daUnidadeC(listaCanc(), UI.unidade).filter(paraHoje).length;
   const ven = vendasVisiveis().length;
+  const ass = Object.values(ESTADO.assinantes || {}).length;
   $('#cnt-cob').textContent = emAberto;
   $('#cnt-res').textContent = hoje;
   $('#cnt-ven').textContent = ven;
+  $('#cnt-ass').textContent = ass;
   document.querySelectorAll('#modos .modo').forEach(b =>
     b.setAttribute('aria-selected', b.dataset.modo === MODO ? 'true' : 'false'));
   $('#view-cobranca').hidden = MODO !== 'cobranca';
   $('#view-resgate').hidden = MODO !== 'resgate';
   $('#view-vendas').hidden = MODO !== 'vendas';
+  $('#view-assinantes').hidden = MODO !== 'assinantes';
   $('#acoes-cob').hidden = MODO !== 'cobranca';
   $('#acoes-res').hidden = MODO !== 'resgate';
-  $('#brand-sub').textContent = MODO === 'cobranca' ? 'Régua de cobrança' : (MODO === 'resgate' ? 'Régua de resgate' : 'Novas vendas');
+  $('#acoes-ass').hidden = MODO !== 'assinantes';
+  $('#brand-sub').textContent = MODO === 'cobranca' ? 'Régua de cobrança' : (MODO === 'resgate' ? 'Régua de resgate' : (MODO === 'assinantes' ? 'Todos os assinantes' : 'Novas vendas'));
   if (TELA_PERF) {
     document.getElementById('modos').hidden = true;
     document.getElementById('tabs').hidden = true;
     $('#view-cobranca').hidden = true;
     $('#view-resgate').hidden = true;
     $('#view-vendas').hidden = true;
+    $('#view-assinantes').hidden = true;
     $('#acoes-cob').hidden = true;
     $('#acoes-res').hidden = true;
+    $('#acoes-ass').hidden = true;
     document.getElementById('kpis').hidden = true;
     document.getElementById('view-performance').hidden = false;
     document.getElementById('brand-sub').textContent = 'Desempenho da recepção';
@@ -2916,6 +3009,238 @@ document.getElementById('v-add').onclick = () => {
     toast('Erro ao adicionar venda: ' + (e && e.message), 'err');
   }
 };
+
+/* ---------- assinantes ---------- */
+let previaAss = null;
+let AUI = { busca: '', metodo: '', situacao: '' };
+
+function assinantesVisiveis() {
+  const lista = Object.values(ESTADO.assinantes || {});
+  const s = (SESSAO && SESSAO.unidade) || UI.unidade;
+  if (SESSAO && SESSAO.perfil !== 'admin') return lista.filter(a => !a.unidade || a.unidade === s);
+  if (s && s !== 'REDE' && s !== 'SEM') return lista.filter(a => a.unidade === s);
+  return lista;
+}
+
+function diasRestantes(a) {
+  if (!a.vencimento) return 999;
+  const diff = diasEntre(hojeISO(), a.vencimento);
+  return diff;
+}
+
+function situacaoAss(a) {
+  if (a.situacao === 'baixado') return 'baixa';
+  const d = diasRestantes(a);
+  if (d < 0) return 'vencido';
+  if (d <= 7) return 'atrasado';
+  return 'ativo';
+}
+
+function abrirUploadAss() {
+  previaAss = null;
+  $('#a-preview').innerHTML = '';
+  $('#a-btn-aplicar').disabled = true;
+  abrirModal('#m-upload-ass');
+}
+
+async function processarArquivoAss(file) {
+  const box = $('#a-preview');
+  box.innerHTML = '<div class="alert info"><span class="ico">…</span><span>Lendo <b>' + esc(file.name) + '</b></span></div>';
+  try {
+    const rows = await lerArquivo(file);
+    const ex = extrairRegistros(rows);
+    const copia = JSON.parse(JSON.stringify(ESTADO));
+    if (!copia.assinantes) copia.assinantes = {};
+    if (!copia.uploadsAss) copia.uploadsAss = [];
+    const hoje = hojeISO();
+    let novos = 0, atualizados = 0, baixados = 0, duplicados = 0;
+    const vistos = {};
+    const ignoradas = [];
+
+    for (const reg of ex.registros) {
+      const chave = reg.chave;
+      if (vistos[chave]) { duplicados++; continue; }
+      vistos[chave] = true;
+      const existente = copia.assinantes[chave];
+      if (existente) {
+        existente.nome = reg.nome || existente.nome;
+        existente.email = reg.email || existente.email;
+        existente.telefone = reg.telefone || existente.telefone;
+        existente.telefoneBruto = reg.telefoneBruto || existente.telefoneBruto;
+        existente.cpf = reg.cpf || existente.cpf;
+        existente.plano = reg.plano || existente.plano;
+        existente.cobranca = reg.cobranca || existente.cobranca;
+        existente.vencimento = reg.vencimento || existente.vencimento;
+        existente.valor = reg.valor || existente.valor;
+        existente.unidade = reg.unidade || existente.unidade;
+        existente.ultimaImportacao = hoje;
+        atualizados++;
+        const dv = diasRestantes(existente);
+        if (dv < 0 && existente.situacao !== 'baixado') {
+          existente.situacao = 'baixado';
+          existente.baixadoEm = hoje;
+          existente.baixadoMotivo = 'vencido_na_semana';
+          existente.historico = existente.historico || [];
+          existente.historico.push({ d: hoje, e: 'baixa_automatica' });
+          baixados++;
+        }
+      } else {
+        copia.assinantes[chave] = {
+          chave,
+          nome: reg.nome,
+          email: reg.email,
+          telefone: reg.telefone,
+          telefoneBruto: reg.telefoneBruto,
+          cpf: reg.cpf,
+          plano: reg.plano,
+          cobranca: reg.cobranca,
+          vencimento: reg.vencimento,
+          valor: reg.valor,
+          unidade: reg.unidade,
+          situacao: 'ativo',
+          primeiraImportacao: hoje,
+          ultimaImportacao: hoje,
+          historico: [{ d: hoje, e: 'importado' }]
+        };
+        novos++;
+      }
+    }
+
+    // baixa automática: quem não veio na planilha mas era ativo
+    const todasChaves = Object.keys(copia.assinantes);
+    for (const k of todasChaves) {
+      const a = copia.assinantes[k];
+      if (a.situacao !== 'baixado' && !vistos[k]) {
+        const dv = diasRestantes(a);
+        if (dv < 0) {
+          a.situacao = 'baixado';
+          a.baixadoEm = hoje;
+          a.baixadoMotivo = 'ausente_na_importacao';
+          a.historico = a.historico || [];
+          a.historico.push({ d: hoje, e: 'baixa_automatica' });
+          baixados++;
+        }
+      }
+    }
+
+    copia.uploadsAss.unshift({
+      id: 'ass-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      data: hoje,
+      arquivo: file.name,
+      linhas: ex.registros.length,
+      novos,
+      atualizados,
+      baixados,
+      duplicados
+    });
+
+    previaAss = { estado: copia, novos, atualizados, baixados, duplicados, total: Object.keys(copia.assinantes).length };
+    let html = '<div class="resumo">' +
+      [['Novos', novos], ['Atualizados', atualizados], ['Baixados (vencidos)', baixados], ['Duplicados', duplicados], ['Total na base', Object.keys(copia.assinantes).length]]
+        .map(c => '<div class="rz"><div class="v num">' + c[1] + '</div><div class="l">' + c[0] + '</div></div>').join('') + '</div>';
+    if (baixados) {
+      html += '<div class="alert warn"><span class="ico">!</span><span><b>' + baixados +
+        ' assinante(s) com vencimento expirado</b> — dados como baixados automaticamente.</span></div>';
+    }
+    if (novos) {
+      html += '<div class="alert ok"><span class="ico">✓</span><span><b>' + novos + ' novo(s) assinante(s)</b> adicionado(s) à base.</span></div>';
+    }
+    box.innerHTML = html;
+    $('#a-btn-aplicar').disabled = MODO_LEITURA;
+  } catch (err) {
+    box.innerHTML = '<div class="alert bad"><span class="ico">!</span><span><b>Não consegui ler o arquivo.</b><br>' + esc(err.message || String(err)) + '</span></div>';
+    $('#a-btn-aplicar').disabled = true;
+  }
+}
+
+function aplicarPreviaAss() {
+  if (!previaAss) return;
+  const modelo = ESTADO.modelo, modelos = ESTADO.modelosResgate, seq = ESTADO.seq, metas = ESTADO.metas, vendas = ESTADO.vendas;
+  const canc = ESTADO.cancelados, clientes = ESTADO.clientes, unidadeDe = ESTADO.unidadeDe;
+  const uploads = ESTADO.uploads, uploadsCanc = ESTADO.uploadsCanc;
+  ESTADO = previaAss.estado;
+  ESTADO.modelo = modelo; ESTADO.modelosResgate = modelos; ESTADO.seq = seq; ESTADO.metas = metas;
+  ESTADO.vendas = vendas; ESTADO.cancelados = canc; ESTADO.clientes = clientes; ESTADO.unidadeDe = unidadeDe;
+  ESTADO.uploads = uploads; ESTADO.uploadsCanc = uploadsCanc;
+  normalizarEstado();
+  agendarSalvar();
+  fecharModais();
+  MODO = 'assinantes';
+  render();
+  toast(previaAss.novos + ' novos, ' + previaAss.baixados + ' baixados. Total: ' + previaAss.total, 'ok');
+  previaAss = null;
+}
+
+function renderAssinantes() {
+  const busca = (AUI.busca || '').toLowerCase();
+  const metodo = AUI.metodo || '';
+  const sit = AUI.situacao || '';
+  let lista = assinantesVisiveis();
+
+  if (busca) lista = lista.filter(a => (a.nome || '').toLowerCase().includes(busca) || (a.plano || '').toLowerCase().includes(busca) || (a.cobranca || '').toLowerCase().includes(busca));
+  if (metodo) lista = lista.filter(a => (a.cobranca || '').toUpperCase().includes(metodo));
+  if (sit) lista = lista.filter(a => situacaoAss(a) === sit);
+
+  const corpo = document.getElementById('a-corpo');
+  if (!lista.length) {
+    corpo.innerHTML = '<tr><td colspan="9" style="color:var(--ink3);padding:18px;text-align:center">Nenhum assinante encontrado.</td></tr>';
+  } else {
+    lista.sort((a, b) => (a.vencimento || '').localeCompare(b.vencimento || ''));
+    corpo.innerHTML = lista.map(a => {
+      const sitA = situacaoAss(a);
+      const d = diasRestantes(a);
+      const rowCls = sitA === 'vencido' ? 'ass-row-vencido' : (sitA === 'atrasado' ? 'ass-row-atrasado' : '');
+      const badge = sitA === 'vencido' ? '<span class="ass-badge ass-badge-vencido">Vencido</span>' :
+        (sitA === 'atrasado' ? '<span class="ass-badge ass-badge-atrasado">Até ' + d + 'd</span>' :
+          (sitA === 'baixa' ? '<span class="ass-badge ass-badge-baixa">Baixado</span>' :
+            '<span class="ass-badge ass-badge-ok">OK</span>'));
+      const tel = a.telefoneBruto || a.telefone || '';
+      const telNum = tel.replace(/\D/g, '');
+      const telFmt = tel.length > 10 ? tel.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3') : tel.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+      const zapLink = telNum ? 'https://wa.me/55' + telNum : '';
+      return '<tr class="' + rowCls + '">' +
+        '<td class="nm">' + esc(a.nome) + '</td>' +
+        '<td>' + esc(a.plano || '—') + '</td>' +
+        '<td class="num">' + brl(a.valor) + '</td>' +
+        '<td>' + dataBr(a.vencimento) + '</td>' +
+        '<td class="ass-dias">' + (d < 0 ? '<span style="color:#d63031">' + d + '</span>' : d <= 7 ? '<span style="color:#e17055">' + d + '</span>' : d) + '</td>' +
+        '<td>' + esc(a.cobranca || '—') + '</td>' +
+        '<td>' + esc(a.unidade ? nomeBonito(a.unidade) : '—') + '</td>' +
+        '<td>' + badge + '</td>' +
+        '<td class="no" style="text-align:center">' + (zapLink ? '<a class="ass-zap" href="' + esc(zapLink) + '" target="_blank" rel="noopener">ZAP</a>' : '<span style="color:var(--ink3)">—</span>') + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  document.getElementById('a-contagem').textContent = lista.length + ' assinante' + (lista.length === 1 ? '' : 's');
+
+  // resumo
+  const todos = assinantesVisiveis();
+  const totAtivos = todos.filter(a => situacaoAss(a) === 'ativo').length;
+  const totAtrasados = todos.filter(a => situacaoAss(a) === 'atrasado').length;
+  const totVencidos = todos.filter(a => situacaoAss(a) === 'vencido').length;
+  const totBaixados = todos.filter(a => situacaoAss(a) === 'baixa').length;
+  const totalValor = todos.filter(a => situacaoAss(a) !== 'baixa').reduce((s, a) => s + (a.valor || 0), 0);
+  const resumo = document.getElementById('a-resumo');
+  resumo.innerHTML = '<div class="resumo">' +
+    [['Total', todos.length], ['Ativos', totAtivos], ['Até vencer', totAtrasados], ['Vencidos', totVencidos], ['Baixados', totBaixados]]
+      .map(c => '<div class="rz"><div class="v num">' + c[1] + '</div><div class="l">' + c[0] + '</div></div>').join('') +
+    '</div>' +
+    '<div style="margin-top:10px;font-size:12.5px;color:var(--ink2)">Valor em aberto: <b style="color:var(--ink)">' + brl(totalValor) + '</b></div>';
+}
+
+document.getElementById('btn-upload-ass').onclick = abrirUploadAss;
+document.getElementById('a-btn-escolher').onclick = () => $('#a-arquivo').click();
+document.getElementById('a-arquivo').onchange = e => { if (e.target.files[0]) processarArquivoAss(e.target.files[0]); };
+document.getElementById('a-btn-aplicar').onclick = aplicarPreviaAss;
+const dropA = document.getElementById('a-drop');
+['dragenter', 'dragover'].forEach(ev => dropA.addEventListener(ev, e => { e.preventDefault(); dropA.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => dropA.addEventListener(ev, e => { e.preventDefault(); dropA.classList.remove('over'); }));
+dropA.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) processarArquivoAss(f); });
+
+document.getElementById('a-busca').oninput = e => { AUI.busca = e.target.value.trim(); renderAssinantes(); };
+document.getElementById('a-filtro-metodo').onchange = e => { AUI.metodo = e.target.value; renderAssinantes(); };
+document.getElementById('a-filtro-situacao').onchange = e => { AUI.situacao = e.target.value; renderAssinantes(); };
 
 
 </script>
