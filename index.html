@@ -3,52 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Réguas Castello Forte</title>
+<title>Castello Forte — Sistema de Recepção</title>
+<meta name="description" content="Sistema de gestão de recepção da Castello Forte Barbearia. Cobrança, resgate, vendas e assinantes.">
+<link rel="icon" type="image/png" href="logo-castello.png">
 <link rel="preconnect" href="https://fonts.googleapis.com" data-mine>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin data-mine>
-<link data-mine rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link data-mine rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style data-mine>
 :root{
-  --bg:#131110; --surface:#1B1815; --surface2:#232019; --surface3:#2C271F;
-  --line:#332D25; --line2:#443C31;
-  --ink:#F2EDE5; --ink2:#A89C8C; --ink3:#7A7063;
-  --brass:#C79A46; --brass-dim:#8A6D33;
-  --ok:#5FA97E; --ok-bg:#16281f;
-  --warn:#D9873C; --warn-bg:#2B2015;
-  --bad:#D3544A; --bad-bg:#2E1917;
-  --info:#7095C7; --info-bg:#181f2b;
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.28);
+  --bg:#050505; --surface:#0E0D0B; --surface2:#161412; --surface3:#1E1B17;
+  --line:#2A2520; --line2:#3A332A;
+  --ink:#F1E7D2; --ink2:#B8A98E; --ink3:#7A6E5D;
+  --brass:#C9972B; --brass-dim:#8C6415;
+  --brass-light:#E5C56A; --brass-grad:linear-gradient(135deg,#8C6415,#D4A93A,#F2D477,#A97617);
+  --bordo:#5A0F16; --bordo-bg:rgba(90,15,22,.15);
+  --marfim:#F1E7D2;
+  --ok:#5FA97E; --ok-bg:#0F1F17;
+  --warn:#D9873C; --warn-bg:#1F1810;
+  --bad:#D3544A; --bad-bg:#1F1210;
+  --info:#7095C7; --info-bg:#121820;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.35);
+  --gold-glow:0 0 20px rgba(201,151,43,.15);
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]){
-    --bg:#F5F2EC; --surface:#FFFFFF; --surface2:#F0EBE2; --surface3:#E6E0D4;
-    --line:#DFD8CA; --line2:#CDC4B2;
-    --ink:#1D1915; --ink2:#6B6255; --ink3:#8C8375;
-    --brass:#8A6516; --brass-dim:#B7913F;
+    --bg:#F1E7D2; --surface:#FFFFFF; --surface2:#F5EFDF; --surface3:#E8DFC8;
+    --line:#D9CEBC; --line2:#C8BAA2;
+    --ink:#050505; --ink2:#4A4035; --ink3:#7A6E5D;
+    --brass:#8C6415; --brass-dim:#C9972B;
+    --brass-light:#D4A93A; --brass-grad:linear-gradient(135deg,#8C6415,#C9972B,#E5C56A,#8C6415);
+    --bordo:#5A0F16; --bordo-bg:rgba(90,15,22,.08);
+    --marfim:#F1E7D2;
     --ok:#2F7A50; --ok-bg:#E7F2EB;
     --warn:#A65C13; --warn-bg:#FBEEE0;
     --bad:#B23125; --bad-bg:#FBE9E7;
     --info:#3A6098; --info-bg:#E9EFF8;
     --shadow:0 1px 2px rgba(60,48,30,.08),0 8px 24px rgba(60,48,30,.08);
+    --gold-glow:0 0 20px rgba(140,100,21,.1);
   }
 }
 :root[data-theme="light"]{
-  --bg:#F5F2EC; --surface:#FFFFFF; --surface2:#F0EBE2; --surface3:#E6E0D4;
-  --line:#DFD8CA; --line2:#CDC4B2;
-  --ink:#1D1915; --ink2:#6B6255; --ink3:#8C8375;
-  --brass:#8A6516; --brass-dim:#B7913F;
+  --bg:#F1E7D2; --surface:#FFFFFF; --surface2:#F5EFDF; --surface3:#E8DFC8;
+  --line:#D9CEBC; --line2:#C8BAA2;
+  --ink:#050505; --ink2:#4A4035; --ink3:#7A6E5D;
+  --brass:#8C6415; --brass-dim:#C9972B;
+  --brass-light:#D4A93A; --brass-grad:linear-gradient(135deg,#8C6415,#C9972B,#E5C56A,#8C6415);
+  --bordo:#5A0F16; --bordo-bg:rgba(90,15,22,.08);
+  --marfim:#F1E7D2;
   --ok:#2F7A50; --ok-bg:#E7F2EB;
   --warn:#A65C13; --warn-bg:#FBEEE0;
   --bad:#B23125; --bad-bg:#FBE9E7;
   --info:#3A6098; --info-bg:#E9EFF8;
   --shadow:0 1px 2px rgba(60,48,30,.08),0 8px 24px rgba(60,48,30,.08);
+  --gold-glow:0 0 20px rgba(140,100,21,.1);
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
 html,body{margin:0;padding:0}
 body{
   background:var(--bg); color:var(--ink);
-  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  font-family:"Montserrat",system-ui,-apple-system,Segoe UI,sans-serif;
   font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
 }
 h1,h2,h3{margin:0; font-weight:500; text-wrap:balance}
@@ -63,19 +77,24 @@ td.num{white-space:nowrap}
 .topbar{
   position:sticky; top:0; z-index:40; background:var(--surface);
   border-bottom:1px solid var(--line);
+  box-shadow:0 1px 0 rgba(201,151,43,.08);
 }
 .topbar-in{
   max-width:1560px; margin:0 auto; padding:12px 20px;
   display:flex; align-items:center; gap:20px; flex-wrap:wrap;
 }
-.brand{display:flex; align-items:baseline; gap:10px; margin-right:auto}
+.brand{display:flex; align-items:center; gap:12px; margin-right:auto}
+.brand .logo-img{
+  width:36px; height:36px; object-fit:contain;
+  filter:drop-shadow(0 0 6px rgba(201,151,43,.25));
+}
 .brand .mark{
-  font-family:Fraunces,Georgia,serif; font-weight:700; font-size:19px;
-  letter-spacing:-.01em; color:var(--ink);
+  font-family:"Cinzel",Georgia,serif; font-weight:700; font-size:18px;
+  letter-spacing:.04em; color:var(--brass); text-transform:uppercase;
 }
 .brand .sub{
-  font-size:10.5px; text-transform:uppercase; letter-spacing:.14em;
-  color:var(--brass); font-weight:600;
+  font-size:10px; text-transform:uppercase; letter-spacing:.14em;
+  color:var(--brass-dim); font-weight:600;
 }
 .tabs{display:flex; gap:2px; background:var(--surface2); padding:3px; border-radius:8px; flex-wrap:wrap}
 .tab{
@@ -93,8 +112,8 @@ td.num{white-space:nowrap}
   display:inline-flex; align-items:center; gap:7px;
 }
 .btn:hover{background:var(--surface3); border-color:var(--brass-dim)}
-.btn-primary{background:var(--brass); border-color:var(--brass); color:#17130B; font-weight:600}
-.btn-primary:hover{filter:brightness(1.08); background:var(--brass)}
+.btn-primary{background:var(--brass); border-color:var(--brass); color:#050505; font-weight:600; box-shadow:0 0 8px rgba(201,151,43,.2)}
+.btn-primary:hover{filter:brightness(1.12); background:var(--brass); box-shadow:0 0 14px rgba(201,151,43,.3)}
 .btn-sm{padding:4px 9px; font-size:12px; border-radius:6px}
 .btn-ghost{background:transparent; border-color:transparent; color:var(--ink2)}
 .btn-ghost:hover{background:var(--surface2); color:var(--ink)}
@@ -121,7 +140,7 @@ td.num{white-space:nowrap}
   display:flex; align-items:center; gap:10px; padding:11px 15px;
   border-bottom:1px solid var(--line); background:var(--surface);
 }
-.panel-h h2{font-family:Fraunces,Georgia,serif; font-size:14.5px; font-weight:700; letter-spacing:-.01em}
+.panel-h h2{font-family:"Cinzel",Georgia,serif; font-size:14px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--brass)}
 .panel-h .hint{font-size:11.5px; color:var(--ink3); margin-left:auto; text-align:right}
 .panel-b{padding:13px 15px}
 
@@ -226,7 +245,7 @@ a.zap:hover{border-color:var(--ok); color:var(--ok)}
   width:min(660px,100%); max-height:88vh; overflow:auto; box-shadow:var(--shadow);
 }
 .sheet-h{display:flex; align-items:center; gap:12px; padding:15px 18px; border-bottom:1px solid var(--line)}
-.sheet-h h2{font-family:Fraunces,Georgia,serif; font-size:16px; font-weight:700}
+.sheet-h h2{font-family:"Cinzel",Georgia,serif; font-size:15px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--brass)}
 .sheet-b{padding:16px 18px; display:flex; flex-direction:column; gap:14px}
 .sheet-f{padding:13px 18px; border-top:1px solid var(--line); display:flex; gap:9px; justify-content:flex-end}
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
@@ -266,7 +285,7 @@ label.lb .field{text-transform:none; letter-spacing:0; font-weight:400; color:va
   font-size:13px; font-weight:600; color:var(--ink3); display:inline-flex; align-items:center; gap:7px;
 }
 .modo:hover{color:var(--ink)}
-.modo[aria-selected="true"]{background:var(--brass); color:#17130B}
+.modo[aria-selected="true"]{background:var(--brass); color:#050505; box-shadow:0 0 12px rgba(201,151,43,.3)}
 .modo .cnt{
   font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
   background:var(--surface3); color:var(--ink2); padding:1px 6px; border-radius:20px;
@@ -308,19 +327,56 @@ tr.resgatado{background:var(--ok-bg)}
 tr.perdido{opacity:.45}
 
 #modelo-preview{white-space:pre-wrap}
-.foot-note{font-size:11.5px; color:var(--ink3); text-align:center; padding:6px 0 22px}
+.foot-note{font-size:11.5px; color:var(--ink3); text-align:center; padding:6px 0 22px; font-family:"Cinzel",Georgia,serif; letter-spacing:.08em}
 @media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
 
+/* Castello ornamental lines */
+.gold-line{height:1px; background:var(--brass-grad); opacity:.4; border:0; margin:0}
+.gold-border{border-image:linear-gradient(90deg,transparent,var(--brass),transparent) 1}
+
+/* Logo glow animation */
+@keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 6px rgba(201,151,43,.2))} 50%{filter:drop-shadow(0 0 14px rgba(201,151,43,.4))}}
+.logo-pulse{animation:logoGlow 3s ease-in-out infinite}
+
 /* ===== login ===== */
-.login-screen{position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--bg)}
-.login-card{width:min(390px,100%); background:var(--surface); border:1px solid var(--line2); border-radius:16px; padding:30px 26px; box-shadow:var(--shadow)}
-.login-card .marca{font-family:Fraunces,Georgia,serif; font-weight:700; font-size:23px; letter-spacing:-.01em; color:var(--ink)}
-.login-card .sub{font-size:10.5px; text-transform:uppercase; letter-spacing:.14em; color:var(--brass); font-weight:600; margin-top:3px}
-.login-card h2{font-family:Fraunces,Georgia,serif; font-size:15px; font-weight:700; margin:20px 0 14px}
+.login-screen{
+  position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,151,43,.06) 0%, transparent 70%),
+    radial-gradient(circle at 50% 100%, rgba(90,15,22,.08) 0%, transparent 50%);
+}
+.login-card{
+  width:min(400px,100%); background:var(--surface); border:1px solid var(--line2); border-radius:16px;
+  padding:36px 30px; box-shadow:var(--shadow), var(--gold-glow);
+  border-top:2px solid var(--brass);
+  position:relative; overflow:hidden;
+}
+.login-card::before{
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--brass), var(--brass-light), var(--brass), transparent);
+}
+.login-logo{
+  display:block; width:72px; height:72px; margin:0 auto 14px; object-fit:contain;
+  filter:drop-shadow(0 0 10px rgba(201,151,43,.3));
+}
+.login-card .marca{
+  font-family:"Cinzel",Georgia,serif; font-weight:700; font-size:22px;
+  letter-spacing:.06em; color:var(--brass); text-align:center; text-transform:uppercase;
+}
+.login-card .sub{
+  font-size:10px; text-transform:uppercase; letter-spacing:.18em;
+  color:var(--ink3); font-weight:600; margin-top:4px; text-align:center;
+}
+.login-card h2{
+  font-family:"Cinzel",Georgia,serif; font-size:14px; font-weight:600;
+  margin:22px 0 14px; text-transform:uppercase; letter-spacing:.05em; color:var(--brass-dim);
+}
 .login-form{display:flex; flex-direction:column; gap:11px}
-.login-form label{display:flex; flex-direction:column; gap:5px; font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink3); font-weight:600}
-.login-form .field{text-transform:none; letter-spacing:0; font-weight:400; color:var(--ink); width:100%}
-.login-form .btn-primary{margin-top:8px; justify-content:center}
+.login-form label{display:flex; flex-direction:column; gap:5px; font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink3); font-weight:600; font-family:"Montserrat",sans-serif}
+.login-form .field{text-transform:none; letter-spacing:0; font-weight:400; color:var(--ink); width:100%; border-color:var(--line2)}
+.login-form .field:focus{border-color:var(--brass); box-shadow:0 0 0 2px rgba(201,151,43,.15)}
+.login-form .btn-primary{margin-top:8px; justify-content:center; font-family:"Cinzel",Georgia,serif; letter-spacing:.08em; text-transform:uppercase; font-size:13px}
 .login-erro{margin-top:12px; color:var(--bad); font-size:12.5px; text-align:center}
 .login-foot{margin-top:18px; display:flex; justify-content:center}
 .login-hint{margin-top:14px; font-size:11px; color:var(--ink3); text-align:center; line-height:1.5}
@@ -381,8 +437,9 @@ tr.perdido{opacity:.45}
 <body>
 <div id="login" class="login-screen">
   <div class="login-card">
+    <img src="logo-castello.png" alt="Castello Forte" class="login-logo logo-pulse">
     <div class="marca">Castello Forte</div>
-    <div class="sub">Sistema de Recepção</div>
+    <div class="sub">Barbearia — Sistema de Recepção</div>
     <h2>Acesso da equipe</h2>
     <form class="login-form" id="login-form" autocomplete="off">
       <label class="lb">Nome<input class="field" id="login-nome" placeholder="Seu nome" required></label>
@@ -412,8 +469,9 @@ tr.perdido{opacity:.45}
 <header class="topbar" hidden>
   <div class="topbar-in">
     <div class="brand">
+      <img src="logo-castello.png" alt="Castello Forte" class="logo-img">
       <span class="mark">Castello Forte</span>
-      <span class="sub" id="brand-sub">Régua de cobrança</span>
+      <span class="sub" id="brand-sub">Recepção</span>
     </div>
     <div class="modos" id="modos" role="tablist">
       <button class="modo" type="button" data-modo="cobranca" aria-selected="true">Cobrança<span class="cnt" id="cnt-cob"></span></button>
