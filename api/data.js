@@ -67,24 +67,13 @@ export default async function handler(req, res) {
       const server = await kv.get('estado');
       const base = server || VAZIO;
       const next = body.estado || {};
-      const merged = {
-        v: 1,
-        clientes: mesclarDicionario(base.clientes, next.clientes),
-        unidadeDe: Object.assign({}, base.unidadeDe || {}, next.unidadeDe || {}),
-        vendas: mesclarDicionario(base.vendas, next.vendas),
-        cancelados: mesclarDicionario(base.cancelados, next.cancelados),
-        assinantes: mesclarDicionario(base.assinantes, next.assinantes),
-        lancamentos: Object.assign({}, base.lancamentos || {}, next.lancamentos || {}),
-        uploads: unirPorId(base.uploads, next.uploads),
-        uploadsCanc: unirPorId(base.uploadsCanc, next.uploadsCanc),
-        uploadsAss: unirPorId(base.uploadsAss, next.uploadsAss),
-        modelo: next.modelo || base.modelo || '',
-        modelosResgate: (next.modelosResgate && next.modelosResgate.length === 3) ? next.modelosResgate : (base.modelosResgate || []),
-        metas: Object.assign({}, base.metas || {}, next.metas || {}),
-        seq: Math.max(base.seq || 0, next.seq || 0) + 1,
-        criadoEm: base.criadoEm || next.criadoEm || '',
-        atualizadoEm: next.atualizadoEm || base.atualizadoEm || ''
-      };
+      const nextSeq = Math.max(base.seq || 0, next.seq || 0) + 1;
+      
+      const merged = Object.assign({}, VAZIO, next, {
+        seq: nextSeq,
+        atualizadoEm: next.atualizadoEm || new Date().toISOString()
+      });
+
       await kv.set('estado', merged);
       return res.status(200).json({ ok: true, seq: merged.seq });
     } catch (e) {

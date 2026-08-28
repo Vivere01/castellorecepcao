@@ -601,12 +601,17 @@ tr.perdido{opacity:.45}
     </div>
     <div class="tabs" id="tabs" role="tablist"></div>
     <span id="acoes-cob" class="acoes">
+      <button class="btn btn-ghost" id="btn-limpar-cob" type="button" style="color:var(--bad)" title="Limpar dados de cobrança">Limpar dados</button>
       <button class="btn" id="btn-exportar" type="button">Exportar</button>
       <button class="btn btn-primary" id="btn-upload" type="button">Subir inadimplentes</button>
     </span>
     <span id="acoes-res" class="acoes" hidden>
+      <button class="btn btn-ghost" id="btn-limpar-res" type="button" style="color:var(--bad)" title="Limpar dados de resgate">Limpar dados</button>
       <button class="btn" id="btn-exportar-res" type="button">Exportar</button>
       <button class="btn btn-primary" id="btn-upload-res" type="button">Subir cancelados</button>
+    </span>
+    <span id="acoes-ven" class="acoes" hidden>
+      <button class="btn btn-ghost" id="btn-limpar-ven" type="button" style="color:var(--bad)" title="Limpar histórico de vendas">Limpar vendas</button>
     </span>
     <span id="acoes-ass" class="acoes" hidden>
       <button class="btn btn-primary" id="btn-upload-ass" type="button">Importar assinantes</button>
@@ -772,6 +777,7 @@ tr.perdido{opacity:.45}
               <th>Unidade</th>
               <th>Quem registrou</th>
               <th>Data</th>
+              <th class="no" style="text-align:right">Ação</th>
             </tr>
           </thead>
           <tbody id="v-corpo"></tbody>
@@ -2666,6 +2672,17 @@ async function exportar() {
 }
 
 /* ============ eventos ============ */
+const btnLimparCob = $('#btn-limpar-cob');
+if (btnLimparCob) {
+  btnLimparCob.onclick = () => {
+    if (!confirm('Atenção: Deseja realmente limpar todos os clientes inadimplentes e uploads da aba Cobrança?')) return;
+    ESTADO.clientes = {};
+    ESTADO.uploads = [];
+    agendarSalvar();
+    render();
+    toast('Dados da aba Cobrança limpos com sucesso.', 'ok');
+  };
+}
 $('#btn-upload').onclick = abrirUpload;
 $('#btn-exportar').onclick = exportar;
 $('#btn-escolher').onclick = () => $('#arquivo').click();
@@ -2714,26 +2731,18 @@ $('#btn-salvar-modelo').onclick = () => {
 
 /* ============ boot ============ */
 function mesclar(sv, lv) {
-  const out = sv ? JSON.parse(JSON.stringify(sv)) : { clientes: {}, cancelados: {}, vendas: {}, assinantes: {}, uploads: [], uploadsCanc: [], uploadsAss: [], modelo: '', modelosResgate: [], metas: {}, seq: 0 };
+  if (sv && (!lv || (sv.seq || 0) >= (lv.seq || 0))) {
+    const out = JSON.parse(JSON.stringify(sv));
+    normalizarEstado(out);
+    return out;
+  }
+  if (lv) {
+    const out = JSON.parse(JSON.stringify(lv));
+    normalizarEstado(out);
+    return out;
+  }
+  const out = { clientes: {}, cancelados: {}, vendas: {}, assinantes: {}, uploads: [], uploadsCanc: [], uploadsAss: [], modelo: '', modelosResgate: [], metas: {}, seq: 0 };
   normalizarEstado(out);
-  const L = lv || {};
-  const porChave = (col) => {
-    Object.keys(L[col] || {}).forEach(k => {
-      const a = L[col][k], b = out[col][k];
-      if (!b) { out[col][k] = a; return; }
-      const ta = a.ultimaAlteracao || a.data || '';
-      const tb = b.ultimaAlteracao || b.data || '';
-      if (ta >= tb) out[col][k] = a;
-    });
-  };
-  porChave('clientes'); porChave('vendas'); porChave('cancelados'); porChave('assinantes');
-  const ids = new Set((out.uploads || []).map(u => u && u.id));
-  (L.uploads || []).forEach(u => { if (u && u.id && !ids.has(u.id)) { out.uploads.push(u); ids.add(u.id); } });
-  const idsC = new Set((out.uploadsCanc || []).map(u => u && u.id));
-  (L.uploadsCanc || []).forEach(u => { if (u && u.id && !idsC.has(u.id)) { out.uploadsCanc.push(u); idsC.add(u.id); } });
-  const idsA = new Set((out.uploadsAss || []).map(u => u && u.id));
-  (L.uploadsAss || []).forEach(u => { if (u && u.id && !idsA.has(u.id)) { out.uploadsAss.push(u); idsA.add(u.id); } });
-  out.seq = Math.max(out.seq || 0, L.seq || 0);
   return out;
 }
 function iniciar() {
@@ -2876,6 +2885,7 @@ function renderModos() {
   if (vLanc) vLanc.hidden = MODO !== 'lancamento';
   $('#acoes-cob').hidden = MODO !== 'cobranca';
   $('#acoes-res').hidden = MODO !== 'resgate';
+  if ($('#acoes-ven')) $('#acoes-ven').hidden = MODO !== 'vendas';
   $('#acoes-ass').hidden = MODO !== 'assinantes';
   $('#brand-sub').textContent = MODO === 'cobranca' ? 'Régua de cobrança' : (MODO === 'resgate' ? 'Régua de resgate' : (MODO === 'assinantes' ? 'Todos os assinantes' : (MODO === 'lancamento' ? 'Lançamento diário' : 'Novas vendas')));
   if (TELA_PERF) {
@@ -2888,6 +2898,7 @@ function renderModos() {
     if (vLanc) vLanc.hidden = true;
     $('#acoes-cob').hidden = true;
     $('#acoes-res').hidden = true;
+    if ($('#acoes-ven')) $('#acoes-ven').hidden = true;
     $('#acoes-ass').hidden = true;
     document.getElementById('kpis').hidden = true;
     document.getElementById('view-performance').hidden = false;
@@ -3475,6 +3486,17 @@ async function exportarResgate() {
 }
 
 /* ---------- eventos ---------- */
+const btnLimparRes = $('#btn-limpar-res');
+if (btnLimparRes) {
+  btnLimparRes.onclick = () => {
+    if (!confirm('Atenção: Deseja realmente limpar todos os clientes da fila de Resgate?')) return;
+    ESTADO.cancelados = {};
+    ESTADO.uploadsCanc = [];
+    agendarSalvar();
+    render();
+    toast('Dados da aba Resgate limpos com sucesso.', 'ok');
+  };
+}
 $('#btn-upload-res').onclick = abrirUploadRes;
 $('#btn-exportar-res').onclick = exportarResgate;
 $('#r-btn-escolher').onclick = () => $('#r-arquivo').click();
@@ -3513,7 +3535,7 @@ function renderVendas() {
   const corpo = document.getElementById('v-corpo');
   const maxV = Math.max(1, ...filt.map(c => c.valor || 0));
   if (!filt.length) {
-    corpo.innerHTML = '<tr><td colspan="7" style="color:var(--ink3);padding:18px;text-align:center">Nenhuma venda registrada ainda.</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="8" style="color:var(--ink3);padding:18px;text-align:center">Nenhuma venda registrada ainda.</td></tr>';
   } else {
     corpo.innerHTML = filt.sort((a, b) => (b.data || '').localeCompare(a.data || '')).map(c => {
       const bw = Math.max(2, Math.round((c.valor || 0) / maxV * 100));
@@ -3525,8 +3547,23 @@ function renderVendas() {
         '<td>' + esc(c.unidade ? (c.unidade === 'todas' ? 'Todas' : nomeBonito(c.unidade)) : '—') + '</td>' +
         '<td>' + esc(c.por || '—') + '</td>' +
         '<td>' + dataBr(c.data) + '</td>' +
+        '<td class="no" style="text-align:right"><button class="btn btn-sm btn-ghost" style="color:var(--bad);padding:3px 8px;font-size:11.5px" data-del="' + esc(c.chave) + '" title="Excluir esta venda">🗑️ Excluir</button></td>' +
         '</tr>';
     }).join('');
+
+    corpo.querySelectorAll('button[data-del]').forEach(b => {
+      b.onclick = (e) => {
+        e.stopPropagation();
+        const k = b.dataset.del;
+        const v = ESTADO.vendas && ESTADO.vendas[k];
+        const nome = (v && v.nome) || 'esta venda';
+        if (!confirm('Deseja realmente excluir a venda de "' + nome + '"?')) return;
+        delete ESTADO.vendas[k];
+        agendarSalvar();
+        renderVendas();
+        toast('Venda de ' + nome + ' excluída do banco de dados.', 'ok');
+      };
+    });
   }
   document.getElementById('v-contagem').textContent = filt.length + ' venda' + (filt.length === 1 ? '' : 's');
   const total = filt.reduce((a, c) => a + (c.valor || 0), 0);
@@ -3561,6 +3598,17 @@ document.getElementById('v-plano').onchange = () => {
   const v = o && o.dataset ? parseFloat(o.dataset.valor) : 0;
   if (v) document.getElementById('v-valor').value = v.toFixed(2);
 };
+
+const btnLimparVen = $('#btn-limpar-ven');
+if (btnLimparVen) {
+  btnLimparVen.onclick = () => {
+    if (!confirm('Atenção: Deseja realmente limpar todo o histórico de Novas Vendas?')) return;
+    ESTADO.vendas = {};
+    agendarSalvar();
+    renderVendas();
+    toast('Histórico de novas vendas limpo com sucesso.', 'ok');
+  };
+}
 document.getElementById('v-add').onclick = () => {
   try {
     const nome = document.getElementById('v-nome').value.trim();
