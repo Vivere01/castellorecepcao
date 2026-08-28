@@ -737,6 +737,7 @@ tr.perdido{opacity:.45}
               <th data-rsort="toque">Toque</th>
               <th data-rsort="proximoToque">Contatar</th>
               <th data-rsort="resultado">Situação</th>
+              <th>Contato</th>
               <th class="no" style="text-align:right">Ação</th>
             </tr>
           </thead>
@@ -817,6 +818,7 @@ tr.perdido{opacity:.45}
         <input class="field" id="a-busca" type="search" placeholder="Buscar cliente…">
         <select class="field" id="a-filtro-metodo"><option value="">Todos os pagamentos</option><option value="PIX">PIX</option><option value="CELCASH">Célcash</option><option value="CASHPAG">Cashpag</option></select>
         <select class="field" id="a-filtro-situacao"><option value="">Todas as situações</option><option value="ativo">Em dia ✓</option><option value="aviso">Próx. do vencimento ⚠</option><option value="inadimplente">Inadimplentes ✗</option><option value="baixa">Baixados</option></select>
+        <select class="field" id="a-filtro-contato"><option value="">Todos os contatos</option><option value="nao_contatado">Não contatado</option><option value="contatado">Contatado</option><option value="prometeu">Prometeu pagar</option><option value="nao_atende">Não atende</option><option value="negociado">Negociado</option></select>
         <span class="hint mono" id="a-contagem"></span>
       </div>
       <div class="tblwrap">
@@ -831,6 +833,7 @@ tr.perdido{opacity:.45}
               <th>Pagamento</th>
               <th>Unidade</th>
               <th>Situação</th>
+              <th>Contato</th>
               <th class="no"></th>
             </tr>
           </thead>
@@ -3155,7 +3158,7 @@ function renderTabelaResgate() {
   $('#r-contagem').textContent = lista.length + ' de ' + total + ' cancelados';
 
   if (!lista.length) {
-    const tr = el('tr'); const td = el('td'); td.colSpan = 8; td.className = 'empty';
+    const tr = el('tr'); const td = el('td'); td.colSpan = 9; td.className = 'empty';
     td.textContent = RUI.situacao === 'hoje'
       ? 'Nenhuma ligação marcada para hoje. Fila em dia.'
       : 'Nada por aqui com esses filtros.';
@@ -3205,6 +3208,19 @@ function renderTabelaResgate() {
       ? '<span style="font-size:11.5px;color:var(--ink2)">' + esc(partes.join(' · ')) + '</span>'
       : '<span style="font-size:11.5px;color:var(--ink3)">sem contato</span>';
 
+    const tdCt = el('td');
+    const sCt = el('select', 'sel-contato');
+    sCt.innerHTML = Object.entries(LABEL_CONTATO).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
+    sCt.value = c.contato || 'nao_contatado';
+    sCt.disabled = MODO_LEITURA;
+    sCt.onchange = () => {
+      c.contato = sCt.value;
+      c.toques = c.toques || [];
+      c.toques.push({ n: c.toque || 0, data: hojeISO(), e: 'contato', t: LABEL_CONTATO[sCt.value] || sCt.value });
+      agendarSalvar();
+    };
+    tdCt.appendChild(sCt);
+
     const tdA = el('td'); tdA.style.textAlign = 'right';
     const acts = el('div', 'acts');
     const tel = telE164(c.telefoneBruto || c.telefone);
@@ -3212,6 +3228,15 @@ function renderTabelaResgate() {
       const a = el('a', 'zap', 'Zap');
       a.href = 'https://wa.me/' + tel + '?text=' + encodeURIComponent(mensagemResgate(c));
       a.target = '_blank'; a.rel = 'noopener';
+      a.onclick = () => {
+        if (!MODO_LEITURA && (c.contato || 'nao_contatado') === 'nao_contatado') {
+          c.contato = 'contatado';
+          c.toques = c.toques || [];
+          c.toques.push({ n: c.toque || 0, data: hojeISO(), e: 'contato', t: 'WhatsApp aberto' });
+          agendarSalvar();
+          setTimeout(renderResgate, 60);
+        }
+      };
       acts.appendChild(a);
     }
     if (c.situacao === 'fila') {
@@ -3231,7 +3256,7 @@ function renderTabelaResgate() {
     }
     tdA.appendChild(acts);
 
-    tr.append(tdN, tdU, tdC, tdB, tdT, tdP, tdR, tdA);
+    tr.append(tdN, tdU, tdC, tdB, tdT, tdP, tdR, tdCt, tdA);
     tb.appendChild(tr);
   }
 }
@@ -3762,7 +3787,16 @@ document.getElementById('v-add').onclick = () => {
 
 /* ---------- assinantes ---------- */
 let previaAss = null;
-let AUI = { busca: '', metodo: '', situacao: '' };
+let AUI = { busca: '', metodo: '', situacao: '', contato: '' };
+
+function assSetContato(chave, val) {
+  const a = ESTADO.assinantes && ESTADO.assinantes[chave];
+  if (!a) return;
+  a.contato = val;
+  a.historico = a.historico || [];
+  a.historico.push({ d: hojeISO(), e: 'contato', t: LABEL_CONTATO[val] || val });
+  agendarSalvar();
+}
 
 function assinantesVisiveis() {
   const lista = Object.values(ESTADO.assinantes || {}).filter(a => a && a.nome && !ehLinhaLixo(a.nome, a.plano));
@@ -3974,15 +4008,17 @@ function renderAssinantes() {
   const busca = (AUI.busca || '').toLowerCase();
   const metodo = AUI.metodo || '';
   const sit = AUI.situacao || '';
+  const cont = AUI.contato || '';
   let lista = assinantesVisiveis();
 
   if (busca) lista = lista.filter(a => (a.nome || '').toLowerCase().includes(busca) || (a.plano || '').toLowerCase().includes(busca) || (a.cobranca || '').toLowerCase().includes(busca));
   if (metodo) lista = lista.filter(a => (a.cobranca || '').toUpperCase().includes(metodo));
   if (sit) lista = lista.filter(a => situacaoAss(a) === sit);
+  if (cont) lista = lista.filter(a => (a.contato || 'nao_contatado') === cont);
 
   const corpo = document.getElementById('a-corpo');
   if (!lista.length) {
-    corpo.innerHTML = '<tr><td colspan="9" style="color:var(--ink3);padding:18px;text-align:center">Nenhum assinante encontrado.</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="10" style="color:var(--ink3);padding:18px;text-align:center">Nenhum assinante encontrado.</td></tr>';
   } else {
     // Ordenar: inadimplentes primeiro, depois aviso, depois ativos por dias restantes, baixados por último
     const ordemSit = { inadimplente: 0, aviso: 1, ativo: 2, baixa: 3 };
@@ -4017,6 +4053,10 @@ function renderAssinantes() {
       const tel = a.telefoneBruto || a.telefone || '';
       const telNum = tel.replace(/\D/g, '');
       const zapLink = telNum ? 'https://wa.me/55' + telNum : '';
+      const sContato = '<select class="sel-contato" onchange="assSetContato(\'' + esc(a.chave) + '\', this.value)">' +
+        Object.entries(LABEL_CONTATO).map(([k, v]) => '<option value="' + k + '"' + ((a.contato || 'nao_contatado') === k ? ' selected' : '') + '>' + v + '</option>').join('') +
+        '</select>';
+
       return '<tr class="' + rowCls + '">' +
         '<td class="nm">' + esc(a.nome) + '</td>' +
         '<td>' + esc(a.plano || '—') + '</td>' +
@@ -4026,7 +4066,8 @@ function renderAssinantes() {
         '<td>' + esc(a.cobranca || '—') + '</td>' +
         '<td>' + esc(a.unidade ? nomeBonito(a.unidade) : '—') + '</td>' +
         '<td>' + badge + '</td>' +
-        '<td class="no" style="text-align:center">' + (zapLink ? '<a class="ass-zap" href="' + esc(zapLink) + '" target="_blank" rel="noopener">ZAP</a>' : '<span style="color:var(--ink3)">—</span>') + '</td>' +
+        '<td>' + sContato + '</td>' +
+        '<td class="no" style="text-align:center">' + (zapLink ? '<a class="ass-zap" href="' + esc(zapLink) + '" target="_blank" rel="noopener" onclick="if((a.contato||\'nao_contatado\')===\'nao_contatado\'){assSetContato(\'' + esc(a.chave) + '\',\'contatado\');setTimeout(renderAssinantes,60);}">ZAP</a>' : '<span style="color:var(--ink3)">—</span>') + '</td>' +
         '</tr>';
     }).join('');
   }
@@ -4060,6 +4101,8 @@ dropA.addEventListener('drop', e => { if (e.dataTransfer.files.length) processar
 document.getElementById('a-busca').oninput = e => { AUI.busca = e.target.value.trim(); renderAssinantes(); };
 document.getElementById('a-filtro-metodo').onchange = e => { AUI.metodo = e.target.value; renderAssinantes(); };
 document.getElementById('a-filtro-situacao').onchange = e => { AUI.situacao = e.target.value; renderAssinantes(); };
+const filtroAssContato = document.getElementById('a-filtro-contato');
+if (filtroAssContato) filtroAssContato.onchange = e => { AUI.contato = e.target.value; renderAssinantes(); };
 
 /* ===================== ACESSO / SESSÃO (Vercel KV) ===================== */
 const LS_USUARIOS = 'cf-usuarios';
