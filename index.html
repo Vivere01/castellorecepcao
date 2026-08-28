@@ -427,14 +427,18 @@ tr.perdido{opacity:.45}
 .v-form label{display:block; margin-bottom:10px; font-size:12px; color:var(--ink2)}
 .v-form .field{width:100%}
 .v-form .btn{width:100%; margin-top:4px}
-.ass-row-vencido td{background:rgba(214,48,49,.1)}
-.ass-row-vencido td:last-child{border-right:3px solid #d63031}
-.ass-row-atrasado td{background:rgba(253,203,110,.15)}
-.ass-row-atrasado td:last-child{border-right:3px solid #fdcb6e}
+.ass-row-inadimplente td{background:rgba(214,48,49,.08)}
+.ass-row-inadimplente td:first-child{border-left:3px solid #d63031}
+.ass-row-aviso td{background:rgba(253,203,110,.12)}
+.ass-row-aviso td:first-child{border-left:3px solid #fdcb6e}
+.ass-row-ok td{background:rgba(0,184,148,.06)}
+.ass-row-ok td:first-child{border-left:3px solid #00b894}
+.ass-row-baixa td{background:rgba(99,110,114,.06)}
+.ass-row-baixa td:first-child{border-left:2px solid #b2bec3}
 .ass-badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:10.5px;font-weight:600;line-height:1.4}
-.ass-badge-ok{background:rgba(0,184,148,.12);color:#00b894}
-.ass-badge-vencido{background:rgba(214,48,49,.12);color:#d63031}
-.ass-badge-atrasado{background:rgba(253,203,110,.2);color:#e17055}
+.ass-badge-ok{background:rgba(0,184,148,.14);color:#00b894}
+.ass-badge-inadimplente{background:rgba(214,48,49,.13);color:#d63031}
+.ass-badge-aviso{background:rgba(253,203,110,.22);color:#e17055}
 .ass-badge-baixa{background:rgba(99,110,114,.1);color:#636e72}
 .ass-dias{font-family:"IBM Plex Mono",monospace;text-align:right;font-size:12px}
 .ass-zap{background:rgba(37,211,102,.1);color:#25d366;border:1px solid rgba(37,211,102,.25);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;text-decoration:none;display:inline-block}
@@ -809,7 +813,7 @@ tr.perdido{opacity:.45}
       <div class="toolbar">
         <input class="field" id="a-busca" type="search" placeholder="Buscar cliente…">
         <select class="field" id="a-filtro-metodo"><option value="">Todos os pagamentos</option><option value="PIX">PIX</option><option value="CELCASH">Célcash</option><option value="CASHPAG">Cashpag</option></select>
-        <select class="field" id="a-filtro-situacao"><option value="">Todas as situações</option><option value="ativo">Ativos</option><option value="inadimplente">Inadimplentes</option><option value="vencido">Vencidos</option><option value="baixa">Baixados</option></select>
+        <select class="field" id="a-filtro-situacao"><option value="">Todas as situações</option><option value="ativo">Em dia ✓</option><option value="aviso">Próx. do vencimento ⚠</option><option value="inadimplente">Inadimplentes ✗</option><option value="baixa">Baixados</option></select>
         <span class="hint mono" id="a-contagem"></span>
       </div>
       <div class="tblwrap">
@@ -1095,7 +1099,9 @@ tr.perdido{opacity:.45}
       <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
     </div>
     <div class="sheet-b">
-      <p style="font-size:12px;color:var(--ink3);margin-bottom:10px">Na <b>importação semanal</b>, assinantes que já venceram serão dados baixa automaticamente.</p>
+      <p style="font-size:12px;color:var(--ink3);margin-bottom:10px">
+        Importe a base completa de assinantes. Após importar, <b>todos ficam marcados como inadimplentes</b> até você subir a planilha de inadimplentes (botão <b>Subir inadimplentes</b> na aba Cobrança) — quem <b>não aparecer</b> nessa planilha será marcado automaticamente como <b>em dia 🟢</b>.
+      </p>
       <div class="drop" id="a-drop">
         <strong style="font-size:13.5px">Arraste os arquivos aqui</strong>
         <p>ou <button class="btn btn-sm" id="a-btn-escolher" type="button">escolher no computador</button></p>
@@ -1729,7 +1735,13 @@ function chavesAlternativas(reg) {
 
 const LIXO = ['totalizado', 'total geral', 'totalgeral', 'soma', 'subtotal'];
 function ehLinhaLixo(nome) {
-  const k = chaveTexto(nome);
+  if (!nome && nome !== 0) return true;
+  const s = nome.toString().trim();
+  if (!s) return true;
+  // Rejeita linhas cujo "nome" é um valor monetário (R$ ...) ou número puro
+  if (/^R\$\s*[\d.,]+$/.test(s)) return true;
+  if (/^[\d.,R$\s%]+$/.test(s) && /\d/.test(s) && s.length < 30) return true;
+  const k = chaveTexto(s);
   return !k || LIXO.some(l => k.startsWith(chaveTexto(l)));
 }
 
@@ -2636,11 +2648,42 @@ function aplicarPrevia() {
   ESTADO = previa.estado;
   ESTADO.modelo = modelo; ESTADO.seq = seq;
   normalizarEstado();
+
+  // ====== BAIXA AUTOMÁTICA NA ABA ASSINANTES ======
+  // Os clientes da planilha de inadimplentes são identificados por chave.
+  // Quem NÃO está na lista de inadimplentes → situacao='ativo' (plano em dia)
+  // Quem ESTÁ na lista de inadimplentes → situacao='inadimplente'
+  if (ESTADO.assinantes && Object.keys(ESTADO.assinantes).length > 0) {
+    // Monta índice de inadimplentes pelo clientes atuais
+    const inadIndice = {};
+    for (const [k, c] of Object.entries(ESTADO.clientes || {})) {
+      if (c.situacao === 'aberto') {
+        for (const alt of chavesAlternativas(c)) inadIndice[alt] = true;
+        inadIndice[k] = true;
+      }
+    }
+    // Atualiza cada assinante
+    for (const [k, a] of Object.entries(ESTADO.assinantes)) {
+      if (a.situacao === 'baixado') continue; // baixados não mudam
+      // Verifica se esse assinante está na lista de inadimplentes
+      const eInadimplente = chavesAlternativas(a).some(alt => inadIndice[alt]) || inadIndice[k];
+      if (eInadimplente) {
+        a.situacao = 'inadimplente';
+      } else {
+        // Não está na lista de inadimplentes → está em dia
+        a.situacao = 'ativo';
+      }
+    }
+  }
+  // ===============================================
+
   agendarSalvar();
   fecharModais();
   render();
   const r = previa.rel;
-  toast('Planilha de ' + dataBr(r.data) + ' aplicada · ' + r.novos.length + ' novos, ' + r.sumiram.length + ' para confirmar', 'ok');
+  const totalInad = Object.values(ESTADO.assinantes || {}).filter(a => a.situacao === 'inadimplente').length;
+  const totalEmDia = Object.values(ESTADO.assinantes || {}).filter(a => a.situacao === 'ativo').length;
+  toast('Planilha aplicada · ' + r.novos.length + ' novos inadimplentes · Assinantes: ' + totalEmDia + ' em dia, ' + totalInad + ' inadimplentes', 'ok');
   previa = null;
 }
 
@@ -3693,9 +3736,13 @@ function diasRestantes(a) {
 
 function situacaoAss(a) {
   if (a.situacao === 'baixado') return 'baixa';
+  // inadimplente: marcado explicitamente como inadimplente pela planilha de inadimplentes
+  if (a.situacao === 'inadimplente') return 'inadimplente';
   const d = diasRestantes(a);
-  if (d < 0) return 'vencido';
-  if (d <= 7) return 'atrasado';
+  // aviso: faltam 5 dias ou menos para vencer (mas ainda não venceu e não está inadimplente)
+  if (d >= 0 && d <= 5) return 'aviso';
+  // vencido: vencimento já passou (sem ter sido marcado inadimplente)
+  if (d < 0) return 'inadimplente';
   return 'ativo';
 }
 
@@ -3858,12 +3905,23 @@ function aplicarPreviaAss() {
   ESTADO.vendas = vendas; ESTADO.cancelados = canc; ESTADO.clientes = clientes; ESTADO.unidadeDe = unidadeDe;
   ESTADO.uploads = uploads; ESTADO.uploadsCanc = uploadsCanc;
   normalizarEstado();
+
+  // ====== PADRÃO: todos os assinantes ficam como inadimplentes ======
+  // O status 'ativo' (verde) só é atribuído DEPOIS que o usuário sobe a
+  // planilha de inadimplentes (botão "Subir inadimplentes" na aba Cobrança).
+  // Quem NÃO aparecer nessa planilha será marcado como 'ativo' automaticamente.
+  for (const a of Object.values(ESTADO.assinantes || {})) {
+    if (a.situacao !== 'baixado') a.situacao = 'inadimplente';
+  }
+  // ====================================================================
+
   agendarSalvar();
   fecharModais();
   MODO = 'assinantes';
   UI.unidade = 'REDE';
   render();
-  toast(previaAss.novos + ' novos, ' + previaAss.baixados + ' baixados. Total: ' + previaAss.total, 'ok');
+  const total = Object.keys(ESTADO.assinantes || {}).length;
+  toast(previaAss.novos + ' novos importados. Total: ' + total + ' assinantes (todos marcados como inadimplentes — suba a planilha de inadimplentes para liberar os em dia).', 'ok');
   previaAss = null;
 }
 
@@ -3881,25 +3939,45 @@ function renderAssinantes() {
   if (!lista.length) {
     corpo.innerHTML = '<tr><td colspan="9" style="color:var(--ink3);padding:18px;text-align:center">Nenhum assinante encontrado.</td></tr>';
   } else {
-    lista.sort((a, b) => (a.vencimento || '').localeCompare(b.vencimento || ''));
+    // Ordenar: inadimplentes primeiro, depois aviso, depois ativos por dias restantes, baixados por último
+    const ordemSit = { inadimplente: 0, aviso: 1, ativo: 2, baixa: 3 };
+    lista.sort((a, b) => {
+      const sa = situacaoAss(a), sb = situacaoAss(b);
+      if (ordemSit[sa] !== ordemSit[sb]) return ordemSit[sa] - ordemSit[sb];
+      return (diasRestantes(a)) - (diasRestantes(b));
+    });
     corpo.innerHTML = lista.map(a => {
       const sitA = situacaoAss(a);
       const d = diasRestantes(a);
-      const rowCls = sitA === 'vencido' ? 'ass-row-vencido' : (sitA === 'atrasado' ? 'ass-row-atrasado' : '');
-      const badge = sitA === 'vencido' ? '<span class="ass-badge ass-badge-vencido">Vencido</span>' :
-        (sitA === 'atrasado' ? '<span class="ass-badge ass-badge-atrasado">Até ' + d + 'd</span>' :
-          (sitA === 'baixa' ? '<span class="ass-badge ass-badge-baixa">Baixado</span>' :
-            '<span class="ass-badge ass-badge-ok">OK</span>'));
+      let rowCls = '';
+      let badge = '';
+      let diasCell = '';
+      if (sitA === 'inadimplente') {
+        rowCls = 'ass-row-inadimplente';
+        badge = '<span class="ass-badge ass-badge-inadimplente">Inadimplente</span>';
+        diasCell = d < 0 ? '<span style="color:#d63031;font-weight:600">' + d + 'd</span>' : '<span style="color:#d63031">Venceu hoje</span>';
+      } else if (sitA === 'aviso') {
+        rowCls = 'ass-row-aviso';
+        badge = '<span class="ass-badge ass-badge-aviso">⚠ ' + d + ' dia' + (d === 1 ? '' : 's') + '</span>';
+        diasCell = '<span style="color:#e17055;font-weight:600">' + d + 'd</span>';
+      } else if (sitA === 'ativo') {
+        rowCls = 'ass-row-ok';
+        badge = '<span class="ass-badge ass-badge-ok">✓ ' + d + ' dia' + (d === 1 ? '' : 's') + '</span>';
+        diasCell = '<span style="color:#00b894">' + d + 'd</span>';
+      } else {
+        rowCls = 'ass-row-baixa';
+        badge = '<span class="ass-badge ass-badge-baixa">Baixado</span>';
+        diasCell = '—';
+      }
       const tel = a.telefoneBruto || a.telefone || '';
       const telNum = tel.replace(/\D/g, '');
-      const telFmt = tel.length > 10 ? tel.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3') : tel.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
       const zapLink = telNum ? 'https://wa.me/55' + telNum : '';
       return '<tr class="' + rowCls + '">' +
         '<td class="nm">' + esc(a.nome) + '</td>' +
         '<td>' + esc(a.plano || '—') + '</td>' +
         '<td class="num">' + brl(a.valor) + '</td>' +
         '<td>' + dataBr(a.vencimento) + '</td>' +
-        '<td class="ass-dias">' + (d < 0 ? '<span style="color:#d63031">' + d + '</span>' : d <= 7 ? '<span style="color:#e17055">' + d + '</span>' : d) + '</td>' +
+        '<td class="ass-dias">' + diasCell + '</td>' +
         '<td>' + esc(a.cobranca || '—') + '</td>' +
         '<td>' + esc(a.unidade ? nomeBonito(a.unidade) : '—') + '</td>' +
         '<td>' + badge + '</td>' +
@@ -3912,14 +3990,14 @@ function renderAssinantes() {
 
   // resumo
   const todos = assinantesVisiveis();
-  const totAtivos = todos.filter(a => situacaoAss(a) === 'ativo').length;
-  const totAtrasados = todos.filter(a => situacaoAss(a) === 'atrasado').length;
-  const totVencidos = todos.filter(a => situacaoAss(a) === 'vencido').length;
-  const totBaixados = todos.filter(a => situacaoAss(a) === 'baixa').length;
-  const totalValor = todos.filter(a => situacaoAss(a) !== 'baixa').reduce((s, a) => s + (a.valor || 0), 0);
+  const totAtivos    = todos.filter(a => situacaoAss(a) === 'ativo').length;
+  const totAviso     = todos.filter(a => situacaoAss(a) === 'aviso').length;
+  const totInad      = todos.filter(a => situacaoAss(a) === 'inadimplente').length;
+  const totBaixados  = todos.filter(a => situacaoAss(a) === 'baixa').length;
+  const totalValor   = todos.filter(a => situacaoAss(a) !== 'baixa').reduce((s, a) => s + (a.valor || 0), 0);
   const resumo = document.getElementById('a-resumo');
   resumo.innerHTML = '<div class="resumo">' +
-    [['Total', todos.length], ['Ativos', totAtivos], ['Até vencer', totAtrasados], ['Vencidos', totVencidos], ['Baixados', totBaixados]]
+    [['Total', todos.length], ['Em dia', totAtivos], ['⚠ Próx. venc.', totAviso], ['Inadimplentes', totInad], ['Baixados', totBaixados]]
       .map(c => '<div class="rz"><div class="v num">' + c[1] + '</div><div class="l">' + c[0] + '</div></div>').join('') +
     '</div>' +
     '<div style="margin-top:10px;font-size:12.5px;color:var(--ink2)">Valor em aberto: <b style="color:var(--ink)">' + brl(totalValor) + '</b></div>';
