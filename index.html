@@ -3719,6 +3719,12 @@ async function processarArquivosAss(files) {
     const arquivosProcessados = [];
     const erros = [];
 
+    // Índice de chaves alternativas para cruzar CPF, telefone, email e nome com 100% de precisão
+    const indice = {};
+    for (const [k, a] of Object.entries(copia.assinantes)) {
+      for (const alt of chavesAlternativas(a)) if (!indice[alt]) indice[alt] = k;
+    }
+
     for (const file of files) {
       try {
         const rows = await lerArquivoTodas(file);
@@ -3726,9 +3732,20 @@ async function processarArquivosAss(files) {
         let novos = 0, atualizados = 0, baixados = 0, duplicados = 0;
 
         for (const reg of ex.registros) {
-          const chave = reg.chave;
+          let chave = null;
+          for (const alt of chavesAlternativas(reg)) {
+            if (indice[alt]) { chave = indice[alt]; break; }
+          }
+          if (!chave) chave = reg.chave;
+
           if (todosVistos[chave]) { duplicados++; continue; }
           todosVistos[chave] = true;
+
+          // Atualiza índice com as novas chaves alternativas encontradas
+          for (const alt of chavesAlternativas(reg)) {
+            if (!indice[alt]) indice[alt] = chave;
+          }
+
           const existente = copia.assinantes[chave];
           if (existente) {
             existente.nome = reg.nome || existente.nome;
