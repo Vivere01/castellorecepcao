@@ -449,7 +449,7 @@ tr.perdido{opacity:.45}
           <option value="RIO DAS OSTRAS">Rio das Ostras</option>
           <option value="BUZIOS">Búzios</option>
           <option value="CABO FRIO">Cabo Frio</option>
-          <option value="todas">ADM (Todas as unidades)</option>
+          <option value="todas">ADM / Gerência (Todas as unidades)</option>
         </select>
       </label>
       <label class="lb">Senha<input class="field" id="login-senha" type="password" placeholder="••••••" required></label>
@@ -1009,18 +1009,27 @@ tr.perdido{opacity:.45}
     <div class="sheet-b">
       <div id="admin-lista" class="stack"></div>
       <hr style="border:0;border-top:1px solid var(--line);margin:6px 0 16px">
-      <h3 style="font-size:13px;margin:0 0 11px;font-weight:600">Novo recepcionista</h3>
+      <h3 style="font-size:13px;margin:0 0 11px;font-weight:600">Novo usuário</h3>
       <div class="grid2">
         <label class="lb">Nome<input class="field" id="nu-nome" placeholder="Ex.: Ana"></label>
         <label class="lb">Senha<input class="field" id="nu-senha" placeholder="••••" type="text"></label>
       </div>
-      <label class="lb" style="margin-top:11px">Unidade
-        <select class="field" id="nu-unidade">
-          <option value="RIO DAS OSTRAS">Rio das Ostras</option>
-          <option value="BUZIOS">Búzios</option>
-          <option value="CABO FRIO">Cabo Frio</option>
-        </select>
-      </label>
+      <div class="grid2" style="margin-top:11px">
+        <label class="lb">Cargo / Função
+          <select class="field" id="nu-perfil">
+            <option value="recepcionista">Recepcionista</option>
+            <option value="gerente">Gerente</option>
+          </select>
+        </label>
+        <label class="lb">Unidade
+          <select class="field" id="nu-unidade">
+            <option value="RIO DAS OSTRAS">Rio das Ostras</option>
+            <option value="BUZIOS">Búzios</option>
+            <option value="CABO FRIO">Cabo Frio</option>
+            <option value="todas">Todas as unidades (ADM / Gerência)</option>
+          </select>
+        </label>
+      </div>
     </div>
     <div class="sheet-f">
       <button class="btn" data-fechar type="button">Fechar</button>
@@ -1894,7 +1903,7 @@ function contaAba(id) {
 function renderTabs() {
   const box = $('#tabs'); box.innerHTML = '';
   const s = sessaoAtual();
-  const mostrarTodas = !s || s.perfil === 'admin';
+  const mostrarTodas = !s || s.perfil === 'admin' || s.perfil === 'gerente' || s.unidade === 'todas';
   const semUni = listaBase().filter(c => !c.unidade && c.situacao === 'aberto').length +
     listaCanc().filter(c => !c.unidade && c.situacao === 'fila').length;
   let itens;
@@ -2517,9 +2526,10 @@ let RUI = { ordem: 'proximoToque', desc: false, busca: '', situacao: 'hoje', toq
 function listaCanc() { return Object.values(ESTADO.cancelados || {}); }
 function listaVendas() { return Object.values(ESTADO.vendas || {}); }
 function vendasVisiveis() {
-  if (SESSAO && SESSAO.perfil === 'admin') return listaVendas();
+  if (SESSAO && (SESSAO.perfil === 'admin' || SESSAO.perfil === 'gerente')) return listaVendas();
   const u = (SESSAO && SESSAO.unidade) || UI.unidade;
-  return listaVendas().filter(v => !v.unidade || v.unidade === u || v.unidade === 'todas');
+  if (u === 'todas' || u === 'REDE') return listaVendas();
+  return listaVendas().filter(v => !v.unidade || v.unidade === u);
 }
 function metaDa(u) {
   if (u === 'REDE') return unidadesAtivas().reduce((a, x) => a + (ESTADO.metas[x] || META_PADRAO), 0);
@@ -3538,10 +3548,11 @@ function mostrarApp() {
   const chip = document.getElementById('user-chip');
   chip.hidden = false;
   document.getElementById('user-nome').textContent = s.nome;
-  document.getElementById('user-perfil').textContent = s.perfil === 'admin' ? 'Admin' : nomeBonito(s.unidade);
-  document.getElementById('btn-admin').hidden = s.perfil !== 'admin';
-  document.getElementById('btn-perf').hidden = s.perfil !== 'admin';
-  if (s.perfil === 'admin') {
+  const perfilLabel = s.perfil === 'admin' ? 'Admin' : (s.perfil === 'gerente' ? 'Gerente' : (nomeBonito(s.unidade) || 'Recepcionista'));
+  document.getElementById('user-perfil').textContent = perfilLabel;
+  document.getElementById('btn-admin').hidden = (s.perfil !== 'admin');
+  document.getElementById('btn-perf').hidden = false;
+  if (s.perfil === 'admin' || s.perfil === 'gerente' || s.unidade === 'todas') {
     UI.unidade = localStorage.getItem('cf-unidade') || 'REDE';
   } else {
     UI.unidade = s.unidade;
@@ -3556,7 +3567,7 @@ function mostrarLogin() {
   document.getElementById('user-chip').hidden = true;
 }
 
-/* ---------- desempenho / performance (ADM) ---------- */
+/* ---------- desempenho / performance ---------- */
 function periodoPreset(per) {
   const hoje = hojeISO();
   if (per === 'hoje') return { de: hoje, ate: hoje };
@@ -3624,10 +3635,18 @@ function computarPerformance(de, ate, unidade) {
 }
 async function abrirPerformance() {
   TELA_PERF = true;
+  const s = sessaoAtual() || {};
   const sel = document.getElementById('perf-uni');
-  sel.innerHTML = '<option value="REDE">Todas as unidades</option>' +
-    unidadesAtivas().map(u => '<option value="' + esc(u) + '">' + esc(nomeBonito(u)) + '</option>').join('');
-  sel.value = TELA_PERF_UNI || 'REDE';
+  if (s.perfil === 'recepcionista' && s.unidade && s.unidade !== 'todas') {
+    sel.innerHTML = '<option value="' + esc(s.unidade) + '">' + esc(nomeBonito(s.unidade)) + '</option>';
+    sel.value = s.unidade;
+    sel.disabled = true;
+  } else {
+    sel.disabled = false;
+    sel.innerHTML = '<option value="REDE">Todas as unidades</option>' +
+      unidadesAtivas().map(u => '<option value="' + esc(u) + '">' + esc(nomeBonito(u)) + '</option>').join('');
+    sel.value = TELA_PERF_UNI || 'REDE';
+  }
   setPerfPeriod(PERF_PER || 'mes');
   render();
 }
@@ -3641,37 +3660,63 @@ function setPerfPeriod(per) {
   renderPerformance();
 }
 async function renderPerformance() {
+  const s = sessaoAtual() || {};
+  const isRecep = (s.perfil === 'recepcionista');
   const de = document.getElementById('perf-de').value || hojeISO().slice(0, 7) + '-01';
   const ate = document.getElementById('perf-ate').value || hojeISO();
-  const unidade = document.getElementById('perf-uni').value || 'REDE';
+  const unidadeSel = document.getElementById('perf-uni');
+  
+  if (isRecep && s.unidade && s.unidade !== 'todas') {
+    unidadeSel.value = s.unidade;
+    unidadeSel.disabled = true;
+  } else {
+    unidadeSel.disabled = false;
+  }
+  
+  const unidade = unidadeSel.value || 'REDE';
   TELA_PERF_UNI = unidade;
   const c = computarPerformance(de, ate, unidade);
   const usuarios = await carregarUsuarios();
-  document.getElementById('perf-periodo-label').textContent =
-    'De ' + dataBr(de) + ' a ' + dataBr(ate) + ' · ' + (unidade === 'REDE' ? 'Todas as unidades' : nomeBonito(unidade));
+  
+  if (isRecep) {
+    document.getElementById('perf-periodo-label').textContent =
+      'Minhas métricas (' + esc(s.nome) + ') · De ' + dataBr(de) + ' a ' + dataBr(ate);
+  } else {
+    document.getElementById('perf-periodo-label').textContent =
+      'De ' + dataBr(de) + ' a ' + dataBr(ate) + ' · ' + (unidade === 'REDE' ? 'Todas as unidades' : nomeBonito(unidade));
+  }
 
-  const totB = Object.values(c.baixas).reduce((a, x) => a + x.baixas, 0);
-  const totR = Object.values(c.resgates).reduce((a, x) => a + x.resgates, 0);
-  const totC = Object.values(c.contatos).reduce((a, x) => a + x.contatos, 0);
-  const totV = Object.values(c.vendas).reduce((a, x) => a + x.vendas, 0);
+  const myB = isRecep ? ((c.baixas[s.nome] || {}).baixas || 0) : Object.values(c.baixas).reduce((a, x) => a + x.baixas, 0);
+  const myVB = isRecep ? ((c.baixas[s.nome] || {}).valor || 0) : c.valorBaixas;
+  const myR = isRecep ? ((c.resgates[s.nome] || {}).resgates || 0) : Object.values(c.resgates).reduce((a, x) => a + x.resgates, 0);
+  const myVR = isRecep ? ((c.resgates[s.nome] || {}).valor || 0) : c.valorResgates;
+  const myC = isRecep ? ((c.contatos[s.nome] || {}).contatos || 0) : Object.values(c.contatos).reduce((a, x) => a + x.contatos, 0);
+  const myV = isRecep ? ((c.vendas[s.nome] || {}).vendas || 0) : Object.values(c.vendas).reduce((a, x) => a + x.vendas, 0);
+  const myVV = isRecep ? ((c.vendas[s.nome] || {}).valor || 0) : c.valorVendas;
+
   const kpis = document.getElementById('perf-kpis');
   const cards = [
-    { lab: 'Baixas de inadimplentes', val: String(totB), foot: brl(c.valorBaixas) + ' recuperado' },
-    { lab: 'Resgates (clientes voltaram)', val: String(totR), foot: brl(c.valorResgates) + ' de volta' },
-    { lab: 'Contatos registrados', val: String(totC), foot: 'ligações na fila de resgate' },
-    { lab: 'Novas vendas', val: String(totV), foot: brl(c.valorVendas) + ' em planos' },
-    { lab: 'Valor total recuperado', val: brl(c.valorBaixas + c.valorResgates + c.valorVendas), foot: 'baixas + resgates + vendas' }
+    { lab: isRecep ? 'Minhas baixas de inadimplentes' : 'Baixas de inadimplentes', val: String(myB), foot: brl(myVB) + ' recuperado' },
+    { lab: isRecep ? 'Meus resgates de clientes' : 'Resgates (clientes voltaram)', val: String(myR), foot: brl(myVR) + ' de volta' },
+    { lab: isRecep ? 'Meus contatos registrados' : 'Contatos registrados', val: String(myC), foot: 'ligações na fila de resgate' },
+    { lab: isRecep ? 'Minhas novas vendas' : 'Novas vendas', val: String(myV), foot: brl(myVV) + ' em planos' },
+    { lab: isRecep ? 'Meu total recuperado' : 'Valor total recuperado', val: brl(myVB + myVR + myVV), foot: 'baixas + resgates + vendas' }
   ];
   kpis.innerHTML = cards.map(k =>
     '<div class="kpi"><span class="lab">' + esc(k.lab) + '</span><span class="val num">' + esc(k.val) +
     '</span><span class="foot">' + esc(k.foot) + '</span></div>').join('');
 
   const nomes = new Map();
-  Object.values(usuarios).forEach(u => { if (u.perfil !== 'admin') { const n = (u.nome || '').trim(); if (n) nomes.set(n, true); } });
-  Object.keys(c.baixas).forEach(n => { if (n) nomes.set(n, true); });
-  Object.keys(c.resgates).forEach(n => { if (n) nomes.set(n, true); });
-  Object.keys(c.contatos).forEach(n => { if (n) nomes.set(n, true); });
-  Object.keys(c.vendas).forEach(n => { if (n) nomes.set(n, true); });
+  if (isRecep) {
+    if (s.nome) nomes.set(s.nome, true);
+  } else {
+    Object.values(usuarios).forEach(u => { if (u.perfil !== 'admin') { const n = (u.nome || '').trim(); if (n) nomes.set(n, true); } });
+    Object.keys(c.baixas).forEach(n => { if (n) nomes.set(n, true); });
+    Object.keys(c.resgates).forEach(n => { if (n) nomes.set(n, true); });
+    Object.keys(c.contatos).forEach(n => { if (n) nomes.set(n, true); });
+    Object.keys(c.vendas).forEach(n => { if (n) nomes.set(n, true); });
+  }
+
   const linhas = [...nomes.keys()].map(nome => {
     const vb = (c.baixas[nome] || {}).valor || 0;
     const vr = (c.resgates[nome] || {}).valor || 0;
@@ -3687,6 +3732,7 @@ async function renderPerformance() {
       voltou: (c.contatos[nome] || {}).voltou || 0
     };
   }).filter(l => l.nome).sort((a, b) => b.total - a.total || b.baixas - a.baixas || b.resgates - a.resgates);
+
   const maxVB = Math.max(1, ...linhas.map(l => l.vBaixas));
   const maxVR = Math.max(1, ...linhas.map(l => l.vResgates));
   const maxT = Math.max(1, ...linhas.map(l => l.total));
@@ -3694,14 +3740,15 @@ async function renderPerformance() {
   if (!linhas.length) {
     rank.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Nenhuma ação registrada no período.</td></tr></tbody>';
   } else {
-    rank.innerHTML = '<thead><tr><th>Recepcionista</th><th class="num">Baixas</th><th>R$ baixas<br><span class="hint">recuperado</span></th><th class="num">Resgates</th><th>R$ resgates<br><span class="hint">recuperado</span></th><th class="num">Vendas</th><th>Total recuperado</th><th class="num">Contatos</th></tr></thead><tbody>' +
+    const colTit = isRecep ? 'Colaborador' : 'Recepcionista';
+    rank.innerHTML = '<thead><tr><th>' + colTit + '</th><th class="num">Baixas</th><th>R$ baixas<br><span class="hint">recuperado</span></th><th class="num">Resgates</th><th>R$ resgates<br><span class="hint">recuperado</span></th><th class="num">Vendas</th><th>Total recuperado</th><th class="num">Contatos</th></tr></thead><tbody>' +
       linhas.map((l, i) => {
-        const top = i === 0 && l.total > 0 ? ' perf-top' : '';
+        const top = i === 0 && l.total > 0 && !isRecep ? ' perf-top' : '';
         const pb = Math.max(2, Math.round(l.vBaixas / maxVB * 100));
         const pr = Math.max(2, Math.round(l.vResgates / maxVR * 100));
         const pt = Math.max(2, Math.round(l.total / maxT * 100));
         return '<tr class="' + top.trim() + '">' +
-          '<td class="nm">' + esc(l.nome) + (i === 0 && l.total > 0 ? ' 🏆' : '') + '</td>' +
+          '<td class="nm">' + esc(l.nome) + (i === 0 && l.total > 0 && !isRecep ? ' 🏆' : '') + '</td>' +
           '<td class="num">' + l.baixas + '</td>' +
           '<td><div class="num">' + brl(l.vBaixas) + '</div><span class="perf-bar" style="width:' + pb + '%" title="R$ recuperado em baixas de inadimplentes"></span></td>' +
           '<td class="num">' + l.resgates + '</td>' +
@@ -3723,13 +3770,14 @@ async function renderPerformance() {
   } else {
     let totResg = 0, totCom = 0;
     comLinhas.forEach(l => { totResg += l.vResgates; totCom += l.vResgates * PERF_COMISSAO / 100; });
-    comTbl.innerHTML = '<thead><tr><th>Recepcionista</th><th class="num">Clientes resgatados</th><th class="num">R$ resgatado</th><th class="num">Comissão (' + PERF_COMISSAO + '%)</th></tr></thead><tbody>' +
+    const colTit = isRecep ? 'Colaborador' : 'Recepcionista';
+    comTbl.innerHTML = '<thead><tr><th>' + colTit + '</th><th class="num">Clientes resgatados</th><th class="num">R$ resgatado</th><th class="num">Comissão (' + PERF_COMISSAO + '%)</th></tr></thead><tbody>' +
       comLinhas.map(l => '<tr><td class="nm">' + esc(l.nome) + '</td><td class="num">' + l.resgates + '</td><td class="num">' +
         brl(l.vResgates) + '</td><td class="num" style="font-weight:600">' + brl(l.vResgates * PERF_COMISSAO / 100) + '</td></tr>').join('') +
       '</tbody><tfoot><tr style="border-top:2px solid var(--line)"><td class="nm"><b>Total</b></td><td class="num"><b>' +
       comLinhas.reduce((a, l) => a + l.resgates, 0) + '</b></td><td class="num"><b>' + brl(totResg) + '</b></td><td class="num" style="font-weight:600"><b>' +
       brl(totCom) + '</b></td></tr></tfoot>';
-    document.getElementById('perf-comissao-total').textContent = 'Total a pagar em comissões: ' + brl(totCom);
+    document.getElementById('perf-comissao-total').textContent = (isRecep ? 'Sua comissão calculada: ' : 'Total a pagar em comissões: ') + brl(totCom);
   }
 
   const series = document.getElementById('perf-series');
@@ -3785,9 +3833,24 @@ async function abrirAdmin() {
   Object.entries(usuarios).forEach(([k, u]) => {
     const row = document.createElement('div'); row.className = 'user-row';
     const info = document.createElement('div'); info.className = 'info';
-    info.innerHTML = '<div class="n">' + esc(u.nome) + '</div><div class="m">' +
-      (u.perfil === 'admin' ? 'Administrador · todas as unidades' : nomeBonito(u.unidade)) + '</div>';
-    const acts = document.createElement('div'); acts.style.display = 'flex'; acts.style.gap = '6px';
+    let cargoTexto = 'Recepcionista · ' + (u.unidade === 'todas' ? 'Todas as unidades' : nomeBonito(u.unidade));
+    if (u.perfil === 'admin') cargoTexto = 'Administrador · Todas as unidades';
+    else if (u.perfil === 'gerente') cargoTexto = 'Gerente · ' + (u.unidade === 'todas' ? 'Todas as unidades' : nomeBonito(u.unidade));
+    
+    info.innerHTML = '<div class="n">' + esc(u.nome) + '</div><div class="m">' + esc(cargoTexto) + '</div>';
+    const acts = document.createElement('div'); acts.style.display = 'flex'; acts.style.gap = '6px'; acts.style.alignItems = 'center';
+    
+    if (u.perfil === 'admin') {
+      const tag = document.createElement('span'); tag.className = 'chip info'; tag.textContent = 'Admin';
+      acts.appendChild(tag);
+    } else if (u.perfil === 'gerente') {
+      const tag = document.createElement('span'); tag.className = 'chip warn'; tag.textContent = 'Gerente';
+      acts.appendChild(tag);
+    } else {
+      const tag = document.createElement('span'); tag.className = 'chip'; tag.textContent = 'Recepcionista';
+      acts.appendChild(tag);
+    }
+    
     if (u.perfil !== 'admin') {
       const del = document.createElement('button');
       del.className = 'btn btn-sm btn-ghost'; del.textContent = 'Excluir';
@@ -3798,9 +3861,6 @@ async function abrirAdmin() {
         }
       };
       acts.appendChild(del);
-    } else {
-      const tag = document.createElement('span'); tag.className = 'chip info'; tag.textContent = 'Admin';
-      acts.appendChild(tag);
     }
     row.append(info, acts); box.appendChild(row);
   });
@@ -3810,15 +3870,40 @@ document.getElementById('btn-admin').onclick = abrirAdmin;
 document.getElementById('btn-add-user').onclick = async () => {
   const nome = document.getElementById('nu-nome').value.trim();
   const senha = document.getElementById('nu-senha').value;
-  const unidade = document.getElementById('nu-unidade').value;
+  const perfil = (document.getElementById('nu-perfil') && document.getElementById('nu-perfil').value) || 'recepcionista';
+  let unidade = document.getElementById('nu-unidade').value;
   if (!nome || !senha) { toast('Preencha nome e senha.', 'err'); return; }
+  if (perfil === 'gerente' && !unidade) unidade = 'todas';
   const usuarios = await carregarUsuarios();
-  usuarios['u' + Date.now()] = { nome, senha, unidade, perfil: 'recepcionista' };
+  usuarios['u' + Date.now()] = { nome, senha, unidade, perfil };
   await salvarUsuarios(usuarios);
   document.getElementById('nu-nome').value = '';
   document.getElementById('nu-senha').value = '';
-  abrirAdmin(); toast('Recepcionista "' + nome + '" adicionado à ' + nomeBonito(unidade) + '.', 'ok');
+  abrirAdmin();
+  const perfilRotulo = perfil === 'gerente' ? 'Gerente' : 'Recepcionista';
+  toast(perfilRotulo + ' "' + nome + '" adicionado com sucesso.', 'ok');
 };
+
+/* ---------- sincronização periódica ativa (background sync) ---------- */
+let syncInterval = null;
+function iniciarSincronizacaoPeriodica() {
+  if (syncInterval) clearInterval(syncInterval);
+  syncInterval = setInterval(async () => {
+    if (document.hidden || salvando || previa || previaAss) return;
+    try {
+      const r = await apiReq('/api/data', 'GET');
+      if (r && !r.erro && r.clientes && typeof r.seq === 'number') {
+        if (r.seq > (ESTADO.seq || 0)) {
+          ESTADO = mesclar(r, ESTADO);
+          ESTADO.seq = r.seq;
+          normalizarEstado();
+          localBackup();
+          render();
+        }
+      }
+    } catch (e) { }
+  }, 20000);
+}
 
 /* ---------- eventos de acesso ---------- */
 document.getElementById('login-form').onsubmit = async (e) => {
@@ -3842,6 +3927,7 @@ document.querySelectorAll('#theme-btn, #login-theme').forEach(b => { if (b) b.on
 aplicarTema((function () { try { return localStorage.getItem(LS_TEMA); } catch (e) { return 'dark'; } })() || 'dark');
 if (SESSAO) mostrarApp(); else mostrarLogin();
 iniciar();
+iniciarSincronizacaoPeriodica();
 </script>
 
 </body>

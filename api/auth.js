@@ -3,11 +3,12 @@ import { kvDisponivel, kvGet, kvSet } from './_lib/kv.js';
 const SEED = { savio: { nome: 'Sávio', senha: '123456', unidade: 'todas', perfil: 'admin' } };
 
 function validar(usuarios, nome, unidade, senha) {
-  const key = Object.keys(usuarios).find(k => {
+  const key = Object.keys(usuarios || {}).find(k => {
     const u = usuarios[k];
-    return u.nome.toLowerCase() === (nome || '').trim().toLowerCase() &&
-      u.senha === senha &&
-      (u.unidade === 'todas' || u.unidade === unidade);
+    const matchNome = (u.nome || '').trim().toLowerCase() === (nome || '').trim().toLowerCase();
+    const matchSenha = String(u.senha) === String(senha);
+    const matchUnidade = (u.unidade === 'todas' || u.unidade === unidade || unidade === 'todas' || u.perfil === 'admin' || u.perfil === 'gerente');
+    return matchNome && matchSenha && matchUnidade;
   });
   return key ? { chave: key, ...usuarios[key] } : null;
 }
