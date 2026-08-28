@@ -493,6 +493,55 @@ tr.perdido{opacity:.45}
 .modal-feed-item{display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--line); font-size:12px}
 .modal-feed-item:last-child{border-bottom:0}
 .modal-feed-item .tag{font-size:10px; padding:2px 6px; border-radius:4px; font-weight:600}
+
+/* ================= LANÇAMENTO DIÁRIO ================= */
+.lanc-wrap{max-width:1200px; margin:0 auto; padding:0}
+.lanc-bar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 0 10px; border-bottom:1px solid var(--line); margin-bottom:14px}
+.lanc-bar .field{width:auto}
+.lanc-status{margin-left:auto; font-size:12px; color:var(--ink3)}
+.lanc-status b.ok{color:var(--ok)} .lanc-status b.warn{color:var(--warn)}
+
+.lanc-card{background:var(--surface); border:1px solid var(--line); border-radius:11px; overflow:hidden; margin-bottom:14px}
+.lanc-card-h{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 14px; border-bottom:1px solid var(--line)}
+.lanc-card-h h2{font-family:"Cinzel",Georgia,serif; font-size:14px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--brass); margin:0}
+.lanc-card-h .sub{font-size:11.5px; color:var(--ink3)}
+
+.lanc-scroll{overflow-x:auto}
+.lanc-table{border-collapse:collapse; width:100%; font-size:13px; white-space:nowrap}
+.lanc-table th{background:var(--surface2); text-align:right; font-size:10px; text-transform:uppercase; letter-spacing:.4px; color:var(--ink3); font-weight:700; padding:9px 8px; border-bottom:1px solid var(--line)}
+.lanc-table th:first-child,.lanc-table td:first-child{text-align:left; position:sticky; left:0; background:var(--surface); z-index:2; border-right:1px solid var(--line)}
+.lanc-table th:first-child{background:var(--surface2)}
+.lanc-table th.calc,.lanc-table td.calc{background:rgba(201,151,43,.06)}
+.lanc-table td{text-align:right; padding:5px 7px; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums}
+.lanc-table tfoot td{font-weight:700; background:var(--surface2); border-top:2px solid var(--line); font-size:13.5px}
+.lanc-table tfoot td:first-child{background:var(--surface2)}
+.lanc-table tr.folga input.lanc-f{opacity:.25; pointer-events:none}
+.lanc-table tr.folga td:first-child b{text-decoration:line-through; color:var(--ink3)}
+
+.lanc-f{
+  width:82px; text-align:right; padding:6px 8px; font-variant-numeric:tabular-nums;
+  background:var(--surface2); border:1px solid var(--line); border-radius:5px; color:var(--ink); font:inherit; font-size:13px;
+}
+.lanc-f:focus{outline:2px solid var(--brass); outline-offset:-1px; background:var(--surface3)}
+.lanc-f.ok{background:rgba(95,169,126,.12); border-color:rgba(95,169,126,.4)}
+.lanc-chk{transform:scale(1.15); accent-color:var(--brass)}
+
+.lanc-prev{margin:14px; background:var(--surface2); border:1px solid var(--line); border-radius:9px; padding:13px 15px; font:12.5px/1.55 "IBM Plex Mono",ui-monospace,monospace; white-space:pre-wrap; max-height:300px; overflow:auto; color:var(--ink2)}
+.lanc-hist{display:flex; flex-wrap:wrap; gap:7px; padding:12px 14px}
+.lanc-hb{border:1px solid var(--line); border-radius:8px; padding:6px 11px; font-size:12px; cursor:pointer; background:var(--surface); color:var(--ink2)}
+.lanc-hb:hover{border-color:var(--brass); color:var(--brass)}
+.lanc-hb.ativo{border-color:var(--brass); color:var(--brass)}
+.lanc-hb b{font-variant-numeric:tabular-nums}
+
+.lanc-admin-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; margin-top:14px}
+.lanc-uni-card{background:var(--surface); border:1px solid var(--line); border-radius:11px; overflow:hidden}
+.lanc-uni-card-h{display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-bottom:1px solid var(--line)}
+.lanc-uni-card-h h3{font-size:13px; font-weight:600; color:var(--brass); margin:0}
+.lanc-uni-card-b{padding:12px 14px; font-size:12.5px; display:flex; flex-direction:column; gap:7px}
+.lanc-uni-row{display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid var(--line)}
+.lanc-uni-row:last-child{border-bottom:0}
+.lanc-uni-row .nm{color:var(--ink2); font-size:12px}
+.lanc-uni-row .vl{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600}
 </style>
 
 </head>
@@ -540,6 +589,7 @@ tr.perdido{opacity:.45}
       <button class="modo" type="button" data-modo="resgate" aria-selected="false">Resgate<span class="cnt" id="cnt-res"></span></button>
       <button class="modo" type="button" data-modo="vendas" aria-selected="false">Novas vendas<span class="cnt" id="cnt-ven"></span></button>
       <button class="modo" type="button" data-modo="assinantes" aria-selected="false">Assinantes<span class="cnt" id="cnt-ass"></span></button>
+      <button class="modo" type="button" data-modo="lancamento" aria-selected="false" id="modo-lancamento">Lançamento</button>
     </div>
     <div class="tabs" id="tabs" role="tablist"></div>
     <span id="acoes-cob" class="acoes">
@@ -776,95 +826,78 @@ tr.perdido{opacity:.45}
     </aside>
   </div>
 
-  <!-- ============ DESEMPENHO ============ -->
-  <div id="view-performance" hidden>
+  <!-- ============ LANÇAMENTO DIÁRIO ============ -->
+  <div id="view-lancamento" hidden>
     <main class="panel" style="padding:20px">
-      <div class="perf-filtros">
-        <div class="seg" id="seg-perf">
-          <button type="button" data-per="hoje">Hoje</button>
-          <button type="button" data-per="semana">Semana</button>
-          <button type="button" data-per="quinzena">Quinzena</button>
-          <button type="button" data-per="mes">Mês</button>
-          <button type="button" data-per="custom">Personalizado</button>
-        </div>
-        <label>De <input type="date" id="perf-de" class="field"></label>
-        <label>Até <input type="date" id="perf-ate" class="field"></label>
-        <select class="field" id="perf-uni"></select>
-        <button class="btn btn-sm" id="perf-atualizar" type="button">Atualizar</button>
-        <button class="btn btn-sm btn-ghost" id="btn-perf-voltar" type="button">← Voltar</button>
-      </div>
-
-      <div class="kpis" id="perf-kpis"></div>
-
-      <!-- Gráficos Dinâmicos Executivos (Linha e Donut) -->
-      <div class="perf-grid-top">
-        <div class="chart-card">
-          <div class="chart-card-h">
-            <div>
-              <h3 class="tit">Evolução Diária de Desempenho</h3>
-              <div class="sub">Recuperação e ações diárias registradas pela equipe</div>
-            </div>
-            <span class="hint mono" id="chart-line-total" style="font-weight:600;color:var(--brass-light)"></span>
-          </div>
-          <div class="chart-svg-wrap" id="perf-chart-line"></div>
-          <div class="chart-legend">
-            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--brass)"></span> Baixas (Inadimplentes)</div>
-            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--ok)"></span> Resgates (Retorno)</div>
-            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--info)"></span> Novas Vendas</div>
-            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#a29bfe"></span> Contatos Feitos</div>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-card-h">
-            <div>
-              <h3 class="tit">Matriz de Composição</h3>
-              <div class="sub">Distribuição do volume recuperado e ações</div>
-            </div>
-          </div>
-          <div class="chart-svg-wrap" id="perf-chart-donut" style="min-height:200px;display:flex;align-items:center;justify-content:center"></div>
-          <div class="chart-legend" id="perf-donut-legend" style="justify-content:center"></div>
-        </div>
-      </div>
-
-      <!-- Seção: Dashboard dos Colaboradores com Gráficos Individuais -->
-      <div class="colab-section-h">
+      <!-- Barra de controles -->
+      <div class="lanc-bar">
         <div>
-          <h2>Dashboard dos Colaboradores</h2>
-          <span class="hint" id="perf-periodo-label"></span>
+          <div style="font-family:'Cinzel',Georgia,serif; font-size:16px; font-weight:700; color:var(--brass); letter-spacing:.04em; text-transform:uppercase">Lançamento Diário</div>
+          <div style="font-size:11.5px; color:var(--ink3); margin-top:2px">Preencha os atendimentos e vendas do dia</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px">
+          <span style="font-size:11.5px; color:var(--ink3)">Data</span>
+          <input type="date" id="lanc-dia" class="field">
+          <button class="btn btn-sm" id="lanc-prev-dia" type="button">◀</button>
+          <button class="btn btn-sm" id="lanc-prox-dia" type="button">▶</button>
+          <button class="btn btn-sm" id="lanc-hoje" type="button">Hoje</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px">
+          <span style="font-size:11.5px; color:var(--ink3)">Recepcionista</span>
+          <input type="text" id="lanc-recep" class="field" placeholder="seu nome" style="width:150px">
+          <select id="lanc-recep-select" class="field" style="display:none; width:150px"></select>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px">
+          <span style="font-size:11.5px; color:var(--ink3)" title="Pessoas que procuraram a barbearia e foram embora sem atendimento">Mandados embora</span>
+          <input type="number" id="lanc-perda" class="field" min="0" step="1" placeholder="0" style="width:70px; text-align:right">
+        </div>
+        <div class="lanc-status" id="lanc-status">—</div>
+      </div>
+
+      <!-- Seletor de unidade (visível só para admin/gerente) -->
+      <div id="lanc-uni-selector" style="display:none; margin-bottom:14px">
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+          <span style="font-size:12px; color:var(--ink2); font-weight:500">Unidade:</span>
+          <div class="seg" id="lanc-seg-uni">
+            <button type="button" data-uni="CABO FRIO">Cabo Frio</button>
+            <button type="button" data-uni="BUZIOS">Búzios</button>
+            <button type="button" data-uni="RIO DAS OSTRAS">Rio das Ostras</button>
+          </div>
+          <button class="btn btn-sm" id="lanc-btn-resumo" type="button">📊 Resumo do dia (todas as lojas)</button>
         </div>
       </div>
-      <div class="colab-cards-grid" id="perf-cards-grid"></div>
 
-      <!-- Seção: Comissões e Detalhamento -->
-      <section class="panel" style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px">
-        <div class="panel-h"><h2>Comissão sobre resgates</h2><span class="hint">% sobre o valor dos clientes que voltaram</span></div>
-        <div class="panel-b">
-          <div class="perf-comissao-filtro">
-            <label>Comissão por resgate
-              <input type="number" id="perf-comissao" class="field" min="0" max="100" step="0.5" value="8"> %
-            </label>
-            <span class="hint" id="perf-comissao-total"></span>
+      <!-- Tabela de lançamento -->
+      <div class="lanc-card">
+        <div class="lanc-card-h">
+          <h2 id="lanc-titulo">—</h2>
+          <div style="display:flex; gap:8px; align-items:center">
+            <button class="btn btn-sm btn-ghost" id="lanc-btn-limpar" type="button">Limpar dia</button>
+            <button class="btn btn-primary" id="lanc-btn-copiar" type="button">Copiar para WhatsApp</button>
           </div>
-          <table class="perf-table" id="perf-comissao-tbl"></table>
         </div>
-      </section>
+        <div class="lanc-scroll">
+          <table class="lanc-table" id="lanc-tab"></table>
+        </div>
+        <div class="alert" id="lanc-aviso" style="margin:12px 14px"></div>
+      </div>
 
-      <!-- Seção: Tabelas de Apoio (Execução por dia e Unidade) -->
-      <div class="perf-grid-top" style="margin-top:20px" id="perf-tabelas-apoio">
-        <section class="chart-card">
-          <div class="chart-card-h">
-            <h3 class="tit">Execução por Dia</h3>
-            <span class="hint">baixas · resgates · contatos</span>
-          </div>
-          <div class="perf-scroll"><table class="perf-table" id="perf-series"></table></div>
-        </section>
-        <section class="chart-card">
-          <div class="chart-card-h">
-            <h3 class="tit">Distribuição por Unidade</h3>
-          </div>
-          <div class="perf-scroll"><table class="perf-table" id="perf-unis"></table></div>
-        </section>
+      <!-- Prévia da mensagem WhatsApp -->
+      <div class="lanc-card">
+        <div class="lanc-card-h">
+          <h2>Mensagem para o WhatsApp</h2>
+          <span class="sub">confira antes de colar no grupo da barbearia</span>
+        </div>
+        <div class="lanc-prev" id="lanc-prev-msg">—</div>
+      </div>
+
+      <!-- Histórico de dias lançados -->
+      <div class="lanc-card">
+        <div class="lanc-card-h">
+          <h2>Dias já lançados</h2>
+          <span class="sub" id="lanc-hist-sub">clique para abrir</span>
+        </div>
+        <div class="lanc-hist" id="lanc-hist"></div>
       </div>
     </main>
   </div>
@@ -872,7 +905,21 @@ tr.perdido{opacity:.45}
   <p class="foot-note" id="rodape"></p>
 </div>
 
-<!-- modal dashboard individual do colaborador -->
+<!-- Modal resumo do dia (admin/gerente) -->
+<div class="modal" id="m-lanc-resumo" hidden>
+  <div class="sheet" style="width:min(860px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-lanc-resumo">
+    <div class="sheet-h">
+      <h2 id="t-lanc-resumo">Resumo do dia — Todas as unidades</h2>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b" id="lanc-resumo-body"></div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Fechar</button>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal" id="m-user-dashboard" hidden>
   <div class="sheet" style="width:min(840px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-user-dash">
     <div class="sheet-h">
@@ -2703,6 +2750,9 @@ function trocarModo(m) {
   MODO = m;
   if (m === 'assinantes') UI.unidade = 'REDE';
   try { localStorage.setItem('cf-modo', m); } catch (e) { }
+  if (m === 'lancamento') {
+    lancIniciar();
+  }
   render();
 }
 document.querySelectorAll('#modos .modo').forEach(b => { b.onclick = () => trocarModo(b.dataset.modo); });
@@ -2722,10 +2772,12 @@ function renderModos() {
   $('#view-resgate').hidden = MODO !== 'resgate';
   $('#view-vendas').hidden = MODO !== 'vendas';
   $('#view-assinantes').hidden = MODO !== 'assinantes';
+  const vLanc = document.getElementById('view-lancamento');
+  if (vLanc) vLanc.hidden = MODO !== 'lancamento';
   $('#acoes-cob').hidden = MODO !== 'cobranca';
   $('#acoes-res').hidden = MODO !== 'resgate';
   $('#acoes-ass').hidden = MODO !== 'assinantes';
-  $('#brand-sub').textContent = MODO === 'cobranca' ? 'Régua de cobrança' : (MODO === 'resgate' ? 'Régua de resgate' : (MODO === 'assinantes' ? 'Todos os assinantes' : 'Novas vendas'));
+  $('#brand-sub').textContent = MODO === 'cobranca' ? 'Régua de cobrança' : (MODO === 'resgate' ? 'Régua de resgate' : (MODO === 'assinantes' ? 'Todos os assinantes' : (MODO === 'lancamento' ? 'Lançamento diário' : 'Novas vendas')));
   if (TELA_PERF) {
     document.getElementById('modos').hidden = true;
     document.getElementById('tabs').hidden = true;
@@ -2733,6 +2785,7 @@ function renderModos() {
     $('#view-resgate').hidden = true;
     $('#view-vendas').hidden = true;
     $('#view-assinantes').hidden = true;
+    if (vLanc) vLanc.hidden = true;
     $('#acoes-cob').hidden = true;
     $('#acoes-res').hidden = true;
     $('#acoes-ass').hidden = true;
@@ -2741,8 +2794,8 @@ function renderModos() {
     document.getElementById('brand-sub').textContent = 'Desempenho da recepção';
   } else {
     document.getElementById('modos').hidden = false;
-    document.getElementById('tabs').hidden = false;
-    document.getElementById('kpis').hidden = false;
+    document.getElementById('tabs').hidden = (MODO === 'lancamento');
+    document.getElementById('kpis').hidden = (MODO === 'lancamento');
     document.getElementById('view-performance').hidden = true;
   }
 }
@@ -4461,11 +4514,569 @@ function iniciarSincronizacaoPeriodica() {
           normalizarEstado();
           localBackup();
           render();
+          // Atualiza lançamentos se a view estiver aberta
+          if (!document.getElementById('view-lancamento').hidden) {
+            lancRender();
+          }
         }
       }
     } catch (e) { }
   }, 20000);
 }
+
+/* ============================================================
+   MÓDULO: LANÇAMENTO DIÁRIO (Isolamento por Usuário / Perfil)
+   ============================================================ */
+const LANC_CONFIG = {
+  'CABO FRIO': {
+    barbeiros: ['Fernando', 'Thiago', 'João', 'Pedro'],
+    escala: {} // padrão: segunda a sábado
+  },
+  'BUZIOS': {
+    barbeiros: ['Fernando', 'Mineiro'],
+    escala: { 'Mineiro': [2, 4, 6] } // dias da semana (0=domingo)
+  },
+  'RIO DAS OSTRAS': {
+    barbeiros: ['Diego', 'Rafael', 'Bruno', 'Lucas'],
+    escala: {}
+  }
+};
+
+const LANC_COLS = [
+  { k: 'at', t: 'Atendimentos', tipo: 'n' },
+  { k: 'pf', t: 'Preferência',  tipo: 'n' },
+  { k: 'qe', t: 'Extra qtd',    tipo: 'n' },
+  { k: 've', t: 'Extra R$',     tipo: 'r' },
+  { k: 'qp', t: 'Produto qtd',  tipo: 'n' },
+  { k: 'vp', t: 'Produto R$',   tipo: 'r' }
+];
+
+let lancUni = 'CABO FRIO'; // unidade atual em visualização
+let lancRecepFiltro = ''; // recepcionista selecionada (para admin/gerente)
+
+/* helpers */
+const lancDt  = s => new Date(s + 'T12:00:00');
+const lancIso = d => d.toISOString().slice(0, 10);
+const lancHojeISO = () => {
+  const now = new Date();
+  return lancIso(new Date(now.getTime() - now.getTimezoneOffset() * 60000));
+};
+const DIAS_PT = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+const lancFmtLongo = s => DIAS_PT[lancDt(s).getDay()] + ', ' + s.slice(8,10) + '/' + s.slice(5,7) + '/' + s.slice(0,4);
+const lancFmtCurto = s => s.slice(8,10) + '/' + s.slice(5,7);
+const lancNum = v => {
+  if (v == null) return 0;
+  let s = String(v).trim().replace(/^R\$\s*/i,'').replace(/\s/g,'');
+  if (!s) return 0;
+  if (s.includes(',') && s.includes('.')) s = s.replace(/\./g,'').replace(',','.');
+  else if (s.includes(',')) s = s.replace(',','.');
+  const n = parseFloat(s); return isNaN(n) ? 0 : n;
+};
+const lancR$ = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const lancN  = v => Math.round(v).toLocaleString('pt-BR');
+
+/* banco de dados (ESTADO.lancamentos) */
+function lancDB() {
+  if (!ESTADO.lancamentos) ESTADO.lancamentos = {};
+  return ESTADO.lancamentos;
+}
+
+function lancObterRecepAtiva() {
+  const s = sessaoAtual();
+  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
+  if (!isGestor) {
+    return s ? s.nome.trim() : 'Recepção';
+  }
+  if (lancRecepFiltro) return lancRecepFiltro;
+  const cx = document.getElementById('lanc-recep');
+  return (cx && cx.value.trim()) || (s ? s.nome.trim() : 'Recepção');
+}
+
+const lancKey = (uni, dia, recep, barb) =>
+  uni + '|' + dia + '|' + (recep || 'padrao').toLowerCase().trim() + '|' + barb;
+
+const lancKeyMeta = (uni, dia, recep, tipo) =>
+  uni + '|' + dia + '|' + (recep || 'padrao').toLowerCase().trim() + '|__' + tipo;
+
+const lancReg = (uni, dia, recep, b) => {
+  const k = lancKey(uni, dia, recep, b);
+  if (!lancDB()[k]) lancDB()[k] = { recep, unidade: uni, dia, barbeiro: b };
+  return lancDB()[k];
+};
+
+const lancVal = (uni, dia, recep, b, c) => {
+  const db = lancDB();
+  const kNovo = lancKey(uni, dia, recep, b);
+  if (db[kNovo] && db[kNovo][c] !== undefined) return db[kNovo][c];
+  // Fallback para lançamentos anteriores sem chave de usuário
+  const kLeg = uni + '|' + dia + '|' + b;
+  if (db[kLeg] && db[kLeg][c] !== undefined) return db[kLeg][c];
+  return 0;
+};
+
+const lancFolga = (uni, dia, recep, b) => {
+  const db = lancDB();
+  const kNovo = lancKey(uni, dia, recep, b);
+  if (db[kNovo] && db[kNovo].folga !== undefined) return db[kNovo].folga;
+  const kLeg = uni + '|' + dia + '|' + b;
+  if (db[kLeg] && db[kLeg].folga !== undefined) return db[kLeg].folga;
+  const escala = (LANC_CONFIG[uni] || {}).escala || {};
+  return !(escala[b] ? escala[b] : [1,2,3,4,5,6]).includes(lancDt(dia).getDay());
+};
+
+const lancRecepNome = (uni, dia, recep) => {
+  const db = lancDB();
+  const k = lancKeyMeta(uni, dia, recep, 'recep');
+  if (db[k] && db[k].nome) return db[k].nome;
+  const kLeg = uni + '|' + dia + '|__recep';
+  if (db[kLeg] && db[kLeg].nome) return db[kLeg].nome;
+  return recep || '';
+};
+
+const lancPerdaDe = (uni, dia, recep) => {
+  const db = lancDB();
+  const k = lancKeyMeta(uni, dia, recep, 'perda');
+  if (db[k] && db[k].n !== undefined) return db[k].n;
+  const kLeg = uni + '|' + dia + '|__perda';
+  if (db[kLeg] && db[kLeg].n !== undefined) return db[kLeg].n;
+  return 0;
+};
+
+const lancAtivos = (uni, dia, recep) => {
+  const cfg = LANC_CONFIG[uni] || {};
+  return (cfg.barbeiros || []).filter(b => !lancFolga(uni, dia, recep, b) && lancVal(uni, dia, recep, b, 'at') > 0);
+};
+
+const lancTotalB = (uni, dia, recep, b) =>
+  lancVal(uni, dia, recep, b, 've') + lancVal(uni, dia, recep, b, 'vp');
+
+const lancDemanda = (uni, dia, recep, b) =>
+  Math.max(0, lancVal(uni, dia, recep, b, 'at') - lancVal(uni, dia, recep, b, 'pf'));
+
+async function lancSalvar() {
+  try {
+    await salvar();
+  } catch(e) {}
+}
+
+let lancAtraso = null;
+const lancAtrasar = () => { clearTimeout(lancAtraso); lancAtraso = setTimeout(lancRender, 350); };
+
+/* Lista todas as recepcionistas que lançaram no dia para a unidade */
+function lancRecepcionistasDoDia(uni, dia) {
+  const db = lancDB();
+  const prefixo = uni + '|' + dia + '|';
+  const nomes = new Set();
+  Object.keys(db).forEach(k => {
+    if (k.startsWith(prefixo)) {
+      const parts = k.split('|');
+      if (parts.length >= 4 && !parts[3].startsWith('__')) {
+        const rNome = lancRecepNome(uni, dia, parts[2]) || parts[2];
+        if (rNome && rNome !== 'padrao') nomes.add(rNome);
+      } else if (parts.length === 3 && parts[2] === '__recep' && db[k].nome) {
+        nomes.add(db[k].nome);
+      }
+    }
+  });
+  return [...nomes];
+}
+
+function lancRender() {
+  const dia = document.getElementById('lanc-dia').value;
+  if (!dia) return;
+  const s = sessaoAtual();
+  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
+
+  // Isolamento estrito de unidade para recepcionista
+  if (!isGestor && s && s.unidade && s.unidade !== 'todas') {
+    lancUni = s.unidade;
+  }
+
+  const uni = lancUni;
+  const cfg = LANC_CONFIG[uni] || { barbeiros: [] };
+  const recepAtual = isGestor ? lancObterRecepAtiva() : (s ? s.nome.trim() : 'Recepção');
+
+  document.getElementById('lanc-titulo').textContent = nomeBonito(uni) + ' — ' + lancFmtLongo(dia);
+
+  const cxR = document.getElementById('lanc-recep');
+  const selR = document.getElementById('lanc-recep-select');
+
+  if (isGestor) {
+    cxR.readOnly = false;
+    cxR.style.opacity = '1';
+    // Para gestores, preenche dropdown com quem lançou neste dia
+    const recepsDia = lancRecepcionistasDoDia(uni, dia);
+    if (recepsDia.length > 1) {
+      selR.style.display = 'inline-block';
+      selR.innerHTML = recepsDia.map(r => '<option value="' + esc(r) + '" ' + (r.toLowerCase() === recepAtual.toLowerCase() ? 'selected' : '') + '>' + esc(r) + '</option>').join('') +
+        '<option value="__nova">+ Novo lançamento...</option>';
+      selR.onchange = () => {
+        if (selR.value === '__nova') {
+          lancRecepFiltro = '';
+          cxR.value = '';
+          cxR.focus();
+        } else {
+          lancRecepFiltro = selR.value;
+          cxR.value = selR.value;
+        }
+        lancRender();
+      };
+    } else {
+      selR.style.display = 'none';
+    }
+    if (document.activeElement !== cxR) cxR.value = recepAtual;
+  } else {
+    // Para recepcionista: trava o campo com o nome da sua sessão
+    cxR.value = s ? s.nome : 'Recepção';
+    cxR.readOnly = true;
+    cxR.style.opacity = '0.85';
+    cxR.title = 'Lançamento registrado na sua conta (' + (s ? s.nome : '') + ')';
+    selR.style.display = 'none';
+  }
+
+  const cxP = document.getElementById('lanc-perda');
+  if (document.activeElement !== cxP) cxP.value = lancPerdaDe(uni, dia, recepAtual) || '';
+
+  // Tabela
+  const th = '<tr><th>Barbeiro</th><th>Folga</th>' +
+    LANC_COLS.map(c => '<th>' + c.t + '</th>').join('') +
+    '<th class="calc">Demanda</th><th class="calc">Total vendas</th></tr>';
+
+  const tb = cfg.barbeiros.map(b => {
+    const f = lancFolga(uni, dia, recepAtual, b);
+    return '<tr class="' + (f ? 'folga' : '') + '">' +
+      '<td><b>' + esc(b) + '</b></td>' +
+      '<td style="text-align:center"><input type="checkbox" class="lanc-chk" ' + (f ? 'checked' : '') +
+        ' onchange="lancSetFolga(\'' + esc(uni) + '\',\'' + esc(recepAtual) + '\',\'' + b + '\',this.checked)">' + '</td>' +
+      LANC_COLS.map(c =>
+        '<td><input class="lanc-f ' + (lancVal(uni, dia, recepAtual, b, c.k) ? 'ok' : '') + '" type="number" min="0" step="' +
+          (c.tipo === 'r' ? '0.01' : '1') + '" inputmode="decimal" value="' +
+          (lancVal(uni, dia, recepAtual, b, c.k) || '') + '" placeholder="0" ' +
+          'oninput="lancSet(\'' + esc(uni) + '\',\'' + esc(recepAtual) + '\',\'' + b + '\',\'' + c.k + '\',this.value)"></td>'
+      ).join('') +
+      '<td class="calc">' + (lancVal(uni, dia, recepAtual, b, 'at') ? lancN(lancDemanda(uni, dia, recepAtual, b)) : '—') + '</td>' +
+      '<td class="calc"><b>' + (lancTotalB(uni, dia, recepAtual, b) ? lancR$(lancTotalB(uni, dia, recepAtual, b)) : '—') + '</b></td>' +
+    '</tr>';
+  }).join('');
+
+  const S = c => cfg.barbeiros.reduce((s, b) => s + lancVal(uni, dia, recepAtual, b, c), 0);
+  const sAt = S('at'), sPf = S('pf'), sTot = S('ve') + S('vp');
+  const tf = '<tr><td>TOTAL DO DIA</td><td></td>' +
+    LANC_COLS.map(c => '<td>' + (c.tipo === 'r' ? lancR$(S(c.k)) : lancN(S(c.k))) + '</td>').join('') +
+    '<td class="calc">' + lancN(Math.max(0, sAt - sPf)) + '</td>' +
+    '<td class="calc">' + lancR$(sTot) + '</td></tr>';
+
+  document.getElementById('lanc-tab').innerHTML =
+    '<thead>' + th + '</thead><tbody>' + tb + '</tbody><tfoot>' + tf + '</tfoot>';
+
+  // Status
+  const ativos = lancAtivos(uni, dia, recepAtual);
+  const nA = ativos.length;
+  const nF = cfg.barbeiros.filter(b => lancFolga(uni, dia, recepAtual, b)).length;
+  const falta = cfg.barbeiros.length - nA - nF;
+  const statusEl = document.getElementById('lanc-status');
+  statusEl.innerHTML = falta > 0
+    ? '<b class="warn">faltam ' + falta + '</b> · ' + nA + ' lançado(s) · ' + nF + ' de folga'
+    : '<b class="ok">dia completo</b> · ' + nA + ' lançado(s) · ' + nF + ' de folga';
+
+  // Aviso
+  const av = document.getElementById('lanc-aviso');
+  av.className = 'alert ' + (falta > 0 ? 'warn' : 'ok');
+  av.innerHTML = falta > 0
+    ? 'Faltam <b>' + falta + '</b> barbeiro(s). Quem não trabalhou hoje, marque <b>Folga</b>.'
+    : (recepAtual
+        ? 'Lançamento de <b>' + esc(recepAtual) + '</b>: <b>' + lancN(sAt) + '</b> atendimentos, vendas <b>' + lancR$(sTot) + '</b>. Clique em <b>Copiar para WhatsApp</b>.'
+        : 'Tudo lançado. Clique em <b>Copiar para WhatsApp</b>.');
+
+  // Prévia da mensagem WhatsApp
+  document.getElementById('lanc-prev-msg').textContent = lancMensagem(uni, dia, recepAtual) || 'Nada lançado ainda neste dia.';
+
+  // Histórico de dias (isolado por perfil)
+  lancRenderHist(uni);
+}
+
+function lancMensagem(uni, dia, recep) {
+  const ativos = lancAtivos(uni, dia, recep);
+  if (!ativos.length) return '';
+  const L = ['*' + (nomeBonito(uni) || uni).toUpperCase() + '* — ' + lancFmtLongo(dia)];
+  L.push('Lançado por: ' + (recep || '(não informado)'), '');
+  ativos.forEach(b => {
+    L.push('*' + b + '*');
+    L.push('Atendimentos: ' + lancN(lancVal(uni, dia, recep, b, 'at')));
+    L.push('Preferência: ' + lancN(lancVal(uni, dia, recep, b, 'pf')));
+    L.push('Demanda (sem preferência): ' + lancN(lancDemanda(uni, dia, recep, b)));
+    L.push('Extra: ' + lancN(lancVal(uni, dia, recep, b, 'qe')) + ' un — ' + lancR$(lancVal(uni, dia, recep, b, 've')));
+    L.push('Produto: ' + lancN(lancVal(uni, dia, recep, b, 'qp')) + ' un — ' + lancR$(lancVal(uni, dia, recep, b, 'vp')));
+    L.push('Total vendas: ' + lancR$(lancTotalB(uni, dia, recep, b)));
+    L.push('');
+  });
+  const S = c => ativos.reduce((s, b) => s + lancVal(uni, dia, recep, b, c), 0);
+  const sAt = S('at'), sPf = S('pf'), perda = lancPerdaDe(uni, dia, recep);
+  L.push('━━━━━━━━━━━━━━');
+  L.push('*TOTAL DO DIA — ' + (nomeBonito(uni) || uni).toUpperCase() + '*');
+  L.push('Atendimentos: ' + lancN(sAt));
+  L.push('Preferência: ' + lancN(sPf));
+  L.push('Demanda (sem preferência): ' + lancN(Math.max(0, sAt - sPf)));
+  L.push('Mandados embora no dia: ' + lancN(perda));
+  L.push('Procura total: ' + lancN(sAt + perda) + (perda ? '  (' + Math.round(perda / (sAt + perda) * 100) + '% perdido)' : ''));
+  L.push('Extra: ' + lancN(S('qe')) + ' un — ' + lancR$(S('ve')));
+  L.push('Produto: ' + lancN(S('qp')) + ' un — ' + lancR$(S('vp')));
+  L.push('*Total vendas: ' + lancR$(S('ve') + S('vp')) + '*');
+  L.push('Barbeiros no dia: ' + ativos.length);
+  L.push('');
+  // Linha de dados para o painel (compatível com os arquivos offline)
+  L.push('#BB2 ' + dia + '|' + uni + '|' + (recep || '-') + '|' + perda + '|' +
+    ativos.map(b => b + ';' + LANC_COLS.map(c => lancVal(uni, dia, recep, b, c.k)).join(';')).join('|'));
+  return L.join('\n');
+}
+
+/* Renderização do histórico com isolamento estrito de usuária */
+function lancRenderHist(uni) {
+  const db = lancDB();
+  const dia = document.getElementById('lanc-dia').value;
+  const s = sessaoAtual();
+  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
+  const nomeUser = (s && s.nome) ? s.nome.trim() : '';
+
+  const subEl = document.getElementById('lanc-hist-sub');
+  if (subEl) {
+    subEl.textContent = isGestor ? 'Todos os lançamentos da equipe' : 'Seus lançamentos realizados';
+  }
+
+  // Lista todos os lançamentos
+  const itens = [];
+  const vistos = new Set();
+
+  Object.keys(db).forEach(k => {
+    if (k.startsWith(uni + '|') && !k.includes('|__')) {
+      const parts = k.split('|');
+      let d = parts[1];
+      let r = parts.length >= 4 ? parts[2] : (lancRecepNome(uni, d, '') || 'Recepção');
+      
+      // Se for recepcionista: SÓ inclui os lançamentos feitos por ela mesma!
+      if (!isGestor) {
+        if (r.toLowerCase() !== nomeUser.toLowerCase() && lancRecepNome(uni, d, r).toLowerCase() !== nomeUser.toLowerCase()) {
+          return; // Descarta lançamentos de outras usuárias
+        }
+      }
+
+      const itemKey = d + '___' + r.toLowerCase();
+      if (!vistos.has(itemKey)) {
+        vistos.add(itemKey);
+        const bs = lancAtivos(uni, d, r);
+        if (bs.length > 0) {
+          const tot = bs.reduce((acc, b) => acc + lancTotalB(uni, d, r, b), 0);
+          itens.push({ dia: d, recep: lancRecepNome(uni, d, r) || r, ativos: bs.length, total: tot });
+        }
+      }
+    }
+  });
+
+  itens.sort((a, b) => b.dia.localeCompare(a.dia));
+  const sliceItens = itens.slice(0, 45);
+
+  document.getElementById('lanc-hist').innerHTML = sliceItens.length
+    ? sliceItens.map(it => {
+        const isAtivo = (it.dia === dia);
+        const labelRecep = (isGestor && it.recep) ? ' · ' + esc(it.recep) : '';
+        return '<button class="lanc-hb' + (isAtivo ? ' ativo' : '') + '" onclick="lancIrDiaRecep(\'' + it.dia + '\',\'' + esc(it.recep) + '\')">' +
+          lancFmtCurto(it.dia) + ' · ' + it.ativos + ' barb.' +
+          labelRecep +
+          (it.total ? ' · ' + lancR$(it.total) : '') +
+          '</button>';
+      }).join('')
+    : '<span style="font-size:12px;color:var(--ink3)">' +
+        (isGestor ? 'Nenhum dia lançado ainda para esta unidade.' : 'Você ainda não fez nenhum lançamento nesta unidade.') +
+      '</span>';
+}
+
+function lancIrDiaRecep(d, r) {
+  document.getElementById('lanc-dia').value = d;
+  const s = sessaoAtual();
+  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
+  if (isGestor && r) {
+    lancRecepFiltro = r;
+  }
+  lancRender();
+}
+
+function lancIrDia(d) {
+  lancIrDiaRecep(d, '');
+}
+
+function lancSet(uni, recep, b, c, v) {
+  const dia = document.getElementById('lanc-dia').value;
+  const o = lancReg(uni, dia, recep, b);
+  const n = lancNum(v);
+  if (n) o[c] = n; else delete o[c];
+  o.folga = false;
+  lancSalvar();
+  lancAtrasar();
+}
+
+function lancSetFolga(uni, recep, b, f) {
+  const dia = document.getElementById('lanc-dia').value;
+  lancReg(uni, dia, recep, b).folga = f;
+  lancSalvar();
+  lancRender();
+}
+
+function lancSetRecep(v) {
+  const s = sessaoAtual();
+  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
+  if (!isGestor) return; // Recepcionista não altera o nome do seu login
+  const dia = document.getElementById('lanc-dia').value;
+  const recepAtual = lancObterRecepAtiva();
+  const k = lancKeyMeta(lancUni, dia, recepAtual, 'recep');
+  lancDB()[k] = { nome: v.trim() };
+  lancSalvar();
+  lancAtrasar();
+}
+
+function lancSetPerda(v) {
+  const dia = document.getElementById('lanc-dia').value;
+  const recepAtual = lancObterRecepAtiva();
+  const k = lancKeyMeta(lancUni, dia, recepAtual, 'perda');
+  const n = lancNum(v);
+  if (n) lancDB()[k] = { n }; else delete lancDB()[k];
+  lancSalvar();
+  lancAtrasar();
+}
+
+function lancCopiar() {
+  const dia = document.getElementById('lanc-dia').value;
+  const recepAtual = lancObterRecepAtiva();
+  const txt = lancMensagem(lancUni, dia, recepAtual);
+  if (!txt) { toast('Nada lançado nesse dia ainda.', 'err'); return; }
+  const bt = document.getElementById('lanc-btn-copiar');
+  const ok = () => { const o = bt.textContent; bt.textContent = 'Copiado ✓ cole no grupo'; setTimeout(() => bt.textContent = o, 2600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, () => lancFallbackCopy(txt, ok));
+  else lancFallbackCopy(txt, ok);
+}
+function lancFallbackCopy(x, cb) {
+  const a = document.createElement('textarea'); a.value = x; document.body.appendChild(a); a.select();
+  try { document.execCommand('copy'); cb(); } catch(e) { prompt('Copie a mensagem:', x); } a.remove();
+}
+
+function lancLimpar() {
+  const dia = document.getElementById('lanc-dia').value;
+  const recepAtual = lancObterRecepAtiva();
+  if (!confirm('Apagar o seu lançamento de ' + lancFmtCurto(dia) + ' em ' + nomeBonito(lancUni) + '?')) return;
+  const db = lancDB();
+  const prefixo = lancUni + '|' + dia + '|' + recepAtual.toLowerCase().trim() + '|';
+  Object.keys(db).filter(k => k.startsWith(prefixo)).forEach(k => delete db[k]);
+  lancSalvar();
+  lancRender();
+}
+
+/* Visão de Gestor / Admin: Resumo comparativo das unidades e recepcionistas */
+function lancAbrirResumo() {
+  const dia = document.getElementById('lanc-dia').value;
+  const body = document.getElementById('lanc-resumo-body');
+  document.getElementById('t-lanc-resumo').textContent = 'Resumo do dia — ' + lancFmtLongo(dia);
+  const unidades = ['CABO FRIO', 'BUZIOS', 'RIO DAS OSTRAS'];
+  let html = '<div class="lanc-admin-grid">';
+  
+  unidades.forEach(uni => {
+    const cfg = LANC_CONFIG[uni] || { barbeiros: [] };
+    const receps = lancRecepcionistasDoDia(uni, dia);
+    const recepsParaVer = receps.length ? receps : [''];
+
+    html += '<div class="lanc-uni-card">';
+    html += '<div class="lanc-uni-card-h"><h3>' + esc(nomeBonito(uni)) + '</h3>';
+    if (receps.length === 0) {
+      html += '<span class="chip" style="font-size:10px">Sem lançamento</span>';
+    } else {
+      html += '<span class="chip ok" style="font-size:10px">' + receps.length + ' lançamento(s)</span>';
+    }
+    html += '</div><div class="lanc-uni-card-b">';
+
+    recepsParaVer.forEach(r => {
+      const ativos = lancAtivos(uni, dia, r);
+      const S = c => ativos.reduce((s, b) => s + lancVal(uni, dia, r, b, c), 0);
+      const sAt = S('at'), sTot = S('ve') + S('vp'), perda = lancPerdaDe(uni, dia, r);
+      if (receps.length > 1) {
+        html += '<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--line2);font-weight:600;color:var(--brass-light)">Lançamento: ' + esc(r) + '</div>';
+      } else if (r) {
+        html += '<div class="lanc-uni-row"><span class="nm">Recepcionista</span><span class="vl">' + esc(r) + '</span></div>';
+      }
+      html += '<div class="lanc-uni-row"><span class="nm">Atendimentos</span><span class="vl">' + lancN(sAt) + '</span></div>';
+      html += '<div class="lanc-uni-row"><span class="nm">Demanda</span><span class="vl">' + lancN(Math.max(0, sAt - S('pf'))) + '</span></div>';
+      html += '<div class="lanc-uni-row"><span class="nm">Mandados embora</span><span class="vl" style="color:var(--bad)">' + lancN(perda) + '</span></div>';
+      html += '<div class="lanc-uni-row"><span class="nm">Total vendas</span><span class="vl" style="color:var(--ok)">' + lancR$(sTot) + '</span></div>';
+      if (ativos.length > 0) {
+        html += '<div style="margin-top:6px; font-size:10.5px; color:var(--ink3); font-weight:600; text-transform:uppercase">Barbeiros</div>';
+        ativos.forEach(b => {
+          html += '<div class="lanc-uni-row"><span class="nm">' + esc(b) + '</span><span class="vl">' + lancN(lancVal(uni, dia, r, b, 'at')) + ' at · ' + lancR$(lancTotalB(uni, dia, r, b)) + '</span></div>';
+        });
+      }
+    });
+
+    html += '</div></div>';
+  });
+
+  html += '</div>';
+  body.innerHTML = html;
+  abrirModal('#m-lanc-resumo');
+}
+
+function lancIniciar() {
+  const s = sessaoAtual();
+  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
+  const uniSessao = s ? s.unidade : 'CABO FRIO';
+
+  if (isGestor) {
+    document.getElementById('lanc-uni-selector').style.display = '';
+    lancUni = (uniSessao && uniSessao !== 'todas') ? uniSessao : 'CABO FRIO';
+  } else {
+    document.getElementById('lanc-uni-selector').style.display = 'none';
+    lancUni = (uniSessao && uniSessao !== 'todas') ? uniSessao : 'CABO FRIO';
+  }
+
+  // Segment selector
+  document.querySelectorAll('#lanc-seg-uni button').forEach(btn => {
+    btn.classList.toggle('on', btn.dataset.uni === lancUni);
+  });
+
+  document.getElementById('lanc-dia').value = lancHojeISO();
+  lancRecepFiltro = '';
+  lancRender();
+}
+
+/* Eventos do módulo de lançamento */
+(function() {
+  document.getElementById('lanc-prev-dia').onclick = () => {
+    const i = document.getElementById('lanc-dia');
+    i.value = lancIso(new Date(lancDt(i.value).getTime() - 864e5));
+    lancRender();
+  };
+  document.getElementById('lanc-prox-dia').onclick = () => {
+    const i = document.getElementById('lanc-dia');
+    i.value = lancIso(new Date(lancDt(i.value).getTime() + 864e5));
+    lancRender();
+  };
+  document.getElementById('lanc-hoje').onclick = () => {
+    document.getElementById('lanc-dia').value = lancHojeISO();
+    lancRender();
+  };
+  document.getElementById('lanc-dia').addEventListener('change', lancRender);
+  document.getElementById('lanc-recep').addEventListener('input', e => lancSetRecep(e.target.value));
+  document.getElementById('lanc-perda').addEventListener('input', e => lancSetPerda(e.target.value));
+  document.getElementById('lanc-btn-copiar').onclick = lancCopiar;
+  document.getElementById('lanc-btn-limpar').onclick = lancLimpar;
+  document.getElementById('lanc-btn-resumo').onclick = lancAbrirResumo;
+
+  // Seletor de unidade (admin/gerente)
+  document.querySelectorAll('#lanc-seg-uni button').forEach(btn => {
+    btn.onclick = () => {
+      lancUni = btn.dataset.uni;
+      lancRecepFiltro = '';
+      document.querySelectorAll('#lanc-seg-uni button').forEach(b => b.classList.toggle('on', b === btn));
+      lancRender();
+    };
+  });
+})();
+
 
 /* ---------- eventos de acesso ---------- */
 document.getElementById('login-form').onsubmit = async (e) => {

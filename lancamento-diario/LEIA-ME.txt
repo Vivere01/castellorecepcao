@@ -1,0 +1,47 @@
+LANÇAMENTO DIÁRIO — BARBEARIA
+=============================
+
+Um arquivo por unidade. Cada recepção usa SÓ o arquivo da loja dela.
+
+  lancamento-cabo-frio.html       -> recepção de Cabo Frio
+  lancamento-rio-das-ostras.html  -> recepção de Rio das Ostras
+  lancamento-buzios.html          -> recepção de Búzios
+
+
+COMO INSTALAR
+-------------
+1. Salve o arquivo na Área de Trabalho do computador da recepção.
+2. Dê dois cliques. Abre no navegador (Chrome, Edge, o que tiver).
+3. Clique com o botão direito na aba e escolha "Fixar aba", ou salve
+   nos favoritos, para não precisar procurar todo dia.
+
+Não precisa de internet nem de instalar nada.
+
+
+COMO USAR (todo dia, no fim do expediente)
+------------------------------------------
+1. Confira a data lá em cima (já abre no dia de hoje).
+2. Escreva seu nome no campo RECEPCIONISTA.
+3. Preencha, para cada barbeiro que trabalhou:
+      Atendimentos, Preferência,
+      Extra qtd, Extra R$, Produto qtd, Produto R$
+   Demanda e Total vendas são calculados sozinhos.
+4. Quem não trabalhou hoje: marque FOLGA.
+   Isso é importante — folga não conta como dia perdido na meta dele.
+5. Preencha MANDADOS EMBORA NO DIA (número da loja inteira, não por barbeiro).
+6. Confira a mensagem que aparece na tela.
+7. Clique em COPIAR PARA O WHATSAPP e cole no grupo.
+
+
+IMPORTANTE
+----------
+- A mensagem termina com uma linha que começa com #BB2.
+  NÃO APAGUE ESSA LINHA. É ela que leva os números para o painel do dono.
+- Salva sozinho no computador. Se fechar sem querer, não perde nada.
+- Dá para voltar em dias anteriores pelos botões de data ou pela lista
+  "Dias já lançados" no rodapé.
+- Faturamento (avulso e assinatura) NÃO é lançado aqui. Isso o dono
+  faz no fechamento, no painel dele.
+
+Dúvida sobre o que conta como "mandado embora": combine a regra com o
+dono antes de começar, para as três lojas contarem do mesmo jeito.

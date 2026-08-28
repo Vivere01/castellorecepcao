@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lançamento diário — Cabo Frio</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#14161a;--ink2:#5a6472;--ink3:#8b95a3;--line:#e3e7ec;--line2:#eef1f4;
+--accent:#1f6feb;--good:#0f9d58;--bad:#d93025;--warn:#e8830c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
+h1{font-size:22px;margin:0;letter-spacing:-.3px}
+h1 span{color:var(--accent)}
+.sub{color:var(--ink3);font-size:13px;margin-top:2px}
+button{font:inherit;font-size:13.5px;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:#f1f4f7}
+.bg{background:var(--good);color:#fff;border-color:var(--good);font-weight:650;font-size:15px;padding:12px 22px}
+.bg:hover{background:#0c8146}
+.btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=date],input[type=number]{font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.bar{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:11px;overflow:hidden;margin-bottom:12px}
+.ch{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.ch h2{font-size:15px;margin:0;font-weight:650}
+.scroll{overflow-x:auto}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px;white-space:nowrap}
+th{background:#fafbfc;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink2);font-weight:700;padding:9px 8px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:2;border-right:1px solid var(--line2)}
+th:first-child{background:#fafbfc}
+th.calc,td.calc{background:#f7f9fc}
+td{text-align:right;padding:5px 7px;border-bottom:1px solid var(--line2);font-variant-numeric:tabular-nums}
+input.f{width:82px;text-align:right;padding:7px 8px;font-variant-numeric:tabular-nums}
+input.f:focus{outline:2px solid var(--accent);outline-offset:-1px}
+input.f.ok{background:#f3fbf6;border-color:#bfe6cd}
+tr.folga input.f{opacity:.25;pointer-events:none}
+tr.folga td:first-child b{text-decoration:line-through;color:var(--ink3)}
+tfoot td{font-weight:700;background:#f1f4f9;border-top:2px solid var(--line);font-size:13.5px}
+tfoot td:first-child{background:#f1f4f9}
+.msg{padding:12px 14px;font-size:13px;line-height:1.6;border-radius:9px;margin:14px}
+.warn{background:#fff6e8;border:1px solid #fadfb4;color:#6b4400}
+.okb{background:#eefaf1;border:1px solid #bfe6cd;color:#0d5c33}
+.info{background:#eef4fd;border:1px solid #d6e4fa;color:#243b5c}
+.hist{display:flex;flex-wrap:wrap;gap:7px;padding:12px 14px}
+.hb{border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-size:12.5px;cursor:pointer;background:#fff}
+.hb:hover{border-color:var(--accent);color:var(--accent)}
+.hb b{font-variant-numeric:tabular-nums}
+.prev{margin:0 14px 14px;background:#0f1720;color:#dfe7ef;border-radius:9px;padding:13px 15px;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;max-height:340px;overflow:auto}
+.chk{transform:scale(1.15)}
+@media(max-width:700px){.wrap{padding:12px 8px 40px}h1{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hd">
+    <div><h1>Lançamento do dia — <span>Cabo Frio</span></h1>
+      <div class="sub">Escreva seu nome, preencha o dia e clique em Copiar para o WhatsApp. Salva sozinho neste computador.</div></div>
+    <div class="btns"><button onclick="baixarMes()">Baixar o mês (CSV)</button></div>
+  </div>
+
+  <div class="bar">
+    <div class="btns"><span class="lbl">Data</span><input type="date" id="dia">
+      <button onclick="passo(-1)">◀ dia anterior</button><button onclick="passo(1)">dia seguinte ▶</button><button onclick="hoje()">hoje</button></div>
+    <span class="lbl" title="quantas pessoas procuraram a barbearia e foram embora sem ser atendidas">Mandados embora no dia</span>
+    <input type="number" id="perda" min="0" step="1" placeholder="0" style="width:80px;text-align:right;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px" oninput="setPerda(this.value)">
+    <span class="lbl">Recepcionista</span>
+    <input type="text" id="recep" placeholder="seu nome" style="width:180px;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px" oninput="setRecep(this.value)">
+    <div style="margin-left:auto" id="status" class="sub">—</div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><h2 id="tit">—</h2>
+      <div class="btns"><button onclick="limpar()">Limpar dia</button>
+      <button class="bg" onclick="copiar()" id="btC">Copiar para o WhatsApp</button></div></div>
+    <div class="scroll"><table id="tab"></table></div>
+    <div class="msg" id="aviso"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><h2>Mensagem que vai ser enviada</h2><span class="sub">confira antes de colar no grupo</span></div>
+    <div class="prev" id="prev">—</div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><h2>Dias já lançados</h2><span class="sub">clique para abrir</span></div>
+    <div class="hist" id="hist"></div>
+  </div>
+</div>
+
+<script>
+const UNIDADE='Cabo Frio';
+const BARBEIROS=["Areas","Caruso","Denilson","Matheus","Mineiro","Moura","Myson","Reis","Samuel","Wanderson"];
+const ESCALA={"Mineiro":[1,3,5]};                       /* barbeiro -> dias da semana (0=dom) */
+const C=[
+ {k:'at',t:'Atendimentos',    tipo:'n'},
+ {k:'pf',t:'Preferência',     tipo:'n'},
+ {k:'qe',t:'Extra qtd',       tipo:'n'},
+ {k:'ve',t:'Extra R$',        tipo:'r'},
+ {k:'qp',t:'Produto qtd',     tipo:'n'},
+ {k:'vp',t:'Produto R$',      tipo:'r'}
+];
+const KEY='lanc-'+UNIDADE;
+let DB={};
+try{DB=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){DB={};}
+const salvar=()=>{try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}};
+
+const DIAS=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+const dt=s=>new Date(s+'T12:00:00');
+const iso=d=>d.toISOString().slice(0,10);
+const hojeISO=()=>iso(new Date(Date.now()-new Date().getTimezoneOffset()*6e4));
+const fmtLongo=s=>DIAS[dt(s).getDay()]+', '+s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
+const fmtCurto=s=>s.slice(8,10)+'/'+s.slice(5,7);
+function num(v){if(v==null)return 0;let s=String(v).trim().replace(/^R\$\s*/i,'').replace(/\s/g,'');if(!s)return 0;
+ if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');else if(s.includes(','))s=s.replace(',','.');
+ const n=parseFloat(s);return isNaN(n)?0:n;}
+const R$=v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const N=v=>Math.round(v).toLocaleString('pt-BR');
+
+const recepDe=d=>(DB['REC|'+d]||{}).nome||'';
+const perdaDe=d=>(DB['PERD|'+d]||{}).n||0;
+function setPerda(v){ const n=num(v); const d=document.getElementById('dia').value;
+ if(n) DB['PERD|'+d]={n:n}; else delete DB['PERD|'+d]; salvar(); atrasa(); }
+function setRecep(v){ DB['REC|'+document.getElementById('dia').value]={nome:v.trim()}; salvar(); atrasa(); }
+const reg=(d,b)=>{const k=d+'|'+b;if(!DB[k])DB[k]={};return DB[k];};
+const val=(d,b,c)=>(DB[d+'|'+b]||{})[c]||0;
+const folga=(d,b)=>{const v=DB[d+'|'+b];return v&&v.folga!==undefined?v.folga:!(ESCALA[b]||[1,2,3,4,5,6]).includes(dt(d).getDay());};
+const demanda=(d,b)=>Math.max(0,val(d,b,'at')-val(d,b,'pf'));
+const totalB=(d,b)=>val(d,b,'ve')+val(d,b,'vp');
+const ativos=d=>BARBEIROS.filter(b=>!folga(d,b)&&(DB[d+'|'+b]||{}).at>0);
+
+function render(){
+ const d=document.getElementById('dia').value; if(!d) return;
+ document.getElementById('tit').textContent=fmtLongo(d);
+ const cxR=document.getElementById('recep');
+ if(document.activeElement!==cxR) cxR.value=recepDe(d);
+ const cxP=document.getElementById('perda');
+ if(document.activeElement!==cxP) cxP.value=perdaDe(d)||'';
+ const th='<tr><th>Barbeiro</th><th>Folga</th>'+C.map(c=>'<th>'+c.t+'</th>').join('')+
+  '<th class="calc">Demanda</th><th class="calc">Total vendas</th></tr>';
+ const tb=BARBEIROS.map(b=>{
+  const f=folga(d,b);
+  return '<tr class="'+(f?'folga':'')+'"><td><b>'+b+'</b></td>'+
+   '<td style="text-align:center"><input type="checkbox" class="chk" '+(f?'checked':'')+' onchange="setFolga(\''+b+'\',this.checked)"></td>'+
+   C.map(c=>'<td><input class="f '+(val(d,b,c.k)?'ok':'')+'" type="number" min="0" step="'+(c.tipo==='r'?'0.01':'1')+
+     '" inputmode="decimal" value="'+(val(d,b,c.k)||'')+'" placeholder="0" oninput="set(\''+b+'\',\''+c.k+'\',this.value)"></td>').join('')+
+   '<td class="calc">'+(val(d,b,'at')?N(demanda(d,b)):'—')+'</td>'+
+   '<td class="calc"><b>'+(totalB(d,b)?R$(totalB(d,b)):'—')+'</b></td></tr>';
+ }).join('');
+ const S=c=>BARBEIROS.reduce((s,b)=>s+val(d,b,c),0);
+ const sAt=S('at'), sPf=S('pf'), sTot=S('ve')+S('vp');
+ const tf='<tr><td>TOTAL DO DIA</td><td></td>'+C.map(c=>'<td>'+(c.tipo==='r'?R$(S(c.k)):N(S(c.k)))+'</td>').join('')+
+  '<td class="calc">'+N(Math.max(0,sAt-sPf))+'</td><td class="calc">'+R$(sTot)+'</td></tr>';
+ document.getElementById('tab').innerHTML='<thead>'+th+'</thead><tbody>'+tb+'</tbody><tfoot>'+tf+'</tfoot>';
+
+ const nA=ativos(d).length, nF=BARBEIROS.filter(b=>folga(d,b)).length, falta=BARBEIROS.length-nA-nF;
+ document.getElementById('status').innerHTML= falta>0
+  ? '<b style="color:var(--warn)">faltam '+falta+'</b> · '+nA+' lançado(s) · '+nF+' de folga'
+  : '<b style="color:var(--good)">dia completo</b> · '+nA+' lançado(s) · '+nF+' de folga';
+ const av=document.getElementById('aviso');
+ av.className='msg '+(falta>0?'warn':'okb');
+ av.innerHTML= falta>0
+  ? 'Faltam <b>'+falta+'</b> barbeiro(s). Quem não trabalhou hoje, marque <b>Folga</b> — assim a média e a meta dele não ficam erradas.'
+  : (recepDe(d)
+    ? 'Tudo lançado por <b>'+recepDe(d)+'</b>: <b>'+N(sAt)+'</b> atendimentos, <b>'+N(sPf)+'</b> por preferência, <b>'+N(Math.max(0,sAt-sPf))+'</b> de demanda'+(perdaDe(d)?', <b style="color:var(--bad)">'+N(perdaDe(d))+'</b> mandados embora ('+Math.round(perdaDe(d)/(sAt+perdaDe(d))*100)+'% da procura)':'')+', vendas <b>'+R$(sTot)+'</b>. Agora é só clicar em <b>Copiar para o WhatsApp</b>.'
+    : 'Tudo lançado. Falta só escrever <b>seu nome no campo Recepcionista</b>, lá em cima, e depois clicar em <b>Copiar para o WhatsApp</b>.');
+ document.getElementById('prev').textContent=mensagem(d)||'Nada lançado ainda neste dia.';
+ renderHist();
+}
+function set(b,c,v){const d=document.getElementById('dia').value,o=reg(d,b),n=num(v);
+ if(n)o[c]=n;else delete o[c];o.folga=false;salvar();atrasa();}
+function setFolga(b,f){const d=document.getElementById('dia').value;reg(d,b).folga=f;salvar();render();}
+let t=null;const atrasa=()=>{clearTimeout(t);t=setTimeout(render,350);};
+function passo(n){const i=document.getElementById('dia');i.value=iso(new Date(dt(i.value).getTime()+n*864e5));render();}
+function hoje(){document.getElementById('dia').value=hojeISO();render();}
+function limpar(){const d=document.getElementById('dia').value;
+ if(!confirm('Apagar tudo que foi lançado em '+fmtCurto(d)+'?'))return;
+ BARBEIROS.forEach(b=>delete DB[d+'|'+b]);delete DB['REC|'+d];delete DB['PERD|'+d];salvar();render();}
+
+/* ---------- mensagem do WhatsApp ---------- */
+function mensagem(d){
+ const bs=ativos(d); if(!bs.length) return '';
+ const L=['*'+UNIDADE.toUpperCase()+'* — '+fmtLongo(d)];
+ L.push('Lançado por: '+(recepDe(d)||'(não informado)'),'');
+ bs.forEach(b=>{
+  L.push('*'+b+'*');
+  L.push('Atendimentos: '+N(val(d,b,'at')));
+  L.push('Preferência: '+N(val(d,b,'pf')));
+  L.push('Demanda (sem preferência): '+N(demanda(d,b)));
+  L.push('Extra: '+N(val(d,b,'qe'))+' un — '+R$(val(d,b,'ve')));
+  L.push('Produto: '+N(val(d,b,'qp'))+' un — '+R$(val(d,b,'vp')));
+  L.push('Total vendas: '+R$(totalB(d,b)));
+  L.push('');
+ });
+ const S=c=>bs.reduce((s,b)=>s+val(d,b,c),0);
+ const sAt=S('at'),sPf=S('pf');
+ L.push('━━━━━━━━━━━━━━');
+ L.push('*TOTAL DO DIA — '+UNIDADE.toUpperCase()+'*');
+ L.push('Atendimentos: '+N(sAt));
+ L.push('Preferência: '+N(sPf));
+ L.push('Demanda (sem preferência): '+N(Math.max(0,sAt-sPf)));
+ L.push('Mandados embora no dia: '+N(perdaDe(d)));
+ L.push('Procura total: '+N(sAt+perdaDe(d))+(perdaDe(d)?'  ('+Math.round(perdaDe(d)/(sAt+perdaDe(d))*100)+'% perdido)':''));
+ L.push('Extra: '+N(S('qe'))+' un — '+R$(S('ve')));
+ L.push('Produto: '+N(S('qp'))+' un — '+R$(S('vp')));
+ L.push('*Total vendas: '+R$(S('ve')+S('vp'))+'*');
+ L.push('Barbeiros no dia: '+bs.length);
+ L.push('');
+ L.push('#BB2 '+d+'|'+UNIDADE+'|'+(recepDe(d)||'-')+'|'+perdaDe(d)+'|'+bs.map(b=>b+';'+C.map(c=>val(d,b,c.k)).join(';')).join('|'));
+ return L.join('\n');
+}
+function copiar(){
+ const d=document.getElementById('dia').value, txt=mensagem(d);
+ if(!txt) return alert('Nada lançado nesse dia ainda.');
+ const bt=document.getElementById('btC');
+ const ok=()=>{const o=bt.textContent;bt.textContent='Copiado ✓ agora é só colar';setTimeout(()=>bt.textContent=o,2600);};
+ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok,()=>fb(txt,ok));
+ else fb(txt,ok);
+ function fb(x,cb){const a=document.createElement('textarea');a.value=x;document.body.appendChild(a);a.select();
+  try{document.execCommand('copy');cb();}catch(e){prompt('Copie a mensagem:',x);}a.remove();}
+}
+function renderHist(){
+ const ds=[...new Set(Object.keys(DB).filter(k=>!k.startsWith('REC|')&&!k.startsWith('PERD|')).map(k=>k.split('|')[0]))].filter(d=>ativos(d).length).sort().reverse().slice(0,45);
+ const at=document.getElementById('dia').value;
+ document.getElementById('hist').innerHTML= ds.length
+  ? ds.map(d=>{const bs=ativos(d),tot=bs.reduce((s,b)=>s+totalB(d,b),0);
+     return '<button class="hb" style="'+(d===at?'border-color:var(--accent);color:var(--accent)':'')+'" onclick="ir(\''+d+'\')">'+
+      fmtCurto(d)+' · '+bs.length+' barb.'+(recepDe(d)?' · '+recepDe(d):'')+'</button>';}).join('')
+  : '<span class="sub">Nenhum dia lançado ainda.</span>';
+}
+function ir(d){document.getElementById('dia').value=d;render();}
+function baixarMes(){
+ const d=document.getElementById('dia').value, mes=d.slice(0,7);
+ const L=['data;unidade;recepcionista;barbeiro;atendimentos;preferencia;demanda;mandados_embora_no_dia;extra_qtd;extra_valor;produto_qtd;produto_valor;total_vendas'];
+ Object.keys(DB).filter(k=>!k.startsWith('REC|')&&!k.startsWith('PERD|')).map(k=>k.split('|')).filter(([dd])=>dd.startsWith(mes)).sort()
+  .forEach(([dd,b])=>{ if(folga(dd,b)||!val(dd,b,'at')) return;
+   L.push([dd,UNIDADE,recepDe(dd),b,val(dd,b,'at'),val(dd,b,'pf'),demanda(dd,b),perdaDe(dd),
+    val(dd,b,'qe'),val(dd,b,'ve'),val(dd,b,'qp'),val(dd,b,'vp'),totalB(dd,b)]
+    .map(x=>typeof x==='number'?String(x).replace('.',','):x).join(';')); });
+ if(L.length<2) return alert('Nenhum lançamento nesse mês.');
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob(['﻿'+L.join('\n')],{type:'text/csv;charset=utf-8'}));
+ a.download='lancamentos-'+UNIDADE.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-')+'-'+mes+'.csv';
+ a.click();
+}
+document.getElementById('dia').addEventListener('change',render);
+document.getElementById('dia').value=hojeISO();
+render();
+</script>
+</body>
+</html>
