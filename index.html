@@ -772,7 +772,6 @@ tr.perdido{opacity:.45}
               <th>Unidade</th>
               <th>Quem registrou</th>
               <th>Data</th>
-              <th class="no"></th>
             </tr>
           </thead>
           <tbody id="v-corpo"></tbody>
@@ -1154,6 +1153,9 @@ tr.perdido{opacity:.45}
           <option value="nao_atende">Não atendeu</option>
           <option value="numero_errado">Número errado</option>
         </select>
+      </label>
+      <label class="lb" id="wrap-plano-reativado">Plano de assinatura reativado
+        <select class="field" id="toque-plano-reativado"></select>
       </label>
       <label class="lb" id="wrap-motivo">Motivo do cancelamento
         <select class="field" id="toque-motivo"></select>
@@ -3162,6 +3164,17 @@ function abrirToque(chave) {
     (c.barbeiro ? ' · atendia com ' + esc(c.barbeiro) : '') + '</span>';
   $('#toque-roteiro').querySelector('span:last-child').textContent = ROTEIRO[n];
   $('#toque-resultado').value = 'voltou';
+
+  const selPlano = $('#toque-plano-reativado');
+  if (selPlano) {
+    selPlano.innerHTML = '<option value="">Selecione o plano reativado…</option>' + PLANOS_VENDA.map(p =>
+      '<option value="' + esc(p.nome) + '" data-valor="' + p.valor + '">' + esc(p.nome) + ' — ' + brl(p.valor) + '</option>').join('');
+    if (c.plano) {
+      const match = PLANOS_VENDA.find(p => p.nome.toLowerCase() === (c.plano || '').toLowerCase() || (c.plano || '').toLowerCase().includes(p.nome.toLowerCase()));
+      if (match) selPlano.value = match.nome;
+    }
+  }
+
   $('#toque-motivo').innerHTML = '<option value="">— escolha —</option>' +
     Object.entries(MOTIVOS).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
   $('#toque-motivo').value = c.motivo || '';
@@ -3178,6 +3191,8 @@ function ajustarCamposToque() {
   const r = $('#toque-resultado').value;
   const precisa = r === 'voltou' || r === 'vai_pensar' || r === 'nao_quer';
   $('#wrap-motivo').style.display = precisa ? '' : 'none';
+  const wrapPlano = $('#wrap-plano-reativado');
+  if (wrapPlano) wrapPlano.style.display = (r === 'voltou') ? '' : 'none';
 }
 $('#toque-resultado').onchange = ajustarCamposToque;
 
@@ -3195,6 +3210,19 @@ function salvarToque() {
     toast('Escolha o motivo do cancelamento antes de salvar — é isso que vira relatório depois.', 'err');
     return;
   }
+
+  let planoReativado = '';
+  let valorReativado = c.valor || 0;
+  if (resultado === 'voltou') {
+    planoReativado = ($('#toque-plano-reativado') && $('#toque-plano-reativado').value) || '';
+    if (!planoReativado) {
+      toast('Selecione o plano de assinatura reativado pelo cliente.', 'err');
+      return;
+    }
+    const planoObj = PLANOS_VENDA.find(p => p.nome === planoReativado);
+    if (planoObj) valorReativado = planoObj.valor;
+  }
+
   try { localStorage.setItem('cf-quem-res', por); } catch (e) { }
 
   if (motivo) c.motivo = motivo;
@@ -3217,7 +3245,51 @@ function salvarToque() {
     c.toque = (c.toque || 0) + 1;
     c.tentativas = 0;
     if (resultado === 'voltou') {
-      c.situacao = 'resgatado'; c.resgatadoEm = hoje; c.resgatadoPor = por;
+      c.situacao = 'resgatado';
+      c.resgatadoEm = hoje;
+      c.resgatadoPor = por;
+      c.plano = planoReativado;
+      c.valor = valorReativado;
+
+      // Adiciona cliente resgatado na lista de Assinantes
+      if (!ESTADO.assinantes) ESTADO.assinantes = {};
+      const chaveAss = fazerChave(c);
+      const assExistente = ESTADO.assinantes[chaveAss];
+      const uniAss = c.unidade || (SESSAO && SESSAO.unidade !== 'todas' ? SESSAO.unidade : 'CABO FRIO');
+      if (assExistente) {
+        assExistente.nome = c.nome;
+        assExistente.telefone = c.telefone || assExistente.telefone;
+        assExistente.telefoneBruto = c.telefoneBruto || assExistente.telefoneBruto;
+        assExistente.email = c.email || assExistente.email;
+        assExistente.cpf = c.cpf || assExistente.cpf;
+        assExistente.unidade = uniAss;
+        assExistente.plano = planoReativado;
+        assExistente.valor = valorReativado;
+        assExistente.vencimento = somarDias(hoje, 30);
+        assExistente.situacao = 'ativo';
+        assExistente.cobranca = assExistente.cobranca || 'Resgate';
+        assExistente.ultimaImportacao = hoje;
+        assExistente.historico = assExistente.historico || [];
+        assExistente.historico.push({ d: hoje, e: 'resgatado', por, plano: planoReativado });
+      } else {
+        ESTADO.assinantes[chaveAss] = {
+          chave: chaveAss,
+          nome: c.nome,
+          email: c.email || '',
+          telefone: c.telefone || '',
+          telefoneBruto: c.telefoneBruto || '',
+          cpf: c.cpf || '',
+          plano: planoReativado,
+          cobranca: 'Resgate',
+          vencimento: somarDias(hoje, 30),
+          valor: valorReativado,
+          unidade: uniAss,
+          situacao: 'ativo',
+          primeiraImportacao: hoje,
+          ultimaImportacao: hoje,
+          historico: [{ d: hoje, e: 'resgatado', por, plano: planoReativado }]
+        };
+      }
     } else if (resultado === 'nao_quer') {
       c.situacao = 'perdido'; c.encerradoEm = hoje; c.encerradoPorque = 'disse que não quer voltar';
     } else {
@@ -3232,13 +3304,13 @@ function salvarToque() {
     }
   }
 
-  c.toques.push({ n: c.toque || 0, data: hoje, por, resultado, motivo: motivo || '', barbeiro, obs });
+  c.toques.push({ n: c.toque || 0, data: hoje, por, resultado, motivo: motivo || '', barbeiro, obs, plano: planoReativado || undefined });
   if (c.toques.length > 30) c.toques = c.toques.slice(-30);
   agendarSalvar();
   fecharModais();
   render();
   const msg = {
-    voltou: 'Resgatado! ' + c.nome + ' voltou.',
+    voltou: 'Resgatado! ' + c.nome + ' reativou o ' + planoReativado + ' e foi adicionado aos Assinantes.',
     vai_pensar: 'Contato registrado. Próximo toque em ' + dataBr(c.proximoToque) + '.',
     nao_quer: c.nome + ' saiu da fila — encerrado.',
     nao_atende: c.situacao === 'perdido' ? c.nome + ' encerrado após 5 tentativas.' : 'Não atendeu. Volta pra fila em ' + dataBr(c.proximoToque) + '.',
@@ -3441,7 +3513,7 @@ function renderVendas() {
   const corpo = document.getElementById('v-corpo');
   const maxV = Math.max(1, ...filt.map(c => c.valor || 0));
   if (!filt.length) {
-    corpo.innerHTML = '<tr><td colspan="8" style="color:var(--ink3);padding:18px;text-align:center">Nenhuma venda registrada ainda.</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="7" style="color:var(--ink3);padding:18px;text-align:center">Nenhuma venda registrada ainda.</td></tr>';
   } else {
     corpo.innerHTML = filt.sort((a, b) => (b.data || '').localeCompare(a.data || '')).map(c => {
       const bw = Math.max(2, Math.round((c.valor || 0) / maxV * 100));
@@ -3450,17 +3522,11 @@ function renderVendas() {
         '<td>' + esc(c.plano) + '</td>' +
         '<td class="num">' + brl(c.valor) + (c.valor ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
         '<td>' + dataBr(c.vencimento) + '</td>' +
-        '<td>' + esc(c.unidade ? nomeBonito(c.unidade) : '—') + '</td>' +
+        '<td>' + esc(c.unidade ? (c.unidade === 'todas' ? 'Todas' : nomeBonito(c.unidade)) : '—') + '</td>' +
         '<td>' + esc(c.por || '—') + '</td>' +
         '<td>' + dataBr(c.data) + '</td>' +
-        '<td class="no" style="text-align:right"><button class="btn btn-sm btn-ghost" data-del="' + esc(c.chave) + '">Excluir</button></td>' +
         '</tr>';
     }).join('');
-    corpo.querySelectorAll('button[data-del]').forEach(b => b.onclick = () => {
-      const k = b.dataset.del;
-      const nome = ESTADO.vendas[k] && ESTADO.vendas[k].nome;
-      if (confirm('Excluir a venda de ' + nome + '?')) { delete ESTADO.vendas[k]; agendarSalvar(); renderVendas(); toast('Venda excluída.', 'ok'); }
-    });
   }
   document.getElementById('v-contagem').textContent = filt.length + ' venda' + (filt.length === 1 ? '' : 's');
   const total = filt.reduce((a, c) => a + (c.valor || 0), 0);
@@ -3507,14 +3573,52 @@ document.getElementById('v-add').onclick = () => {
     if (!(valor >= 0)) { toast('Informe o valor do plano.', 'err'); return; }
     if (!venc) { toast('Informe o vencimento.', 'err'); return; }
     if (!unidade) { toast('Escolha a unidade.', 'err'); return; }
+
     const chave = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const uniFinal = (unidade === 'todas') ? ((SESSAO && SESSAO.unidade !== 'todas') ? SESSAO.unidade : 'CABO FRIO') : unidade;
     ESTADO.vendas[chave] = { chave, nome, plano, valor, vencimento: venc, unidade, por: (SESSAO && SESSAO.nome) || '', data: hojeISO() };
+
+    // Adiciona o novo cliente também à lista de Assinantes
+    if (!ESTADO.assinantes) ESTADO.assinantes = {};
+    const chaveAss = 'nome:' + chaveTexto(nome);
+    const assExistente = ESTADO.assinantes[chaveAss];
+    if (assExistente) {
+      assExistente.nome = nome;
+      assExistente.plano = plano;
+      assExistente.valor = valor;
+      assExistente.vencimento = venc;
+      assExistente.unidade = uniFinal;
+      assExistente.situacao = 'ativo';
+      assExistente.cobranca = assExistente.cobranca || 'Nova Venda';
+      assExistente.ultimaImportacao = hojeISO();
+      assExistente.historico = assExistente.historico || [];
+      assExistente.historico.push({ d: hojeISO(), e: 'nova_venda', por: (SESSAO && SESSAO.nome) || '', plano });
+    } else {
+      ESTADO.assinantes[chaveAss] = {
+        chave: chaveAss,
+        nome,
+        email: '',
+        telefone: '',
+        telefoneBruto: '',
+        cpf: '',
+        plano,
+        cobranca: 'Nova Venda',
+        vencimento: venc,
+        valor,
+        unidade: uniFinal,
+        situacao: 'ativo',
+        primeiraImportacao: hojeISO(),
+        ultimaImportacao: hojeISO(),
+        historico: [{ d: hojeISO(), e: 'nova_venda', por: (SESSAO && SESSAO.nome) || '', plano }]
+      };
+    }
+
     agendarSalvar();
     document.getElementById('v-nome').value = '';
     document.getElementById('v-valor').value = '';
     document.getElementById('v-venc').value = '';
     renderVendas();
-    toast('Venda de ' + nome + ' registrada.', 'ok');
+    toast('Venda de ' + nome + ' registrada e adicionada aos Assinantes!', 'ok');
   } catch (e) {
     toast('Erro ao adicionar venda: ' + (e && e.message), 'err');
   }
