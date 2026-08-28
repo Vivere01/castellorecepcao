@@ -910,6 +910,99 @@ tr.perdido{opacity:.45}
     </main>
   </div>
 
+  <!-- ============ DESEMPENHO ============ -->
+  <div id="view-performance" hidden>
+    <main class="panel" style="padding:20px">
+      <div class="perf-filtros">
+        <div class="seg" id="seg-perf">
+          <button type="button" data-per="hoje">Hoje</button>
+          <button type="button" data-per="semana">Semana</button>
+          <button type="button" data-per="quinzena">Quinzena</button>
+          <button type="button" data-per="mes">Mês</button>
+          <button type="button" data-per="custom">Personalizado</button>
+        </div>
+        <label>De <input type="date" id="perf-de" class="field"></label>
+        <label>Até <input type="date" id="perf-ate" class="field"></label>
+        <select class="field" id="perf-uni"></select>
+        <button class="btn btn-sm" id="perf-atualizar" type="button">Atualizar</button>
+        <button class="btn btn-sm btn-ghost" id="btn-perf-voltar" type="button">← Voltar</button>
+      </div>
+
+      <div class="kpis" id="perf-kpis"></div>
+
+      <!-- Gráficos Dinâmicos Executivos (Linha e Donut) -->
+      <div class="perf-grid-top">
+        <div class="chart-card">
+          <div class="chart-card-h">
+            <div>
+              <h3 class="tit">Evolução Diária de Desempenho</h3>
+              <div class="sub">Recuperação e ações diárias registradas pela equipe</div>
+            </div>
+            <span class="hint mono" id="chart-line-total" style="font-weight:600;color:var(--brass-light)"></span>
+          </div>
+          <div class="chart-svg-wrap" id="perf-chart-line"></div>
+          <div class="chart-legend">
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--brass)"></span> Baixas (Inadimplentes)</div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--ok)"></span> Resgates (Retorno)</div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--info)"></span> Novas Vendas</div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#a29bfe"></span> Contatos Feitos</div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-h">
+            <div>
+              <h3 class="tit">Matriz de Composição</h3>
+              <div class="sub">Distribuição do volume recuperado e ações</div>
+            </div>
+          </div>
+          <div class="chart-svg-wrap" id="perf-chart-donut" style="min-height:200px;display:flex;align-items:center;justify-content:center"></div>
+          <div class="chart-legend" id="perf-donut-legend" style="justify-content:center"></div>
+        </div>
+      </div>
+
+      <!-- Seção: Dashboard dos Colaboradores com Gráficos Individuais -->
+      <div class="colab-section-h">
+        <div>
+          <h2>Dashboard dos Colaboradores</h2>
+          <span class="hint" id="perf-periodo-label"></span>
+        </div>
+      </div>
+      <div class="colab-cards-grid" id="perf-cards-grid"></div>
+
+      <!-- Seção: Comissões e Detalhamento -->
+      <section class="panel" style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px">
+        <div class="panel-h"><h2>Comissão sobre resgates</h2><span class="hint">% sobre o valor dos clientes que voltaram</span></div>
+        <div class="panel-b">
+          <div class="perf-comissao-filtro">
+            <label>Comissão por resgate
+              <input type="number" id="perf-comissao" class="field" min="0" max="100" step="0.5" value="8"> %
+            </label>
+            <span class="hint" id="perf-comissao-total"></span>
+          </div>
+          <table class="perf-table" id="perf-comissao-tbl"></table>
+        </div>
+      </section>
+
+      <!-- Seção: Tabelas de Apoio (Execução por dia e Unidade) -->
+      <div class="perf-grid-top" style="margin-top:20px" id="perf-tabelas-apoio">
+        <section class="chart-card">
+          <div class="chart-card-h">
+            <h3 class="tit">Execução por Dia</h3>
+            <span class="hint">baixas · resgates · contatos</span>
+          </div>
+          <div class="perf-scroll"><table class="perf-table" id="perf-series"></table></div>
+        </section>
+        <section class="chart-card">
+          <div class="chart-card-h">
+            <h3 class="tit">Distribuição por Unidade</h3>
+          </div>
+          <div class="perf-scroll"><table class="perf-table" id="perf-unis"></table></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
   <p class="foot-note" id="rodape"></p>
 </div>
 
