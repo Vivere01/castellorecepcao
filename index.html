@@ -1,11 +1,19 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Castello Forte — Sistema de Recepção</title>
 <meta name="description" content="Sistema de gestão de recepção da Castello Forte Barbearia. Cobrança, resgate, vendas e assinantes.">
 <link rel="icon" type="image/png" href="logo-castello.png">
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('cf-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  } catch(e){}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" data-mine>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin data-mine>
 <link data-mine rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -1943,10 +1951,14 @@ function conciliar(estado, registros, meta) {
 
 /* ============ fonte canônica da página (template de publicação) ============ */
 const PAGINA_BASE = (function () {
-  var h = document.documentElement.outerHTML;
-  // remove scripts externos injetados pelo runtime do visualizador
-  h = h.replace(/<script\b(?![^>]*data-mine)[^>]*\ssrc=[^>]*>[\s\S]*?<\/script>/gi, '');
-  return '<!doctype html>\n' + h;
+  try {
+    var h = (document && document.documentElement && document.documentElement.outerHTML) || '';
+    // remove scripts externos injetados pelo runtime do visualizador
+    h = h.replace(/<script\b(?![^>]*data-mine)[^>]*\ssrc=[^>]*>[\s\S]*?<\/script>/gi, '');
+    return '<!doctype html>\n' + h;
+  } catch (e) {
+    return '<!doctype html>\n<html></html>';
+  }
 })();
 const MARCA_ESTADO = '<script type="application/json" id="estado">';
 function paginaCom(estado) {
@@ -3671,10 +3683,6 @@ document.getElementById('a-busca').oninput = e => { AUI.busca = e.target.value.t
 document.getElementById('a-filtro-metodo').onchange = e => { AUI.metodo = e.target.value; renderAssinantes(); };
 document.getElementById('a-filtro-situacao').onchange = e => { AUI.situacao = e.target.value; renderAssinantes(); };
 
-
-</script>
-
-<script>
 /* ===================== ACESSO / SESSÃO (Vercel KV) ===================== */
 const LS_USUARIOS = 'cf-usuarios';
 const LS_SESSAO = 'cf-sessao';
@@ -3714,18 +3722,24 @@ async function salvarUsuarios(u) {
 function sessaoAtual() { try { return JSON.parse(localStorage.getItem(LS_SESSAO)); } catch (e) { return null; } }
 
 async function fazerLogin(nome, unidade, senha) {
-  const r = await apiReq('/api/auth', 'POST', { nome, unidade, senha });
-  if (r && r.nome) {
-    const s = { chave: r.chave || '', nome: r.nome, unidade: r.unidade, perfil: r.perfil };
-    try { localStorage.setItem(LS_SESSAO, JSON.stringify(s)); } catch (e) {}
-    return s;
-  }
+  nome = (nome || '').trim();
+  senha = String(senha || '').trim();
+  try {
+    const r = await apiReq('/api/auth', 'POST', { nome, unidade, senha });
+    if (r && r.nome) {
+      const s = { chave: r.chave || '', nome: r.nome, unidade: r.unidade, perfil: r.perfil };
+      try { localStorage.setItem(LS_SESSAO, JSON.stringify(s)); } catch (e) {}
+      return s;
+    }
+  } catch (e) {}
   const usuarios = await carregarUsuarios();
-  const key = Object.keys(usuarios).find(k => {
+  const key = Object.keys(usuarios || {}).find(k => {
     const u = usuarios[k];
-    return u.nome.toLowerCase() === nome.trim().toLowerCase() &&
-      u.senha === senha &&
-      (u.unidade === 'todas' || u.unidade === unidade);
+    if (!u) return false;
+    const matchNome = (u.nome || '').trim().toLowerCase() === nome.toLowerCase();
+    const matchSenha = String(u.senha || '').trim() === senha;
+    const matchUnidade = (u.unidade === 'todas' || u.unidade === unidade || unidade === 'todas' || u.perfil === 'admin' || u.perfil === 'gerente');
+    return matchNome && matchSenha && matchUnidade;
   });
   if (!key) return null;
   const u = usuarios[key];
