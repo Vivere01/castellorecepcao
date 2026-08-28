@@ -194,6 +194,9 @@ thead th.no{cursor:default}
 tbody td{padding:8px 9px; border-bottom:1px solid var(--line); vertical-align:middle}
 tbody tr:hover{background:var(--surface2)}
 tbody tr.baixado{opacity:.5}
+tbody tr.inadimplente td{background:rgba(214,48,49,.08)}
+tbody tr.inadimplente td:first-child{border-left:3px solid #d63031}
+tbody tr.inadimplente:hover td{background:rgba(214,48,49,.14)}
 tbody tr.recobranca{background:var(--bad-bg)}
 tbody tr.recobranca:hover{background:var(--bad-bg); filter:brightness(1.12)}
 tbody tr.sugerido{background:var(--ok-bg)}
@@ -1733,16 +1736,38 @@ function chavesAlternativas(reg) {
   return out;
 }
 
-const LIXO = ['totalizado', 'total geral', 'totalgeral', 'soma', 'subtotal'];
-function ehLinhaLixo(nome) {
+const LIXO_PALAVRAS = [
+  'totalizado', 'total geral', 'totalgeral', 'total', 'soma', 'subtotal',
+  'cliente', 'nome', 'nomecliente', 'nomedocliente', 'assinante', 'plano', 'valor',
+  'tipodecobranca', 'cobranca', 'vencimento', 'relatorio', 'resumo', 'saldo'
+];
+function ehLinhaLixo(nome, plano) {
   if (!nome && nome !== 0) return true;
   const s = nome.toString().trim();
-  if (!s) return true;
-  // Rejeita linhas cujo "nome" é um valor monetário (R$ ...) ou número puro
-  if (/^R\$\s*[\d.,]+$/.test(s)) return true;
-  if (/^[\d.,R$\s%]+$/.test(s) && /\d/.test(s) && s.length < 30) return true;
+  if (!s || s === '-' || s === '—' || s === '0') return true;
+
+  // Rejeita linhas cujo "nome" tem formato monetário (R$...) ou símbolo $
+  if (/r\$/i.test(s) || /\$/.test(s)) return true;
+
+  // Rejeita linhas que são puramente números, pontuações ou porcentagens (ex: 75.234,60 ou 0,00)
+  if (/^[\d.,\s\-\/\%]+$/.test(s)) return true;
+
   const k = chaveTexto(s);
-  return !k || LIXO.some(l => k.startsWith(chaveTexto(l)));
+  if (!k) return true;
+  if (LIXO_PALAVRAS.some(l => k === l || k.startsWith(l))) return true;
+
+  // Um nome de cliente legítimo deve ter no mínimo 2 letras alfabéticas
+  const letras = (s.match(/[a-zA-ZÀ-ÿ]/g) || []).length;
+  if (letras < 2) return true;
+
+  // Validação complementar quando o plano também é cabeçalho ou valor monetário
+  if (plano) {
+    const kp = chaveTexto(plano.toString().trim());
+    if (kp === 'plano' || kp === 'tipodecobranca' || kp === 'formadepagamento' || /r\$/i.test(plano.toString())) {
+      if (k === 'cliente' || k === 'nome' || letras < 3) return true;
+    }
+  }
+  return false;
 }
 
 /* --- cabecalho flexivel (só exige nome) --- */
@@ -1764,7 +1789,8 @@ function extrairAssinantes(rows) {
   for (let i = linha + 1; i < rows.length; i++) {
     const r = rows[i] || [];
     const nome = (get(r, 'nome') ?? '').toString().trim();
-    if (ehLinhaLixo(nome)) { if (nome) ignoradas.push(nome); continue; }
+    const plano = (get(r, 'plano') ?? '').toString().trim();
+    if (ehLinhaLixo(nome, plano)) { if (nome) ignoradas.push(nome); continue; }
     if (!nome) continue;
     const reg = {
       nome,
@@ -1796,7 +1822,8 @@ function extrairRegistros(rows) {
   for (let i = linha + 1; i < rows.length; i++) {
     const r = rows[i] || [];
     const nome = (get(r, 'nome') ?? '').toString().trim();
-    if (ehLinhaLixo(nome)) { if (nome) ignoradas.push(nome); continue; }
+    const plano = (get(r, 'plano') ?? '').toString().trim();
+    if (ehLinhaLixo(nome, plano)) { if (nome) ignoradas.push(nome); continue; }
     const temContato = emailNorm(get(r, 'email')) || telNorm(get(r, 'telefone')) || soDigitos(get(r, 'cpf'));
     if (!temContato) { ignoradas.push(nome); continue; }
     const reg = {
@@ -1830,7 +1857,8 @@ function extrairCancelados(rows, dataUpload) {
   for (let i = linha + 1; i < rows.length; i++) {
     const r = rows[i] || [];
     const nome = (get(r, 'nome') ?? '').toString().trim();
-    if (ehLinhaLixo(nome)) { if (nome) ignoradas.push(nome); continue; }
+    const plano = (get(r, 'plano') ?? '').toString().trim();
+    if (ehLinhaLixo(nome, plano)) { if (nome) ignoradas.push(nome); continue; }
     const temContato = emailNorm(get(r, 'email')) || telNorm(get(r, 'telefone')) || soDigitos(get(r, 'cpf'));
     if (!temContato) { ignoradas.push(nome); continue; }
     const reg = {
@@ -2409,7 +2437,7 @@ function renderTabela() {
   for (const c of lista) {
     const d = atraso(c);
     const tr = el('tr');
-    tr.className = c.situacao === 'baixado' ? 'baixado' : c.alerta === 'recobranca' ? 'recobranca' : c.sugestao === 'provavel_pagamento' ? 'sugerido' : '';
+    tr.className = c.situacao === 'baixado' ? 'baixado' : c.alerta === 'recobranca' ? 'recobranca' : c.sugestao === 'provavel_pagamento' ? 'sugerido' : 'inadimplente';
 
     const tdN = el('td');
     const nome = el('div', 'cli');
@@ -2869,6 +2897,23 @@ function normalizarEstado(e) {
   if (!e.modelosResgate || e.modelosResgate.length !== 3) e.modelosResgate = MODELOS_RESGATE_PADRAO.slice();
   if (!e.metas) e.metas = {};
   if (!e.seq) e.seq = 0;
+
+  // Limpeza de linhas-lixo / cabeçalhos / valores intrusos que foram salvos anteriormente no estado
+  if (e.assinantes) {
+    for (const [k, a] of Object.entries(e.assinantes)) {
+      if (!a || !a.nome || ehLinhaLixo(a.nome, a.plano)) delete e.assinantes[k];
+    }
+  }
+  if (e.clientes) {
+    for (const [k, c] of Object.entries(e.clientes)) {
+      if (!c || !c.nome || ehLinhaLixo(c.nome, c.plano)) delete e.clientes[k];
+    }
+  }
+  if (e.cancelados) {
+    for (const [k, c] of Object.entries(e.cancelados)) {
+      if (!c || !c.nome || ehLinhaLixo(c.nome, c.plano)) delete e.cancelados[k];
+    }
+  }
 }
 normalizarEstado();
 
@@ -3720,7 +3765,7 @@ let previaAss = null;
 let AUI = { busca: '', metodo: '', situacao: '' };
 
 function assinantesVisiveis() {
-  const lista = Object.values(ESTADO.assinantes || {});
+  const lista = Object.values(ESTADO.assinantes || {}).filter(a => a && a.nome && !ehLinhaLixo(a.nome, a.plano));
   if (MODO !== 'assinantes') return [];
   const s = UI.unidade;
   if (s && s !== 'REDE' && s !== 'SEM') return lista.filter(a => a.unidade === s);
