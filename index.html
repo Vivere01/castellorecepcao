@@ -5218,11 +5218,45 @@ function lancCopiarUni(uni) {
 function lancMensagem(uni, dia, recep) {
   const ativos = lancAtivos(uni, dia, recep);
   if (!ativos.length) return '';
-  const L = ['*' + nomeBonito(uni).toUpperCase() + '* — ' + lancFmtLongo(dia)];
+  const perda = lancPerdaDe(uni, dia, recep);
+  const L = [
+    '*' + nomeBonito(uni).toUpperCase() + '* — ' + lancFmtLongo(dia),
+    (recep ? 'Recepcionista: *' + esc(recep) + '* | ' : '') + 'Mandados embora: *' + perda + '*',
+    ''
+  ];
+
+  let totAt = 0, totPf = 0, totDem = 0, totQe = 0, totVe = 0, totQp = 0, totVp = 0, totVendas = 0;
+
   ativos.forEach(b => {
-    L.push('*' + b + '*: Atend: ' + lancN(lancVal(uni, dia, recep, b, 'at')) + ' | Vendas: ' + lancR$(lancTotalB(uni, dia, recep, b)));
+    const at = lancVal(uni, dia, recep, b, 'at');
+    const pf = lancVal(uni, dia, recep, b, 'pf');
+    const dem = Math.max(0, at - pf);
+    const qe = lancVal(uni, dia, recep, b, 'qe');
+    const ve = lancVal(uni, dia, recep, b, 've');
+    const qp = lancVal(uni, dia, recep, b, 'qp');
+    const vp = lancVal(uni, dia, recep, b, 'vp');
+    const vendas = lancTotalB(uni, dia, recep, b);
+
+    totAt += at; totPf += pf; totDem += dem;
+    totQe += qe; totVe += ve; totQp += qp; totVp += vp;
+    totVendas += vendas;
+
+    L.push('*' + b + '*');
+    L.push('• Atendimentos: ' + lancN(at) + ' | Preferência: ' + lancN(pf) + ' | Demanda: ' + lancN(dem));
+    L.push('• Serviços Extras: ' + lancN(qe) + ' (' + lancR$(ve) + ')');
+    L.push('• Produtos Vendidos: ' + lancN(qp) + ' (' + lancR$(vp) + ')');
+    L.push('• Total Vendas: ' + lancR$(vendas));
+    L.push('');
   });
-  L.push('', '#BB2 ' + dia + '|' + uni + '|' + (recep || '-') + '|' + lancPerdaDe(uni, dia, recep) + '|' + ativos.map(b => b + ';' + LANC_COLS.map(c => lancVal(uni, dia, recep, b, c.k)).join(';')).join('|'));
+
+  L.push('----------------------------------------');
+  L.push('*TOTAL ' + nomeBonito(uni).toUpperCase() + '*');
+  L.push('• Atendimentos: ' + lancN(totAt) + ' | Preferência: ' + lancN(totPf) + ' | Demanda: ' + lancN(totDem));
+  L.push('• Extras: ' + lancN(totQe) + ' (' + lancR$(totVe) + ') | Produtos: ' + lancN(totQp) + ' (' + lancR$(totVp) + ')');
+  L.push('• Faturamento Total Vendas: ' + lancR$(totVendas));
+  if (perda > 0) L.push('• Clientes Mandados embora: ' + lancN(perda));
+  L.push('');
+  L.push('#BB2 ' + dia + '|' + uni + '|' + (recep || '-') + '|' + perda + '|' + ativos.map(b => b + ';' + LANC_COLS.map(c => lancVal(uni, dia, recep, b, c.k)).join(';')).join('|'));
   return L.join('\n');
 }
 
