@@ -431,6 +431,68 @@ tr.perdido{opacity:.45}
 .ass-dias{font-family:"IBM Plex Mono",monospace;text-align:right;font-size:12px}
 .ass-zap{background:rgba(37,211,102,.1);color:#25d366;border:1px solid rgba(37,211,102,.25);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;text-decoration:none;display:inline-block}
 .ass-zap:hover{background:rgba(37,211,102,.2)}
+
+/* ================= DASHBOARD DINÂMICO & ANALYTICS ================= */
+.perf-grid-top{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:16px; margin-top:16px}
+@media (max-width:1024px){.perf-grid-top{grid-template-columns:1fr}}
+
+.chart-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px; position:relative; overflow:hidden; display:flex; flex-direction:column}
+.chart-card-h{display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; gap:8px}
+.chart-card-h .tit{font-size:14px; font-weight:600; color:var(--ink); margin:0}
+.chart-card-h .sub{font-size:11.5px; color:var(--ink3); margin-top:2px}
+
+.chart-svg-wrap{width:100%; position:relative; overflow:hidden}
+.chart-legend{display:flex; flex-wrap:wrap; gap:14px; margin-top:12px; font-size:11.5px; color:var(--ink2)}
+.chart-legend-item{display:inline-flex; align-items:center; gap:6px}
+.chart-legend-dot{width:9px; height:9px; border-radius:50%}
+
+/* Collaborator Dynamic Cards Grid */
+.colab-section-h{display:flex; align-items:center; justify-content:space-between; margin:22px 0 12px; flex-wrap:wrap; gap:10px}
+.colab-section-h h2{font-size:16px; font-weight:600; color:var(--ink)}
+.colab-cards-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:16px}
+@media (max-width:480px){.colab-cards-grid{grid-template-columns:1fr}}
+
+.colab-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px; transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease; position:relative; overflow:hidden; display:flex; flex-direction:column}
+.colab-card:hover{transform:translateY(-2px); border-color:var(--brass-dim); box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.colab-card.perf-top{border-color:var(--brass); background:linear-gradient(180deg, rgba(201,151,43,.08) 0%, var(--surface) 100%)}
+
+.colab-header{display:flex; align-items:center; gap:12px; margin-bottom:12px}
+.colab-avatar{width:42px; height:42px; border-radius:50%; background:var(--surface2); border:2px solid var(--brass); display:flex; align-items:center; justify-content:center; font-family:"Cinzel",Georgia,serif; font-weight:700; font-size:16px; color:var(--brass-light); flex-shrink:0}
+.colab-info{flex:1; min-width:0}
+.colab-info .nome{font-size:14.5px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.colab-info .meta{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink3); margin-top:2px}
+.colab-rank-badge{padding:3px 9px; border-radius:8px; font-size:11px; font-weight:600; white-space:nowrap; flex-shrink:0}
+.colab-rank-1{background:rgba(201,151,43,.2); color:var(--brass-light); border:1px solid var(--brass)}
+.colab-rank-2{background:rgba(184,169,142,.15); color:var(--ink2); border:1px solid var(--ink3)}
+.colab-rank-3{background:rgba(140,100,21,.15); color:var(--brass-dim); border:1px solid var(--brass-dim)}
+.colab-rank-other{background:var(--surface2); color:var(--ink3)}
+
+.colab-big-total{margin:8px 0 12px; padding:10px 14px; background:var(--surface2); border-radius:8px; display:flex; align-items:center; justify-content:space-between}
+.colab-big-total .lbl{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink3)}
+.colab-big-total .val{font-size:17px; font-weight:700; color:var(--brass-light)}
+
+.colab-spark-box{background:rgba(0,0,0,.2); border-radius:8px; padding:8px 10px; margin-bottom:12px}
+.colab-spark-h{display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink3); margin-bottom:4px}
+
+.colab-metrics-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; margin-bottom:14px}
+.colab-metric-pill{padding:8px 10px; background:var(--surface2); border-radius:8px; font-size:11px}
+.colab-metric-pill .lbl{color:var(--ink3); font-size:10px; text-transform:uppercase; margin-bottom:2px}
+.colab-metric-pill .val{font-size:12.5px; font-weight:600; color:var(--ink); font-family:"IBM Plex Mono",monospace}
+.colab-metric-pill.m-baixas{border-left:3px solid var(--brass)}
+.colab-metric-pill.m-resgates{border-left:3px solid var(--ok)}
+.colab-metric-pill.m-vendas{border-left:3px solid var(--info)}
+.colab-metric-pill.m-contatos{border-left:3px solid #a29bfe}
+
+.colab-actions{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto; border-top:1px solid var(--line); padding-top:12px}
+.colab-comissao{font-size:11.5px; color:var(--ink2)}
+.colab-comissao b{color:var(--ok)}
+
+/* Detalhes do Usuário no Modal */
+.modal-dash-top{display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:16px}
+.modal-feed{max-height:220px; overflow-y:auto; border:1px solid var(--line); border-radius:8px; background:var(--surface2)}
+.modal-feed-item{display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--line); font-size:12px}
+.modal-feed-item:last-child{border-bottom:0}
+.modal-feed-item .tag{font-size:10px; padding:2px 6px; border-radius:4px; font-weight:600}
 </style>
 
 </head>
@@ -715,8 +777,8 @@ tr.perdido{opacity:.45}
   </div>
 
   <!-- ============ DESEMPENHO ============ -->
-  <div class="cols" id="view-performance" hidden>
-    <main class="panel">
+  <div id="view-performance" hidden>
+    <main class="panel" style="padding:20px">
       <div class="perf-filtros">
         <div class="seg" id="seg-perf">
           <button type="button" data-per="hoje">Hoje</button>
@@ -731,12 +793,51 @@ tr.perdido{opacity:.45}
         <button class="btn btn-sm" id="perf-atualizar" type="button">Atualizar</button>
         <button class="btn btn-sm btn-ghost" id="btn-perf-voltar" type="button">← Voltar</button>
       </div>
+
       <div class="kpis" id="perf-kpis"></div>
-      <div class="panel" style="margin-top:16px">
-        <div class="panel-h"><h2>Ranking da recepção</h2><span class="hint" id="perf-periodo-label"></span></div>
-        <div class="panel-b perf-scroll"><table class="perf-table" id="perf-ranking"></table></div>
+
+      <!-- Gráficos Dinâmicos Executivos (Linha e Donut) -->
+      <div class="perf-grid-top">
+        <div class="chart-card">
+          <div class="chart-card-h">
+            <div>
+              <h3 class="tit">Evolução Diária de Desempenho</h3>
+              <div class="sub">Recuperação e ações diárias registradas pela equipe</div>
+            </div>
+            <span class="hint mono" id="chart-line-total" style="font-weight:600;color:var(--brass-light)"></span>
+          </div>
+          <div class="chart-svg-wrap" id="perf-chart-line"></div>
+          <div class="chart-legend">
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--brass)"></span> Baixas (Inadimplentes)</div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--ok)"></span> Resgates (Retorno)</div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--info)"></span> Novas Vendas</div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#a29bfe"></span> Contatos Feitos</div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-h">
+            <div>
+              <h3 class="tit">Matriz de Composição</h3>
+              <div class="sub">Distribuição do volume recuperado e ações</div>
+            </div>
+          </div>
+          <div class="chart-svg-wrap" id="perf-chart-donut" style="min-height:200px;display:flex;align-items:center;justify-content:center"></div>
+          <div class="chart-legend" id="perf-donut-legend" style="justify-content:center"></div>
+        </div>
       </div>
-      <section class="panel" style="margin-top:16px">
+
+      <!-- Seção: Dashboard dos Colaboradores com Gráficos Individuais -->
+      <div class="colab-section-h">
+        <div>
+          <h2>Dashboard dos Colaboradores</h2>
+          <span class="hint" id="perf-periodo-label"></span>
+        </div>
+      </div>
+      <div class="colab-cards-grid" id="perf-cards-grid"></div>
+
+      <!-- Seção: Comissões e Detalhamento -->
+      <section class="panel" style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px">
         <div class="panel-h"><h2>Comissão sobre resgates</h2><span class="hint">% sobre o valor dos clientes que voltaram</span></div>
         <div class="panel-b">
           <div class="perf-comissao-filtro">
@@ -748,20 +849,77 @@ tr.perdido{opacity:.45}
           <table class="perf-table" id="perf-comissao-tbl"></table>
         </div>
       </section>
+
+      <!-- Seção: Tabelas de Apoio (Execução por dia e Unidade) -->
+      <div class="perf-grid-top" style="margin-top:20px" id="perf-tabelas-apoio">
+        <section class="chart-card">
+          <div class="chart-card-h">
+            <h3 class="tit">Execução por Dia</h3>
+            <span class="hint">baixas · resgates · contatos</span>
+          </div>
+          <div class="perf-scroll"><table class="perf-table" id="perf-series"></table></div>
+        </section>
+        <section class="chart-card">
+          <div class="chart-card-h">
+            <h3 class="tit">Distribuição por Unidade</h3>
+          </div>
+          <div class="perf-scroll"><table class="perf-table" id="perf-unis"></table></div>
+        </section>
+      </div>
     </main>
-    <aside class="rail">
-      <section class="panel">
-        <div class="panel-h"><h2>Execução por dia</h2><span class="hint">baixas · resgates · contatos</span></div>
-        <div class="panel-b perf-scroll"><table class="perf-table" id="perf-series"></table></div>
-      </section>
-      <section class="panel">
-        <div class="panel-h"><h2>Por unidade</h2></div>
-        <div class="panel-b"><table class="perf-table" id="perf-unis"></table></div>
-      </section>
-    </aside>
   </div>
 
   <p class="foot-note" id="rodape"></p>
+</div>
+
+<!-- modal dashboard individual do colaborador -->
+<div class="modal" id="m-user-dashboard" hidden>
+  <div class="sheet" style="width:min(840px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-user-dash">
+    <div class="sheet-h">
+      <div>
+        <h2 id="t-user-dash" style="font-size:16px">Dashboard do Colaborador</h2>
+        <span class="hint" id="user-dash-sub"></span>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <div class="modal-dash-top" id="user-dash-kpis"></div>
+      
+      <div class="perf-grid-top" style="margin-top:0;margin-bottom:16px">
+        <div class="chart-card" style="padding:14px">
+          <div class="chart-card-h">
+            <div>
+              <h3 class="tit" style="font-size:13px">Evolução do Colaborador</h3>
+              <div class="sub">Histórico diário de produção</div>
+            </div>
+          </div>
+          <div class="chart-svg-wrap" id="user-dash-chart-line"></div>
+          <div class="chart-legend" style="margin-top:8px">
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--brass)"></span> Baixas</div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--ok)"></span> Resgates</div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--info)"></span> Vendas</div>
+          </div>
+        </div>
+
+        <div class="chart-card" style="padding:14px">
+          <div class="chart-card-h">
+            <div>
+              <h3 class="tit" style="font-size:13px">Share de Ações</h3>
+              <div class="sub">Distribuição da produção</div>
+            </div>
+          </div>
+          <div class="chart-svg-wrap" id="user-dash-chart-donut" style="min-height:160px;display:flex;align-items:center;justify-content:center"></div>
+          <div class="chart-legend" id="user-dash-donut-legend" style="justify-content:center;margin-top:8px"></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:13px;font-weight:600;margin:14px 0 8px;color:var(--ink)">Ações Registradas no Período</h3>
+      <div class="modal-feed" id="user-dash-feed"></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Fechar</button>
+    </div>
+  </div>
 </div>
 
 <!-- modal upload inadimplentes -->
@@ -3580,35 +3738,67 @@ function periodoPreset(per) {
   return { de: hoje.slice(0, 7) + '-01', ate: hoje };
 }
 function isoNoPeriodo(d, de, ate) { return d && d >= de && d <= ate; }
+
 function computarPerformance(de, ate, unidade) {
   const clientes = daUnidade(listaBase(), unidade);
-  const baixas = {}, resgates = {}, contatos = {};
-  let valorBaixas = 0, valorResgates = 0;
-  const series = {}, porUni = {};
-  const addUni = (u, k) => { u = u || 'Sem unidade'; (porUni[u] = porUni[u] || { b: 0, r: 0 })[k]++; };
+  const baixas = {}, resgates = {}, contatos = {}, vendas = {};
+  let valorBaixas = 0, valorResgates = 0, valorVendas = 0;
+  const series = {}, seriesPorUsuario = {}, acoesPorUsuario = {}, porUni = {};
+
+  const initDia = (s, dia) => {
+    s[dia] = s[dia] || { baixas: 0, resgates: 0, contatos: 0, vendas: 0, vBaixas: 0, vResgates: 0, vVendas: 0, total: 0 };
+    return s[dia];
+  };
+  const addAcao = (nome, acao) => {
+    (acoesPorUsuario[nome] = acoesPorUsuario[nome] || []).push(acao);
+  };
+  const addUni = (u, k) => {
+    u = u || 'Sem unidade';
+    (porUni[u] = porUni[u] || { b: 0, r: 0, v: 0 })[k]++;
+  };
+
   for (const c of clientes) {
     if (c.baixa && isoNoPeriodo(c.baixa.data, de, ate)) {
       const nome = (c.baixa.por || '').trim() || 'sem registro';
       baixas[nome] = baixas[nome] || { baixas: 0, valor: 0 };
-      baixas[nome].baixas++; baixas[nome].valor += (c.valor || 0);
-      valorBaixas += (c.valor || 0);
+      const v = (c.valor || 0);
+      baixas[nome].baixas++;
+      baixas[nome].valor += v;
+      valorBaixas += v;
       addUni(c.unidade, 'b');
+      
       const dia = c.baixa.data;
-      series[dia] = series[dia] || { baixas: 0, resgates: 0, contatos: 0 };
-      series[dia].baixas++;
+      const sDia = initDia(series, dia);
+      sDia.baixas++; sDia.vBaixas += v; sDia.total += v;
+
+      seriesPorUsuario[nome] = seriesPorUsuario[nome] || {};
+      const uDia = initDia(seriesPorUsuario[nome], dia);
+      uDia.baixas++; uDia.vBaixas += v; uDia.total += v;
+
+      addAcao(nome, { tipo: 'baixa', data: dia, cliente: c.nome, plano: c.plano, valor: v, unidade: c.unidade, detalhe: 'Baixa de inadimplente' });
     }
   }
+
   const canc = daUnidadeC(listaCanc(), unidade);
   for (const c of canc) {
     if (c.situacao === 'resgatado' && isoNoPeriodo(c.resgatadoEm, de, ate)) {
       const nome = (c.resgatadoPor || '').trim() || 'sem registro';
       resgates[nome] = resgates[nome] || { resgates: 0, valor: 0 };
-      resgates[nome].resgates++; resgates[nome].valor += (c.valor || 0);
-      valorResgates += (c.valor || 0);
+      const v = (c.valor || 0);
+      resgates[nome].resgates++;
+      resgates[nome].valor += v;
+      valorResgates += v;
       addUni(c.unidade, 'r');
+
       const dia = c.resgatadoEm;
-      series[dia] = series[dia] || { baixas: 0, resgates: 0, contatos: 0 };
-      series[dia].resgates++;
+      const sDia = initDia(series, dia);
+      sDia.resgates++; sDia.vResgates += v; sDia.total += v;
+
+      seriesPorUsuario[nome] = seriesPorUsuario[nome] || {};
+      const uDia = initDia(seriesPorUsuario[nome], dia);
+      uDia.resgates++; uDia.vResgates += v; uDia.total += v;
+
+      addAcao(nome, { tipo: 'resgate', data: dia, cliente: c.nome, plano: c.plano, valor: v, unidade: c.unidade, detalhe: 'Cliente cancelado resgatado' });
     }
     for (const t of (c.toques || [])) {
       if (isoNoPeriodo(t.data, de, ate) && t.resultado) {
@@ -3616,23 +3806,223 @@ function computarPerformance(de, ate, unidade) {
         contatos[nome] = contatos[nome] || { contatos: 0, voltou: 0 };
         contatos[nome].contatos++;
         if (t.resultado === 'voltou') contatos[nome].voltou++;
+
         const dia = t.data;
-        series[dia] = series[dia] || { baixas: 0, resgates: 0, contatos: 0 };
-        series[dia].contatos++;
+        const sDia = initDia(series, dia);
+        sDia.contatos++;
+
+        seriesPorUsuario[nome] = seriesPorUsuario[nome] || {};
+        const uDia = initDia(seriesPorUsuario[nome], dia);
+        uDia.contatos++;
+
+        addAcao(nome, { tipo: 'contato', data: dia, cliente: c.nome, plano: c.plano, valor: 0, unidade: c.unidade, detalhe: 'Contato (' + t.resultado + ')' });
       }
     }
   }
-  const vendas = {}; let valorVendas = 0;
+
   for (const c of daUnidade(listaVendas(), unidade)) {
     if (isoNoPeriodo(c.data, de, ate)) {
       const nome = (c.por || '').trim() || 'sem registro';
       vendas[nome] = vendas[nome] || { vendas: 0, valor: 0 };
-      vendas[nome].vendas++; vendas[nome].valor += (c.valor || 0);
-      valorVendas += (c.valor || 0);
+      const v = (c.valor || 0);
+      vendas[nome].vendas++;
+      vendas[nome].valor += v;
+      valorVendas += v;
+      addUni(c.unidade, 'v');
+
+      const dia = c.data;
+      const sDia = initDia(series, dia);
+      sDia.vendas++; sDia.vVendas += v; sDia.total += v;
+
+      seriesPorUsuario[nome] = seriesPorUsuario[nome] || {};
+      const uDia = initDia(seriesPorUsuario[nome], dia);
+      uDia.vendas++; uDia.vVendas += v; uDia.total += v;
+
+      addAcao(nome, { tipo: 'venda', data: dia, cliente: c.nome, plano: c.plano, valor: v, unidade: c.unidade, detalhe: 'Nova venda de plano' });
     }
   }
-  return { baixas, resgates, contatos, valorBaixas, valorResgates, series, porUni, vendas, valorVendas };
+
+  return {
+    baixas, resgates, contatos, vendas,
+    valorBaixas, valorResgates, valorVendas,
+    series, seriesPorUsuario, acoesPorUsuario, porUni
+  };
 }
+
+/* ================= GERADORES DE GRÁFICOS DINÂMICOS (SVG PURO) ================= */
+function gerarGraficoLinhasSVG(seriesObj, dias, height, idUnico) {
+  if (!dias || !dias.length) return '<div class="hint" style="padding:20px;text-align:center">Sem dados no período</div>';
+  height = height || 200;
+  const width = 640;
+  const padLeft = 40, padRight = 20, padTop = 20, padBottom = 30;
+  const chartW = width - padLeft - padRight;
+  const chartH = height - padTop - padBottom;
+
+  let maxVal = 1;
+  dias.forEach(d => {
+    const s = seriesObj[d] || {};
+    const m = Math.max(s.baixas || 0, s.resgates || 0, s.vendas || 0, s.contatos || 0);
+    if (m > maxVal) maxVal = m;
+  });
+  // arredondar maxVal para escala limpa
+  maxVal = Math.ceil(maxVal * 1.15);
+
+  const getX = (idx) => dias.length <= 1 ? (padLeft + chartW / 2) : (padLeft + (idx / (dias.length - 1)) * chartW);
+  const getY = (val) => padTop + chartH - ((val || 0) / maxVal) * chartH;
+
+  // Gerar caminho suave Bezier
+  const gerarPathBezier = (chave) => {
+    if (!dias.length) return '';
+    const pts = dias.map((d, i) => ({ x: getX(i), y: getY((seriesObj[d] || {})[chave] || 0) }));
+    if (pts.length === 1) return 'M ' + (pts[0].x - 10) + ' ' + pts[0].y + ' L ' + (pts[0].x + 10) + ' ' + pts[0].y;
+    let dStr = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i];
+      const p1 = pts[i + 1];
+      const mx = (p0.x + p1.x) / 2;
+      dStr += ' C ' + mx.toFixed(1) + ' ' + p0.y.toFixed(1) + ', ' + mx.toFixed(1) + ' ' + p1.y.toFixed(1) + ', ' + p1.x.toFixed(1) + ' ' + p1.y.toFixed(1);
+    }
+    return dStr;
+  };
+
+  const pathB = gerarPathBezier('baixas');
+  const pathR = gerarPathBezier('resgates');
+  const pathV = gerarPathBezier('vendas');
+  const pathC = gerarPathBezier('contatos');
+
+  // Gradiente de preenchimento para baixas
+  const areaB = dias.length > 1 ? (pathB + ' L ' + getX(dias.length - 1).toFixed(1) + ' ' + (padTop + chartH) + ' L ' + getX(0).toFixed(1) + ' ' + (padTop + chartH) + ' Z') : '';
+  const areaR = dias.length > 1 ? (pathR + ' L ' + getX(dias.length - 1).toFixed(1) + ' ' + (padTop + chartH) + ' L ' + getX(0).toFixed(1) + ' ' + (padTop + chartH) + ' Z') : '';
+
+  // Linhas de grade horizontal
+  const gridSteps = 3;
+  let gridSvg = '';
+  for (let i = 0; i <= gridSteps; i++) {
+    const val = Math.round((maxVal / gridSteps) * i);
+    const y = getY(val);
+    gridSvg += '<line x1="' + padLeft + '" y1="' + y + '" x2="' + (width - padRight) + '" y2="' + y + '" stroke="var(--line)" stroke-dasharray="3,3" stroke-width="1"/>';
+    gridSvg += '<text x="' + (padLeft - 8) + '" y="' + (y + 4) + '" fill="var(--ink3)" font-size="10" text-anchor="end" font-family="monospace">' + val + '</text>';
+  }
+
+  // Rótulos do eixo X (Amostragem para evitar sobreposição)
+  let xLabelsSvg = '';
+  const stepLabel = Math.max(1, Math.ceil(dias.length / 7));
+  dias.forEach((d, idx) => {
+    if (idx === 0 || idx === dias.length - 1 || idx % stepLabel === 0) {
+      const x = getX(idx);
+      const diaTxt = d.slice(8, 10) + '/' + d.slice(5, 7);
+      xLabelsSvg += '<text x="' + x + '" y="' + (height - 8) + '" fill="var(--ink3)" font-size="10" text-anchor="middle" font-family="monospace">' + diaTxt + '</text>';
+    }
+  });
+
+  // Pontos interativos com tooltip nativo
+  let dotsSvg = '';
+  dias.forEach((d, idx) => {
+    const s = seriesObj[d] || {};
+    const x = getX(idx);
+    if (s.baixas) {
+      const y = getY(s.baixas);
+      dotsSvg += '<circle cx="' + x + '" cy="' + y + '" r="3.5" fill="#C9972B" stroke="var(--surface)" stroke-width="1.5"><title>' + dataBr(d) + ': ' + s.baixas + ' Baixas (' + brl(s.vBaixas || 0) + ')</title></circle>';
+    }
+    if (s.resgates) {
+      const y = getY(s.resgates);
+      dotsSvg += '<circle cx="' + x + '" cy="' + y + '" r="3.5" fill="#5FA97E" stroke="var(--surface)" stroke-width="1.5"><title>' + dataBr(d) + ': ' + s.resgates + ' Resgates (' + brl(s.vResgates || 0) + ')</title></circle>';
+    }
+    if (s.vendas) {
+      const y = getY(s.vendas);
+      dotsSvg += '<circle cx="' + x + '" cy="' + y + '" r="3.5" fill="#4A90E2" stroke="var(--surface)" stroke-width="1.5"><title>' + dataBr(d) + ': ' + s.vendas + ' Vendas (' + brl(s.vVendas || 0) + ')</title></circle>';
+    }
+  });
+
+  const gradId = 'grad-' + (idUnico || Math.random().toString(36).slice(2));
+
+  return '<svg viewBox="0 0 ' + width + ' ' + height + '" width="100%" height="' + height + '" style="overflow:visible">' +
+    '<defs>' +
+      '<linearGradient id="' + gradId + '-b" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="#C9972B" stop-opacity="0.3"/>' +
+        '<stop offset="100%" stop-color="#C9972B" stop-opacity="0.0"/>' +
+      '</linearGradient>' +
+      '<linearGradient id="' + gradId + '-r" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="#5FA97E" stop-opacity="0.25"/>' +
+        '<stop offset="100%" stop-color="#5FA97E" stop-opacity="0.0"/>' +
+      '</linearGradient>' +
+    '</defs>' +
+    gridSvg +
+    (areaB ? '<path d="' + areaB + '" fill="url(#' + gradId + '-b)"/>' : '') +
+    (areaR ? '<path d="' + areaR + '" fill="url(#' + gradId + '-r)"/>' : '') +
+    (pathC ? '<path d="' + pathC + '" fill="none" stroke="#a29bfe" stroke-width="1.8" stroke-dasharray="4,4" opacity="0.6"/>' : '') +
+    (pathB ? '<path d="' + pathB + '" fill="none" stroke="#C9972B" stroke-width="2.5" stroke-linecap="round"/>' : '') +
+    (pathR ? '<path d="' + pathR + '" fill="none" stroke="#5FA97E" stroke-width="2.5" stroke-linecap="round"/>' : '') +
+    (pathV ? '<path d="' + pathV + '" fill="none" stroke="#4A90E2" stroke-width="2" stroke-linecap="round"/>' : '') +
+    dotsSvg +
+    xLabelsSvg +
+  '</svg>';
+}
+
+function gerarGraficoDonutSVG(slices, totalValor, totalRotulo) {
+  const total = slices.reduce((acc, s) => acc + (s.valor || 0), 0);
+  if (total <= 0) {
+    return '<div class="hint" style="padding:30px;text-align:center">Nenhuma movimentação registrada no período.</div>';
+  }
+  const size = 180, radius = 60, strokeWidth = 22;
+  const center = size / 2;
+  const circ = 2 * Math.PI * radius;
+  let offset = 0;
+
+  const paths = slices.map(s => {
+    if (!s.valor) return '';
+    const pct = s.valor / total;
+    const dash = pct * circ;
+    const svgSlice = '<circle cx="' + center + '" cy="' + center + '" r="' + radius + '" fill="transparent" ' +
+      'stroke="' + s.cor + '" stroke-width="' + strokeWidth + '" ' +
+      'stroke-dasharray="' + dash.toFixed(2) + ' ' + (circ - dash).toFixed(2) + '" ' +
+      'stroke-dashoffset="' + (-offset).toFixed(2) + '" ' +
+      'transform="rotate(-90 ' + center + ' ' + center + ')">' +
+      '<title>' + esc(s.label) + ': ' + (s.isCurrency ? brl(s.valor) : s.valor) + ' (' + (pct * 100).toFixed(1) + '%)</title>' +
+      '</circle>';
+    offset += dash;
+    return svgSlice;
+  }).join('');
+
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' +
+    '<circle cx="' + center + '" cy="' + center + '" r="' + radius + '" fill="transparent" stroke="var(--surface3)" stroke-width="' + strokeWidth + '"/>' +
+    paths +
+    '<text x="' + center + '" y="' + (center - 6) + '" text-anchor="middle" font-size="11" fill="var(--ink3)" text-transform="uppercase" letter-spacing="0.05em">' + esc(totalRotulo || 'Total') + '</text>' +
+    '<text x="' + center + '" y="' + (center + 14) + '" text-anchor="middle" font-size="13" font-weight="700" fill="var(--brass-light)" font-family="monospace">' + (typeof totalValor === 'string' ? totalValor : brl(totalValor || total)) + '</text>' +
+  '</svg>';
+}
+
+function gerarSparklineSVG(seriesColab, dias, cor) {
+  cor = cor || '#C9972B';
+  if (!dias || dias.length < 2) return '';
+  const w = 240, h = 32, pad = 3;
+  let maxV = 1;
+  dias.forEach(d => {
+    const s = seriesColab[d] || {};
+    const tot = (s.baixas || 0) + (s.resgates || 0) + (s.vendas || 0);
+    if (tot > maxV) maxV = tot;
+  });
+  const getX = (i) => pad + (i / (dias.length - 1)) * (w - 2 * pad);
+  const getY = (v) => (h - pad) - ((v || 0) / maxV) * (h - 2 * pad);
+
+  let dStr = 'M ' + getX(0).toFixed(1) + ' ' + getY((seriesColab[dias[0]] || {}).total || 0).toFixed(1);
+  for (let i = 0; i < dias.length - 1; i++) {
+    const p0 = { x: getX(i), y: getY(((seriesColab[dias[i]] || {}).baixas || 0) + ((seriesColab[dias[i]] || {}).resgates || 0)) };
+    const p1 = { x: getX(i + 1), y: getY(((seriesColab[dias[i + 1]] || {}).baixas || 0) + ((seriesColab[dias[i + 1]] || {}).resgates || 0)) };
+    const mx = (p0.x + p1.x) / 2;
+    dStr += ' C ' + mx.toFixed(1) + ' ' + p0.y.toFixed(1) + ', ' + mx.toFixed(1) + ' ' + p1.y.toFixed(1) + ', ' + p1.x.toFixed(1) + ' ' + p1.y.toFixed(1);
+  }
+  const area = dStr + ' L ' + (w - pad) + ' ' + h + ' L ' + pad + ' ' + h + ' Z';
+
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" preserveAspectRatio="none">' +
+    '<path d="' + area + '" fill="' + cor + '" fill-opacity="0.15"/>' +
+    '<path d="' + dStr + '" fill="none" stroke="' + cor + '" stroke-width="1.8" stroke-linecap="round"/>' +
+  '</svg>';
+}
+
+/* ================= RENDER PERFORMANCE & DASHBOARDS ================= */
+let CACHE_PERF_GLOBAL = null;
+
 async function abrirPerformance() {
   TELA_PERF = true;
   const s = sessaoAtual() || {};
@@ -3650,7 +4040,9 @@ async function abrirPerformance() {
   setPerfPeriod(PERF_PER || 'mes');
   render();
 }
+
 function sairPerformance() { TELA_PERF = false; render(); }
+
 function setPerfPeriod(per) {
   PERF_PER = per;
   const { de, ate } = periodoPreset(per);
@@ -3659,6 +4051,7 @@ function setPerfPeriod(per) {
   document.querySelectorAll('#seg-perf button').forEach(b => b.classList.toggle('on', b.dataset.per === per));
   renderPerformance();
 }
+
 async function renderPerformance() {
   const s = sessaoAtual() || {};
   const isRecep = (s.perfil === 'recepcionista');
@@ -3676,8 +4069,14 @@ async function renderPerformance() {
   const unidade = unidadeSel.value || 'REDE';
   TELA_PERF_UNI = unidade;
   const c = computarPerformance(de, ate, unidade);
+  CACHE_PERF_GLOBAL = { c, de, ate, unidade };
   const usuarios = await carregarUsuarios();
   
+  // Lista de dias do período
+  const dias = [];
+  let curD = de; let guard = 0;
+  while (curD <= ate && guard < 400) { dias.push(curD); curD = somarDias(curD, 1); guard++; }
+
   if (isRecep) {
     document.getElementById('perf-periodo-label').textContent =
       'Minhas métricas (' + esc(s.nome) + ') · De ' + dataBr(de) + ' a ' + dataBr(ate);
@@ -3693,75 +4092,153 @@ async function renderPerformance() {
   const myC = isRecep ? ((c.contatos[s.nome] || {}).contatos || 0) : Object.values(c.contatos).reduce((a, x) => a + x.contatos, 0);
   const myV = isRecep ? ((c.vendas[s.nome] || {}).vendas || 0) : Object.values(c.vendas).reduce((a, x) => a + x.vendas, 0);
   const myVV = isRecep ? ((c.vendas[s.nome] || {}).valor || 0) : c.valorVendas;
+  const totalGeralRecuperado = myVB + myVR + myVV;
 
+  // 1. Render Top KPIs
   const kpis = document.getElementById('perf-kpis');
   const cards = [
     { lab: isRecep ? 'Minhas baixas de inadimplentes' : 'Baixas de inadimplentes', val: String(myB), foot: brl(myVB) + ' recuperado' },
     { lab: isRecep ? 'Meus resgates de clientes' : 'Resgates (clientes voltaram)', val: String(myR), foot: brl(myVR) + ' de volta' },
     { lab: isRecep ? 'Meus contatos registrados' : 'Contatos registrados', val: String(myC), foot: 'ligações na fila de resgate' },
     { lab: isRecep ? 'Minhas novas vendas' : 'Novas vendas', val: String(myV), foot: brl(myVV) + ' em planos' },
-    { lab: isRecep ? 'Meu total recuperado' : 'Valor total recuperado', val: brl(myVB + myVR + myVV), foot: 'baixas + resgates + vendas' }
+    { lab: isRecep ? 'Meu total recuperado' : 'Valor total recuperado', val: brl(totalGeralRecuperado), foot: 'baixas + resgates + vendas' }
   ];
   kpis.innerHTML = cards.map(k =>
     '<div class="kpi"><span class="lab">' + esc(k.lab) + '</span><span class="val num">' + esc(k.val) +
     '</span><span class="foot">' + esc(k.foot) + '</span></div>').join('');
 
+  // 2. Render Gráficos Dinâmicos do Topo
+  const chartLineWrap = document.getElementById('perf-chart-line');
+  const chartLineTotal = document.getElementById('chart-line-total');
+  if (chartLineWrap) {
+    const sGlobal = isRecep ? (c.seriesPorUsuario[s.nome] || {}) : c.series;
+    chartLineWrap.innerHTML = gerarGraficoLinhasSVG(sGlobal, dias, 210, 'perf-main');
+    if (chartLineTotal) chartLineTotal.textContent = brl(totalGeralRecuperado);
+  }
+
+  const chartDonutWrap = document.getElementById('perf-chart-donut');
+  const donutLegend = document.getElementById('perf-donut-legend');
+  if (chartDonutWrap) {
+    const slices = [
+      { label: 'Baixas (Inadimplência)', valor: myVB, cor: '#C9972B', isCurrency: true },
+      { label: 'Resgates (Retorno)', valor: myVR, cor: '#5FA97E', isCurrency: true },
+      { label: 'Novas Vendas', valor: myVV, cor: '#4A90E2', isCurrency: true }
+    ];
+    chartDonutWrap.innerHTML = gerarGraficoDonutSVG(slices, totalGeralRecuperado, 'Recuperado');
+    if (donutLegend) {
+      donutLegend.innerHTML = slices.map(sl =>
+        '<div class="chart-legend-item"><span class="chart-legend-dot" style="background:' + sl.cor + '"></span> ' +
+        esc(sl.label) + ': <b>' + brl(sl.valor) + '</b></div>'
+      ).join('');
+    }
+  }
+
+  // 3. Mapear colaboradores e suas estatísticas completas
   const nomes = new Map();
   if (isRecep) {
     if (s.nome) nomes.set(s.nome, true);
   } else {
-    Object.values(usuarios).forEach(u => { if (u.perfil !== 'admin') { const n = (u.nome || '').trim(); if (n) nomes.set(n, true); } });
+    Object.values(usuarios).forEach(u => {
+      if (u.perfil !== 'admin') {
+        const n = (u.nome || '').trim();
+        if (n) nomes.set(n, true);
+      }
+    });
     Object.keys(c.baixas).forEach(n => { if (n) nomes.set(n, true); });
     Object.keys(c.resgates).forEach(n => { if (n) nomes.set(n, true); });
     Object.keys(c.contatos).forEach(n => { if (n) nomes.set(n, true); });
     Object.keys(c.vendas).forEach(n => { if (n) nomes.set(n, true); });
   }
 
+  const pct = parseFloat(document.getElementById('perf-comissao').value);
+  PERF_COMISSAO = isNaN(pct) ? 0 : pct;
+
   const linhas = [...nomes.keys()].map(nome => {
     const vb = (c.baixas[nome] || {}).valor || 0;
     const vr = (c.resgates[nome] || {}).valor || 0;
+    const vv = (c.vendas[nome] || {}).valor || 0;
+    const userObj = Object.values(usuarios).find(u => (u.nome || '').trim().toLowerCase() === nome.toLowerCase()) || {};
     return {
       nome,
+      perfil: userObj.perfil || 'recepcionista',
+      unidade: userObj.unidade || 'REDE',
       baixas: (c.baixas[nome] || {}).baixas || 0,
       vBaixas: vb,
       resgates: (c.resgates[nome] || {}).resgates || 0,
       vResgates: vr,
-      total: vb + vr,
       vendas: (c.vendas[nome] || {}).vendas || 0,
+      vVendas: vv,
+      total: vb + vr + vv,
       contatos: (c.contatos[nome] || {}).contatos || 0,
-      voltou: (c.contatos[nome] || {}).voltou || 0
+      voltou: (c.contatos[nome] || {}).voltou || 0,
+      series: c.seriesPorUsuario[nome] || {}
     };
   }).filter(l => l.nome).sort((a, b) => b.total - a.total || b.baixas - a.baixas || b.resgates - a.resgates);
 
-  const maxVB = Math.max(1, ...linhas.map(l => l.vBaixas));
-  const maxVR = Math.max(1, ...linhas.map(l => l.vResgates));
-  const maxT = Math.max(1, ...linhas.map(l => l.total));
-  const rank = document.getElementById('perf-ranking');
-  if (!linhas.length) {
-    rank.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Nenhuma ação registrada no período.</td></tr></tbody>';
-  } else {
-    const colTit = isRecep ? 'Colaborador' : 'Recepcionista';
-    rank.innerHTML = '<thead><tr><th>' + colTit + '</th><th class="num">Baixas</th><th>R$ baixas<br><span class="hint">recuperado</span></th><th class="num">Resgates</th><th>R$ resgates<br><span class="hint">recuperado</span></th><th class="num">Vendas</th><th>Total recuperado</th><th class="num">Contatos</th></tr></thead><tbody>' +
-      linhas.map((l, i) => {
-        const top = i === 0 && l.total > 0 && !isRecep ? ' perf-top' : '';
-        const pb = Math.max(2, Math.round(l.vBaixas / maxVB * 100));
-        const pr = Math.max(2, Math.round(l.vResgates / maxVR * 100));
-        const pt = Math.max(2, Math.round(l.total / maxT * 100));
-        return '<tr class="' + top.trim() + '">' +
-          '<td class="nm">' + esc(l.nome) + (i === 0 && l.total > 0 && !isRecep ? ' 🏆' : '') + '</td>' +
-          '<td class="num">' + l.baixas + '</td>' +
-          '<td><div class="num">' + brl(l.vBaixas) + '</div><span class="perf-bar" style="width:' + pb + '%" title="R$ recuperado em baixas de inadimplentes"></span></td>' +
-          '<td class="num">' + l.resgates + '</td>' +
-          '<td><div class="num">' + brl(l.vResgates) + '</div><span class="perf-bar r" style="width:' + pr + '%" title="R$ recuperado em resgates de cancelados"></span></td>' +
-          '<td class="num' + (l.vendas ? '' : ' badge-zero') + '">' + l.vendas + '</td>' +
-          '<td><div class="num" style="font-weight:600">' + brl(l.total) + '</div><span class="perf-bar" style="width:' + pt + '%;background:linear-gradient(90deg,var(--brass),var(--ok))" title="Total recuperado"></span></td>' +
-          '<td class="num' + (l.contatos ? '' : ' badge-zero') + '">' + l.contatos + '</td>' +
-          '</tr>';
-      }).join('') + '</tbody>';
+  // 4. Render Grid de Cards Individuais Dinâmicos e Espaçosos
+  const cardsGrid = document.getElementById('perf-cards-grid');
+  if (cardsGrid) {
+    if (!linhas.length) {
+      cardsGrid.innerHTML = '<div class="chart-card" style="grid-column:1/-1;text-align:center;color:var(--ink3);padding:30px">Nenhum colaborador com atividade registrada no período.</div>';
+    } else {
+      cardsGrid.innerHTML = linhas.map((l, i) => {
+        const isTop1 = (i === 0 && l.total > 0 && !isRecep);
+        const rankClass = i === 0 ? 'colab-rank-1' : (i === 1 ? 'colab-rank-2' : (i === 2 ? 'colab-rank-3' : 'colab-rank-other'));
+        const rankTxt = i === 0 ? '🏆 1º Lugar' : (i === 1 ? '🥈 2º Lugar' : (i === 2 ? '🥉 3º Lugar' : (i + 1) + 'º Lugar'));
+        const inicial = (l.nome || 'U').charAt(0).toUpperCase();
+        const comissaoVal = l.vResgates * PERF_COMISSAO / 100;
+        const sparkSvg = gerarSparklineSVG(l.series, dias, i === 0 ? '#C9972B' : '#5FA97E');
+        const perfilTag = l.perfil === 'gerente' ? 'Gerente' : ('Recepcionista · ' + nomeBonito(l.unidade));
+
+        return '<div class="colab-card' + (isTop1 ? ' perf-top' : '') + '">' +
+          '<div class="colab-header">' +
+            '<div class="colab-avatar">' + inicial + '</div>' +
+            '<div class="colab-info">' +
+              '<div class="nome">' + esc(l.nome) + '</div>' +
+              '<div class="meta"><span class="chip" style="font-size:10px">' + esc(perfilTag) + '</span></div>' +
+            '</div>' +
+            (!isRecep ? '<span class="colab-rank-badge ' + rankClass + '">' + rankTxt + '</span>' : '') +
+          '</div>' +
+          
+          '<div class="colab-big-total">' +
+            '<span class="lbl">Total Recuperado</span>' +
+            '<span class="val num">' + brl(l.total) + '</span>' +
+          '</div>' +
+
+          (sparkSvg ? '<div class="colab-spark-box">' +
+            '<div class="colab-spark-h"><span>Ritmo de Atividade no Período</span><span class="mono">' + dias.length + ' dias</span></div>' +
+            sparkSvg +
+          '</div>' : '') +
+
+          '<div class="colab-metrics-grid">' +
+            '<div class="colab-metric-pill m-baixas">' +
+              '<div class="lbl">Baixas (' + l.baixas + ')</div>' +
+              '<div class="val">' + brl(l.vBaixas) + '</div>' +
+            '</div>' +
+            '<div class="colab-metric-pill m-resgates">' +
+              '<div class="lbl">Resgates (' + l.resgates + ')</div>' +
+              '<div class="val">' + brl(l.vResgates) + '</div>' +
+            '</div>' +
+            '<div class="colab-metric-pill m-vendas">' +
+              '<div class="lbl">Vendas (' + l.vendas + ')</div>' +
+              '<div class="val">' + brl(l.vVendas) + '</div>' +
+            '</div>' +
+            '<div class="colab-metric-pill m-contatos">' +
+              '<div class="lbl">Contatos (' + l.contatos + ')</div>' +
+              '<div class="val">' + l.voltou + ' voltaram</div>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="colab-actions">' +
+            '<span class="colab-comissao">Comissão: <b>' + brl(comissaoVal) + '</b></span>' +
+            '<button class="btn btn-sm" type="button" onclick="abrirDashboardColaborador(\'' + esc(l.nome).replace(/'/g, "\\'") + '\')">📊 Ver Análise</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
   }
 
-  const pct = parseFloat(document.getElementById('perf-comissao').value);
-  PERF_COMISSAO = isNaN(pct) ? 0 : pct;
+  // 5. Tabela de Comissões
   const comTbl = document.getElementById('perf-comissao-tbl');
   const comLinhas = linhas.filter(l => l.resgates > 0 || l.vResgates > 0);
   if (!comLinhas.length) {
@@ -3780,40 +4257,125 @@ async function renderPerformance() {
     document.getElementById('perf-comissao-total').textContent = (isRecep ? 'Sua comissão calculada: ' : 'Total a pagar em comissões: ') + brl(totCom);
   }
 
+  // 6. Tabelas de Execução por Dia e Por Unidade
   const series = document.getElementById('perf-series');
-  const dias = [];
-  let d = de; let guard = 0;
-  while (d <= ate && guard < 400) { dias.push(d); d = somarDias(d, 1); guard++; }
-  if (!dias.length) {
-    series.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Período inválido.</td></tr></tbody>';
-  } else {
-    const sMax = Math.max(1, ...dias.map(x => (c.series[x] || {}).baixas || 0));
-    series.innerHTML = '<thead><tr><th>Data</th><th class="num">Baixas</th><th class="num">Resgates</th><th class="num">Contatos</th></tr></thead><tbody>' +
-      dias.map(x => {
-        const s = c.series[x] || { baixas: 0, resgates: 0, contatos: 0 };
-        const bw = Math.round((s.baixas || 0) / sMax * 60);
-        return '<tr><td>' + dataBr(x) + '</td>' +
-          '<td class="num">' + (s.baixas || 0) + (s.baixas ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
-          '<td class="num">' + (s.resgates || 0) + '</td>' +
-          '<td class="num">' + (s.contatos || 0) + '</td></tr>';
-      }).join('') + '</tbody>';
+  if (series) {
+    if (!dias.length) {
+      series.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Período inválido.</td></tr></tbody>';
+    } else {
+      const sMax = Math.max(1, ...dias.map(x => (c.series[x] || {}).baixas || 0));
+      series.innerHTML = '<thead><tr><th>Data</th><th class="num">Baixas</th><th class="num">Resgates</th><th class="num">Vendas</th><th class="num">Contatos</th></tr></thead><tbody>' +
+        dias.map(x => {
+          const s = c.series[x] || { baixas: 0, resgates: 0, vendas: 0, contatos: 0 };
+          const bw = Math.round((s.baixas || 0) / sMax * 60);
+          return '<tr><td>' + dataBr(x) + '</td>' +
+            '<td class="num">' + (s.baixas || 0) + (s.baixas ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
+            '<td class="num">' + (s.resgates || 0) + '</td>' +
+            '<td class="num">' + (s.vendas || 0) + '</td>' +
+            '<td class="num">' + (s.contatos || 0) + '</td></tr>';
+        }).join('') + '</tbody>';
+    }
   }
 
   const unis = document.getElementById('perf-unis');
-  const uKeys = Object.keys(c.porUni);
-  if (!uKeys.length) {
-    unis.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Sem dados no período.</td></tr></tbody>';
-  } else {
-    const uMax = Math.max(1, ...uKeys.map(u => (c.porUni[u].b + c.porUni[u].r)));
-    unis.innerHTML = '<thead><tr><th>Unidade</th><th class="num">Baixas</th><th class="num">Resgates</th></tr></thead><tbody>' +
-      uKeys.sort((a, b) => (c.porUni[b].b + c.porUni[b].r) - (c.porUni[a].b + c.porUni[a].r)).map(u => {
-        const x = c.porUni[u];
-        const bw = Math.round(x.b / uMax * 60);
-        return '<tr><td class="nm">' + esc(nomeBonito(u)) + '</td>' +
-          '<td class="num">' + x.b + (x.b ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
-          '<td class="num">' + x.r + (x.r ? '<span class="perf-bar r" style="width:' + Math.min(60, x.r * 12) + 'px"></span>' : '') + '</td></tr>';
-      }).join('') + '</tbody>';
+  if (unis) {
+    const uKeys = Object.keys(c.porUni);
+    if (!uKeys.length) {
+      unis.innerHTML = '<tbody><tr><td style="color:var(--ink3)">Sem dados no período.</td></tr></tbody>';
+    } else {
+      const uMax = Math.max(1, ...uKeys.map(u => (c.porUni[u].b + c.porUni[u].r + (c.porUni[u].v || 0))));
+      unis.innerHTML = '<thead><tr><th>Unidade</th><th class="num">Baixas</th><th class="num">Resgates</th><th class="num">Vendas</th></tr></thead><tbody>' +
+        uKeys.sort((a, b) => (c.porUni[b].b + c.porUni[b].r) - (c.porUni[a].b + c.porUni[a].r)).map(u => {
+          const x = c.porUni[u];
+          const bw = Math.round(x.b / uMax * 60);
+          return '<tr><td class="nm">' + esc(nomeBonito(u)) + '</td>' +
+            '<td class="num">' + x.b + (x.b ? '<span class="perf-bar" style="width:' + bw + 'px"></span>' : '') + '</td>' +
+            '<td class="num">' + x.r + (x.r ? '<span class="perf-bar r" style="width:' + Math.min(60, x.r * 12) + 'px"></span>' : '') + '</td>' +
+            '<td class="num">' + (x.v || 0) + '</td></tr>';
+        }).join('') + '</tbody>';
+    }
   }
+}
+
+/* ================= MODAL DETALHADO DO COLABORADOR ================= */
+function abrirDashboardColaborador(nome) {
+  if (!CACHE_PERF_GLOBAL) return;
+  const { c, de, ate } = CACHE_PERF_GLOBAL;
+  const dias = [];
+  let curD = de; let guard = 0;
+  while (curD <= ate && guard < 400) { dias.push(curD); curD = somarDias(curD, 1); guard++; }
+
+  const b = (c.baixas[nome] || {}).baixas || 0;
+  const vb = (c.baixas[nome] || {}).valor || 0;
+  const r = (c.resgates[nome] || {}).resgates || 0;
+  const vr = (c.resgates[nome] || {}).valor || 0;
+  const v = (c.vendas[nome] || {}).vendas || 0;
+  const vv = (c.vendas[nome] || {}).valor || 0;
+  const ct = (c.contatos[nome] || {}).contatos || 0;
+  const cvol = (c.contatos[nome] || {}).voltou || 0;
+  const tot = vb + vr + vv;
+  const userSeries = c.seriesPorUsuario[nome] || {};
+  const acoes = (c.acoesPorUsuario[nome] || []).sort((a, b) => b.data.localeCompare(a.data));
+
+  document.getElementById('t-user-dash').textContent = 'Dashboard Individual: ' + nome;
+  document.getElementById('user-dash-sub').textContent = 'Período: ' + dataBr(de) + ' até ' + dataBr(ate);
+
+  const kpiEl = document.getElementById('user-dash-kpis');
+  kpiEl.innerHTML = [
+    { lab: 'Total Recuperado', val: brl(tot), cor: 'var(--brass-light)' },
+    { lab: 'Baixas de Inadimplência', val: b + ' (' + brl(vb) + ')', cor: 'var(--brass)' },
+    { lab: 'Clientes Resgatados', val: r + ' (' + brl(vr) + ')', cor: 'var(--ok)' },
+    { lab: 'Novas Vendas', val: v + ' (' + brl(vv) + ')', cor: 'var(--info)' }
+  ].map(kp => '<div class="kpi" style="padding:12px"><span class="lab">' + esc(kp.lab) + '</span><span class="val num" style="font-size:16px;color:' + kp.cor + '">' + esc(kp.val) + '</span></div>').join('');
+
+  // Gráfico de linha individual
+  const lineWrap = document.getElementById('user-dash-chart-line');
+  lineWrap.innerHTML = gerarGraficoLinhasSVG(userSeries, dias, 180, 'user-dash-' + nome.replace(/\s+/g, '-'));
+
+  // Gráfico Donut individual
+  const donutWrap = document.getElementById('user-dash-chart-donut');
+  const donutLegend = document.getElementById('user-dash-donut-legend');
+  const slices = [
+    { label: 'Baixas', valor: vb, cor: '#C9972B', isCurrency: true },
+    { label: 'Resgates', valor: vr, cor: '#5FA97E', isCurrency: true },
+    { label: 'Vendas', valor: vv, cor: '#4A90E2', isCurrency: true }
+  ];
+  donutWrap.innerHTML = gerarGraficoDonutSVG(slices, tot, 'Produção');
+  donutLegend.innerHTML = slices.map(sl =>
+    '<div class="chart-legend-item"><span class="chart-legend-dot" style="background:' + sl.cor + '"></span> ' +
+    esc(sl.label) + ': <b>' + brl(sl.valor) + '</b></div>'
+  ).join('');
+
+  // Feed de Ações
+  const feedEl = document.getElementById('user-dash-feed');
+  if (!acoes.length) {
+    feedEl.innerHTML = '<div class="hint" style="padding:20px;text-align:center">Nenhuma ação detalhada registrada no período.</div>';
+  } else {
+    feedEl.innerHTML = acoes.map(ac => {
+      let tagBg = 'var(--surface3)', tagColor = 'var(--ink)', tagTxt = ac.tipo.toUpperCase();
+      if (ac.tipo === 'baixa') { tagBg = 'rgba(201,151,43,.15)'; tagColor = 'var(--brass-light)'; tagTxt = 'BAIXA'; }
+      if (ac.tipo === 'resgate') { tagBg = 'rgba(0,184,148,.15)'; tagColor = 'var(--ok)'; tagTxt = 'RESGATE'; }
+      if (ac.tipo === 'venda') { tagBg = 'rgba(74,144,226,.15)'; tagColor = 'var(--info)'; tagTxt = 'VENDA'; }
+      if (ac.tipo === 'contato') { tagBg = 'rgba(162,155,254,.15)'; tagColor = '#a29bfe'; tagTxt = 'CONTATO'; }
+
+      return '<div class="modal-feed-item">' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<span class="tag" style="background:' + tagBg + ';color:' + tagColor + '">' + tagTxt + '</span>' +
+          '<div>' +
+            '<strong>' + esc(ac.cliente || 'Cliente') + '</strong> ' +
+            (ac.plano ? '<span class="hint">(' + esc(ac.plano) + ')</span>' : '') +
+            '<div class="hint" style="font-size:11px">' + esc(ac.detalhe || '') + ' · ' + esc(nomeBonito(ac.unidade || '')) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          (ac.valor ? '<div class="num" style="font-weight:600;color:var(--brass-light)">' + brl(ac.valor) + '</div>' : '') +
+          '<div class="hint" style="font-size:10.5px">' + dataBr(ac.data) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('m-user-dashboard').hidden = false;
 }
 
 document.getElementById('btn-perf').onclick = () => { if (TELA_PERF) sairPerformance(); else abrirPerformance(); };
