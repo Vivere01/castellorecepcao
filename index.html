@@ -837,70 +837,34 @@ tr.perdido{opacity:.45}
   <!-- ============ LANÇAMENTO DIÁRIO ============ -->
   <div id="view-lancamento" hidden>
     <main class="panel" style="padding:20px">
-      <!-- Barra de controles -->
+      <!-- Barra de controles globais -->
       <div class="lanc-bar">
         <div>
           <div style="font-family:'Cinzel',Georgia,serif; font-size:16px; font-weight:700; color:var(--brass); letter-spacing:.04em; text-transform:uppercase">Lançamento Diário</div>
-          <div style="font-size:11.5px; color:var(--ink3); margin-top:2px">Preencha os atendimentos e vendas do dia</div>
+          <div style="font-size:11.5px; color:var(--ink3); margin-top:2px">Preencha os atendimentos e vendas do dia por unidade</div>
         </div>
         <div style="display:flex; align-items:center; gap:6px">
           <span style="font-size:11.5px; color:var(--ink3)">Data</span>
           <input type="date" id="lanc-dia" class="field">
-          <button class="btn btn-sm" id="lanc-prev-dia" type="button">◀</button>
-          <button class="btn btn-sm" id="lanc-prox-dia" type="button">▶</button>
+          <button class="btn btn-sm" id="lanc-prev-dia" type="button" title="Dia anterior">◀</button>
+          <button class="btn btn-sm" id="lanc-prox-dia" type="button" title="Próximo dia">▶</button>
           <button class="btn btn-sm" id="lanc-hoje" type="button">Hoje</button>
         </div>
         <div style="display:flex; align-items:center; gap:6px">
-          <span style="font-size:11.5px; color:var(--ink3)">Recepcionista</span>
-          <input type="text" id="lanc-recep" class="field" placeholder="seu nome" style="width:150px">
-          <select id="lanc-recep-select" class="field" style="display:none; width:150px"></select>
+          <span style="font-size:11.5px; color:var(--ink3)">Operador / Recepção</span>
+          <input type="text" id="lanc-recep" class="field" placeholder="seu nome" style="width:160px">
+          <select id="lanc-recep-select" class="field" style="display:none; width:160px"></select>
         </div>
-        <div style="display:flex; align-items:center; gap:6px">
-          <span style="font-size:11.5px; color:var(--ink3)" title="Pessoas que procuraram a barbearia e foram embora sem atendimento">Mandados embora</span>
-          <input type="number" id="lanc-perda" class="field" min="0" step="1" placeholder="0" style="width:70px; text-align:right">
-        </div>
-        <div class="lanc-status" id="lanc-status">—</div>
-      </div>
-
-      <!-- Seletor de unidade (visível só para admin/gerente) -->
-      <div id="lanc-uni-selector" style="display:none; margin-bottom:14px">
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-          <span style="font-size:12px; color:var(--ink2); font-weight:500">Unidade:</span>
-          <div class="seg" id="lanc-seg-uni">
-            <button type="button" data-uni="CABO FRIO">Cabo Frio</button>
-            <button type="button" data-uni="BUZIOS">Búzios</button>
-            <button type="button" data-uni="RIO DAS OSTRAS">Rio das Ostras</button>
-          </div>
-          <button class="btn btn-sm" id="lanc-btn-resumo" type="button">📊 Resumo do dia (todas as lojas)</button>
+        <div id="lanc-gestor-tools" style="margin-left:auto; display:flex; align-items:center; gap:8px">
+          <button class="btn btn-sm btn-primary" id="lanc-btn-resumo" type="button">📊 Resumo Consolidado (todas as lojas)</button>
         </div>
       </div>
 
-      <!-- Tabela de lançamento -->
-      <div class="lanc-card">
-        <div class="lanc-card-h">
-          <h2 id="lanc-titulo">—</h2>
-          <div style="display:flex; gap:8px; align-items:center">
-            <button class="btn btn-sm btn-ghost" id="lanc-btn-limpar" type="button">Limpar dia</button>
-            <button class="btn btn-primary" id="lanc-btn-copiar" type="button">Copiar para WhatsApp</button>
-          </div>
-        </div>
-        <div class="lanc-scroll">
-          <table class="lanc-table" id="lanc-tab"></table>
-        </div>
-        <div class="alert" id="lanc-aviso" style="margin:12px 14px"></div>
-      </div>
-
-      <!-- Prévia da mensagem WhatsApp -->
-      <div class="lanc-card">
-        <div class="lanc-card-h">
-          <h2>Mensagem para o WhatsApp</h2>
-          <span class="sub">confira antes de colar no grupo da barbearia</span>
-        </div>
-        <div class="lanc-prev" id="lanc-prev-msg">—</div>
-      </div>
+      <!-- Container dinâmico com os blocos das unidades (Cabo Frio, Búzios, Rio das Ostras) -->
+      <div id="lanc-blocos-container" style="display:flex; flex-direction:column; gap:22px; margin-top:14px"></div>
 
       <!-- Histórico de dias lançados -->
-      <div class="lanc-card">
+      <div class="lanc-card" style="margin-top:20px">
         <div class="lanc-card-h">
           <h2>Dias já lançados</h2>
           <span class="sub" id="lanc-hist-sub">clique para abrir</span>
@@ -1340,6 +1304,35 @@ tr.perdido{opacity:.45}
     <div class="sheet-f">
       <button class="btn" data-fechar type="button">Fechar</button>
       <button class="btn btn-primary" id="btn-add-user" type="button">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal admin: gerenciar barbeiros -->
+<div class="modal" id="m-barbeiros" hidden>
+  <div class="sheet" style="width:min(520px,100%)" role="dialog" aria-modal="true" aria-labelledby="t-barbeiros">
+    <div class="sheet-h">
+      <div>
+        <h2 id="t-barbeiros">Gerenciar Barbeiros</h2>
+        <span class="hint" id="barbeiros-unidade-sub">Unidade</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-fechar type="button">Fechar</button>
+    </div>
+    <div class="sheet-b">
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:14px;line-height:1.45">
+        Cadastre novos barbeiros ou remova quem saiu desta unidade. A lista é sincronizada automaticamente na nuvem para toda a equipe.
+      </div>
+      <div id="barbeiros-lista" class="stack" style="gap:8px;max-height:260px;overflow-y:auto;padding-right:4px"></div>
+      
+      <hr style="border:0;border-top:1px solid var(--line);margin:16px 0 14px">
+      <h3 style="font-size:13px;margin:0 0 10px;font-weight:600;color:var(--brass-light)">+ Adicionar Barbeiro</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="field" id="nb-nome" placeholder="Nome do barbeiro (Ex.: Lucas)" style="flex:1">
+        <button class="btn btn-primary" id="btn-add-barbeiro" type="button">+ Adicionar</button>
+      </div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" data-fechar type="button">Fechar</button>
     </div>
   </div>
 </div>
@@ -4621,7 +4614,6 @@ function iniciarSincronizacaoPeriodica() {
           normalizarEstado();
           localBackup();
           render();
-          // Atualiza lançamentos se a view estiver aberta
           if (!document.getElementById('view-lancamento').hidden) {
             lancRender();
           }
@@ -4632,21 +4624,12 @@ function iniciarSincronizacaoPeriodica() {
 }
 
 /* ============================================================
-   MÓDULO: LANÇAMENTO DIÁRIO (Isolamento por Usuário / Perfil)
+   MÓDULO: LANÇAMENTO DIÁRIO (Multi-Unidade & Gestão de Barbeiros)
    ============================================================ */
-const LANC_CONFIG = {
-  'CABO FRIO': {
-    barbeiros: ['Fernando', 'Thiago', 'João', 'Pedro'],
-    escala: {} // padrão: segunda a sábado
-  },
-  'BUZIOS': {
-    barbeiros: ['Fernando', 'Mineiro'],
-    escala: { 'Mineiro': [2, 4, 6] } // dias da semana (0=domingo)
-  },
-  'RIO DAS OSTRAS': {
-    barbeiros: ['Diego', 'Rafael', 'Bruno', 'Lucas'],
-    escala: {}
-  }
+const BARBEIROS_DEFAULT = {
+  'CABO FRIO': ['Fernando', 'Thiago', 'João', 'Pedro', 'Areas', 'Caruso', 'Denilson', 'Matheus', 'Mineiro', 'Moura', 'Myson', 'Reis', 'Samuel', 'Wanderson'],
+  'BUZIOS': ['Fernando', 'Mineiro'],
+  'RIO DAS OSTRAS': ['Daniel', 'Jota', 'Lia', 'Max', 'Salatiel', 'Thiago']
 };
 
 const LANC_COLS = [
@@ -4658,10 +4641,79 @@ const LANC_COLS = [
   { k: 'vp', t: 'Produto R$',   tipo: 'r' }
 ];
 
-let lancUni = 'CABO FRIO'; // unidade atual em visualização
-let lancRecepFiltro = ''; // recepcionista selecionada (para admin/gerente)
+let BARBEIRO_UNI_MODAL = 'CABO FRIO';
 
-/* helpers */
+function lancObterBarbeiros(uni) {
+  if (!ESTADO.barbeiros_config) ESTADO.barbeiros_config = {};
+  if (!ESTADO.barbeiros_config[uni] || !Array.isArray(ESTADO.barbeiros_config[uni]) || ESTADO.barbeiros_config[uni].length === 0) {
+    ESTADO.barbeiros_config[uni] = [...(BARBEIROS_DEFAULT[uni] || ['Barbeiro 1'])];
+  }
+  return ESTADO.barbeiros_config[uni];
+}
+
+function lancAbrirGerenciarBarbeiros(uni) {
+  BARBEIRO_UNI_MODAL = uni;
+  document.getElementById('barbeiros-unidade-sub').textContent = 'Unidade ' + nomeBonito(uni);
+  const lista = lancObterBarbeiros(uni);
+  const box = document.getElementById('barbeiros-lista');
+  box.innerHTML = '';
+
+  if (!lista.length) {
+    box.innerHTML = '<div style="font-size:12px;color:var(--ink3);padding:8px 0">Nenhum barbeiro cadastrado nesta unidade.</div>';
+  } else {
+    lista.forEach(b => {
+      const row = document.createElement('div');
+      row.className = 'user-row';
+      row.style.display = 'flex';
+      row.style.justifyContent = 'space-between';
+      row.style.alignItems = 'center';
+      row.style.padding = '8px 12px';
+      row.style.background = 'var(--surface2)';
+      row.style.borderRadius = '8px';
+      row.style.border = '1px solid var(--line)';
+
+      row.innerHTML = '<div style="display:flex;align-items:center;gap:8px">' +
+        '<span style="color:var(--brass);font-weight:600">✂</span>' +
+        '<span style="font-weight:500;font-size:13px;color:var(--ink)">' + esc(b) + '</span>' +
+        '</div>' +
+        '<button class="btn btn-sm btn-ghost" type="button" style="color:var(--bad);font-size:11.5px;padding:3px 8px" title="Remover barbeiro">🗑️ Remover</button>';
+
+      row.querySelector('button').onclick = () => lancRemoverBarbeiro(uni, b);
+      box.appendChild(row);
+    });
+  }
+
+  document.getElementById('nb-nome').value = '';
+  abrirModal('#m-barbeiros');
+}
+
+function lancAdicionarBarbeiro(uni, nome) {
+  if (!nome || !nome.trim()) { toast('Digite o nome do barbeiro.', 'err'); return; }
+  const barbs = lancObterBarbeiros(uni);
+  const normal = nome.trim();
+  if (barbs.some(b => b.toLowerCase() === normal.toLowerCase())) {
+    toast('Barbeiro "' + normal + '" já está cadastrado nesta unidade.', 'err');
+    return;
+  }
+  barbs.push(normal);
+  ESTADO.barbeiros_config[uni] = barbs;
+  agendarSalvar();
+  toast('Barbeiro "' + normal + '" adicionado à unidade ' + nomeBonito(uni) + '.', 'ok');
+  lancAbrirGerenciarBarbeiros(uni);
+  lancRender();
+}
+
+function lancRemoverBarbeiro(uni, nome) {
+  if (!confirm('Deseja realmente remover o barbeiro "' + nome + '" da unidade ' + nomeBonito(uni) + '?')) return;
+  let barbs = lancObterBarbeiros(uni).filter(b => b !== nome);
+  if (!barbs.length) barbs = ['Barbeiro 1'];
+  ESTADO.barbeiros_config[uni] = barbs;
+  agendarSalvar();
+  toast('Barbeiro "' + nome + '" removido.', 'ok');
+  lancAbrirGerenciarBarbeiros(uni);
+  lancRender();
+}
+
 const lancDt  = s => new Date(s + 'T12:00:00');
 const lancIso = d => d.toISOString().slice(0, 10);
 const lancHojeISO = () => {
@@ -4679,10 +4731,9 @@ const lancNum = v => {
   else if (s.includes(',')) s = s.replace(',','.');
   const n = parseFloat(s); return isNaN(n) ? 0 : n;
 };
-const lancR$ = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const lancN  = v => Math.round(v).toLocaleString('pt-BR');
+const lancR$ = v => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const lancN  = v => Math.round(v || 0).toLocaleString('pt-BR');
 
-/* banco de dados (ESTADO.lancamentos) */
 function lancDB() {
   if (!ESTADO.lancamentos) ESTADO.lancamentos = {};
   return ESTADO.lancamentos;
@@ -4691,19 +4742,13 @@ function lancDB() {
 function lancObterRecepAtiva() {
   const s = sessaoAtual();
   const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
-  if (!isGestor) {
-    return s ? s.nome.trim() : 'Recepção';
-  }
-  if (lancRecepFiltro) return lancRecepFiltro;
+  if (!isGestor) return s ? s.nome.trim() : 'Recepção';
   const cx = document.getElementById('lanc-recep');
   return (cx && cx.value.trim()) || (s ? s.nome.trim() : 'Recepção');
 }
 
-const lancKey = (uni, dia, recep, barb) =>
-  uni + '|' + dia + '|' + (recep || 'padrao').toLowerCase().trim() + '|' + barb;
-
-const lancKeyMeta = (uni, dia, recep, tipo) =>
-  uni + '|' + dia + '|' + (recep || 'padrao').toLowerCase().trim() + '|__' + tipo;
+const lancKey = (uni, dia, recep, barb) => uni + '|' + dia + '|' + (recep || 'padrao').toLowerCase().trim() + '|' + barb;
+const lancKeyMeta = (uni, dia, recep, tipo) => uni + '|' + dia + '|' + (recep || 'padrao').toLowerCase().trim() + '|__' + tipo;
 
 const lancReg = (uni, dia, recep, b) => {
   const k = lancKey(uni, dia, recep, b);
@@ -4715,7 +4760,6 @@ const lancVal = (uni, dia, recep, b, c) => {
   const db = lancDB();
   const kNovo = lancKey(uni, dia, recep, b);
   if (db[kNovo] && db[kNovo][c] !== undefined) return db[kNovo][c];
-  // Fallback para lançamentos anteriores sem chave de usuário
   const kLeg = uni + '|' + dia + '|' + b;
   if (db[kLeg] && db[kLeg][c] !== undefined) return db[kLeg][c];
   return 0;
@@ -4727,8 +4771,7 @@ const lancFolga = (uni, dia, recep, b) => {
   if (db[kNovo] && db[kNovo].folga !== undefined) return db[kNovo].folga;
   const kLeg = uni + '|' + dia + '|' + b;
   if (db[kLeg] && db[kLeg].folga !== undefined) return db[kLeg].folga;
-  const escala = (LANC_CONFIG[uni] || {}).escala || {};
-  return !(escala[b] ? escala[b] : [1,2,3,4,5,6]).includes(lancDt(dia).getDay());
+  return false;
 };
 
 const lancRecepNome = (uni, dia, recep) => {
@@ -4750,438 +4793,278 @@ const lancPerdaDe = (uni, dia, recep) => {
 };
 
 const lancAtivos = (uni, dia, recep) => {
-  const cfg = LANC_CONFIG[uni] || {};
-  return (cfg.barbeiros || []).filter(b => !lancFolga(uni, dia, recep, b) && lancVal(uni, dia, recep, b, 'at') > 0);
+  const barbs = lancObterBarbeiros(uni);
+  return barbs.filter(b => !lancFolga(uni, dia, recep, b) && lancVal(uni, dia, recep, b, 'at') > 0);
 };
 
-const lancTotalB = (uni, dia, recep, b) =>
-  lancVal(uni, dia, recep, b, 've') + lancVal(uni, dia, recep, b, 'vp');
-
-const lancDemanda = (uni, dia, recep, b) =>
-  Math.max(0, lancVal(uni, dia, recep, b, 'at') - lancVal(uni, dia, recep, b, 'pf'));
-
-async function lancSalvar() {
-  try {
-    await salvar();
-  } catch(e) {}
-}
+const lancTotalB = (uni, dia, recep, b) => lancVal(uni, dia, recep, b, 've') + lancVal(uni, dia, recep, b, 'vp');
+const lancDemanda = (uni, dia, recep, b) => Math.max(0, lancVal(uni, dia, recep, b, 'at') - lancVal(uni, dia, recep, b, 'pf'));
 
 let lancAtraso = null;
-const lancAtrasar = () => { clearTimeout(lancAtraso); lancAtraso = setTimeout(lancRender, 350); };
-
-/* Lista todas as recepcionistas que lançaram no dia para a unidade */
-function lancRecepcionistasDoDia(uni, dia) {
-  const db = lancDB();
-  const prefixo = uni + '|' + dia + '|';
-  const nomes = new Set();
-  Object.keys(db).forEach(k => {
-    if (k.startsWith(prefixo)) {
-      const parts = k.split('|');
-      if (parts.length >= 4 && !parts[3].startsWith('__')) {
-        const rNome = lancRecepNome(uni, dia, parts[2]) || parts[2];
-        if (rNome && rNome !== 'padrao') nomes.add(rNome);
-      } else if (parts.length === 3 && parts[2] === '__recep' && db[k].nome) {
-        nomes.add(db[k].nome);
-      }
-    }
-  });
-  return [...nomes];
-}
+const lancAtrasar = () => { clearTimeout(lancAtraso); lancAtraso = setTimeout(lancRender, 300); };
 
 function lancRender() {
-  const dia = document.getElementById('lanc-dia').value;
-  if (!dia) return;
-  const s = sessaoAtual();
-  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
-
-  // Isolamento estrito de unidade para recepcionista
-  if (!isGestor && s && s.unidade && s.unidade !== 'todas') {
-    lancUni = s.unidade;
-  }
-
-  const uni = lancUni;
-  const cfg = LANC_CONFIG[uni] || { barbeiros: [] };
-  const recepAtual = isGestor ? lancObterRecepAtiva() : (s ? s.nome.trim() : 'Recepção');
-
-  document.getElementById('lanc-titulo').textContent = nomeBonito(uni) + ' — ' + lancFmtLongo(dia);
+  const diaInput = document.getElementById('lanc-dia');
+  if (!diaInput) return;
+  const dia = diaInput.value || lancHojeISO();
+  const s = sessaoAtual() || {};
+  const isGestor = (s.perfil === 'admin' || s.perfil === 'gerente' || s.unidade === 'todas');
 
   const cxR = document.getElementById('lanc-recep');
-  const selR = document.getElementById('lanc-recep-select');
-
-  if (isGestor) {
-    cxR.readOnly = false;
-    cxR.style.opacity = '1';
-    // Para gestores, preenche dropdown com quem lançou neste dia
-    const recepsDia = lancRecepcionistasDoDia(uni, dia);
-    if (recepsDia.length > 1) {
-      selR.style.display = 'inline-block';
-      selR.innerHTML = recepsDia.map(r => '<option value="' + esc(r) + '" ' + (r.toLowerCase() === recepAtual.toLowerCase() ? 'selected' : '') + '>' + esc(r) + '</option>').join('') +
-        '<option value="__nova">+ Novo lançamento...</option>';
-      selR.onchange = () => {
-        if (selR.value === '__nova') {
-          lancRecepFiltro = '';
-          cxR.value = '';
-          cxR.focus();
-        } else {
-          lancRecepFiltro = selR.value;
-          cxR.value = selR.value;
-        }
-        lancRender();
-      };
-    } else {
-      selR.style.display = 'none';
-    }
-    if (document.activeElement !== cxR) cxR.value = recepAtual;
-  } else {
-    // Para recepcionista: trava o campo com o nome da sua sessão
-    cxR.value = s ? s.nome : 'Recepção';
-    cxR.readOnly = true;
-    cxR.style.opacity = '0.85';
-    cxR.title = 'Lançamento registrado na sua conta (' + (s ? s.nome : '') + ')';
-    selR.style.display = 'none';
+  const recepAtual = isGestor ? lancObterRecepAtiva() : (s.nome ? s.nome.trim() : 'Recepção');
+  if (cxR && document.activeElement !== cxR) {
+    cxR.value = recepAtual;
+    cxR.readOnly = !isGestor;
+    cxR.style.opacity = isGestor ? '1' : '0.85';
   }
 
-  const cxP = document.getElementById('lanc-perda');
-  if (document.activeElement !== cxP) cxP.value = lancPerdaDe(uni, dia, recepAtual) || '';
+  let unidadesVisiveis = isGestor ? ['CABO FRIO', 'BUZIOS', 'RIO DAS OSTRAS'] : [s.unidade || 'CABO FRIO'];
+  const container = document.getElementById('lanc-blocos-container');
+  if (!container) return;
 
-  // Tabela
-  const th = '<tr><th>Barbeiro</th><th>Folga</th>' +
-    LANC_COLS.map(c => '<th>' + c.t + '</th>').join('') +
-    '<th class="calc">Demanda</th><th class="calc">Total vendas</th></tr>';
+  const UNI_ICONS = { 'CABO FRIO': '🏢', 'BUZIOS': '🌊', 'RIO DAS OSTRAS': '🌴' };
+  let html = '';
 
-  const tb = cfg.barbeiros.map(b => {
-    const f = lancFolga(uni, dia, recepAtual, b);
-    return '<tr class="' + (f ? 'folga' : '') + '">' +
-      '<td><b>' + esc(b) + '</b></td>' +
-      '<td style="text-align:center"><input type="checkbox" class="lanc-chk" ' + (f ? 'checked' : '') +
-        ' onchange="lancSetFolga(\'' + esc(uni) + '\',\'' + esc(recepAtual) + '\',\'' + b + '\',this.checked)">' + '</td>' +
-      LANC_COLS.map(c =>
-        '<td><input class="lanc-f ' + (lancVal(uni, dia, recepAtual, b, c.k) ? 'ok' : '') + '" type="number" min="0" step="' +
-          (c.tipo === 'r' ? '0.01' : '1') + '" inputmode="decimal" value="' +
-          (lancVal(uni, dia, recepAtual, b, c.k) || '') + '" placeholder="0" ' +
-          'oninput="lancSet(\'' + esc(uni) + '\',\'' + esc(recepAtual) + '\',\'' + b + '\',\'' + c.k + '\',this.value)"></td>'
-      ).join('') +
-      '<td class="calc">' + (lancVal(uni, dia, recepAtual, b, 'at') ? lancN(lancDemanda(uni, dia, recepAtual, b)) : '—') + '</td>' +
-      '<td class="calc"><b>' + (lancTotalB(uni, dia, recepAtual, b) ? lancR$(lancTotalB(uni, dia, recepAtual, b)) : '—') + '</b></td>' +
-    '</tr>';
-  }).join('');
+  unidadesVisiveis.forEach(uni => {
+    const uniSafe = uni.replace(/\s+/g, '-').toLowerCase();
+    const barbs = lancObterBarbeiros(uni);
+    const perdaVal = lancPerdaDe(uni, dia, recepAtual);
+    const ativos = lancAtivos(uni, dia, recepAtual);
+    const folgas = barbs.filter(b => lancFolga(uni, dia, recepAtual, b)).length;
+    const faltam = Math.max(0, barbs.length - ativos.length - folgas);
 
-  const S = c => cfg.barbeiros.reduce((s, b) => s + lancVal(uni, dia, recepAtual, b, c), 0);
-  const sAt = S('at'), sPf = S('pf'), sTot = S('ve') + S('vp');
-  const tf = '<tr><td>TOTAL DO DIA</td><td></td>' +
-    LANC_COLS.map(c => '<td>' + (c.tipo === 'r' ? lancR$(S(c.k)) : lancN(S(c.k))) + '</td>').join('') +
-    '<td class="calc">' + lancN(Math.max(0, sAt - sPf)) + '</td>' +
-    '<td class="calc">' + lancR$(sTot) + '</td></tr>';
+    const rowsHTML = barbs.map(b => {
+      const f = lancFolga(uni, dia, recepAtual, b);
+      const totalB = lancTotalB(uni, dia, recepAtual, b);
+      const demandaB = lancDemanda(uni, dia, recepAtual, b);
+      const temAt = lancVal(uni, dia, recepAtual, b, 'at') > 0;
+      return '<tr class="' + (f ? 'folga' : '') + '">' +
+        '<td><b>' + esc(b) + '</b></td>' +
+        '<td style="text-align:center"><input type="checkbox" class="lanc-chk" ' + (f ? 'checked' : '') +
+          ' onchange="lancSetFolgaUni(\'' + esc(uni) + '\',\'' + esc(recepAtual) + '\',\'' + esc(b) + '\',this.checked)"></td>' +
+        LANC_COLS.map(c => {
+          const val = lancVal(uni, dia, recepAtual, b, c.k);
+          return '<td><input class="lanc-f ' + (val ? 'ok' : '') + '" type="number" min="0" step="' +
+            (c.tipo === 'r' ? '0.01' : '1') + '" inputmode="decimal" value="' + (val || '') + '" placeholder="0" ' +
+            'oninput="lancSetUni(\'' + esc(uni) + '\',\'' + esc(recepAtual) + '\',\'' + esc(b) + '\',\'' + c.k + '\',this.value)"></td>';
+        }).join('') +
+        '<td class="calc">' + (temAt ? lancN(demandaB) : '—') + '</td>' +
+        '<td class="calc" style="font-weight:600;color:var(--brass-light)">' + (totalB ? lancR$(totalB) : '—') + '</td></tr>';
+    }).join('');
 
-  document.getElementById('lanc-tab').innerHTML =
-    '<thead>' + th + '</thead><tbody>' + tb + '</tbody><tfoot>' + tf + '</tfoot>';
+    const S = c => barbs.reduce((acc, b) => acc + lancVal(uni, dia, recepAtual, b, c), 0);
+    const sAt = S('at'), sPf = S('pf'), sTot = S('ve') + S('vp');
+    const totalRowHTML = '<tr><td>TOTAL DO DIA</td><td></td>' + LANC_COLS.map(c => '<td>' + (c.tipo === 'r' ? lancR$(S(c.k)) : lancN(S(c.k))) + '</td>').join('') +
+      '<td class="calc">' + lancN(Math.max(0, sAt - sPf)) + '</td><td class="calc" style="color:var(--brass-light);font-size:14px"><b>' + lancR$(sTot) + '</b></td></tr>';
 
-  // Status
-  const ativos = lancAtivos(uni, dia, recepAtual);
-  const nA = ativos.length;
-  const nF = cfg.barbeiros.filter(b => lancFolga(uni, dia, recepAtual, b)).length;
-  const falta = cfg.barbeiros.length - nA - nF;
-  const statusEl = document.getElementById('lanc-status');
-  statusEl.innerHTML = falta > 0
-    ? '<b class="warn">faltam ' + falta + '</b> · ' + nA + ' lançado(s) · ' + nF + ' de folga'
-    : '<b class="ok">dia completo</b> · ' + nA + ' lançado(s) · ' + nF + ' de folga';
+    const msgWpp = lancMensagem(uni, dia, recepAtual);
+    let avisoTxt = faltam > 0 ? 'Faltam <b>' + faltam + '</b> barbeiro(s). Quem não trabalhou, marque <b>Folga</b>.' : '✓ Todos os <b>' + barbs.length + '</b> cadastrados.';
+    let avisoClass = faltam > 0 ? 'warn' : 'ok';
 
-  // Aviso
-  const av = document.getElementById('lanc-aviso');
-  av.className = 'alert ' + (falta > 0 ? 'warn' : 'ok');
-  av.innerHTML = falta > 0
-    ? 'Faltam <b>' + falta + '</b> barbeiro(s). Quem não trabalhou hoje, marque <b>Folga</b>.'
-    : (recepAtual
-        ? 'Lançamento de <b>' + esc(recepAtual) + '</b>: <b>' + lancN(sAt) + '</b> atendimentos, vendas <b>' + lancR$(sTot) + '</b>. Clique em <b>Copiar para WhatsApp</b>.'
-        : 'Tudo lançado. Clique em <b>Copiar para WhatsApp</b>.');
+    html += '<div class="lanc-card" id="lanc-bloco-' + uniSafe + '" style="border:1px solid var(--brass-dim);box-shadow:0 4px 20px rgba(0,0,0,.25)">' +
+      '<div class="lanc-card-h" style="background:var(--surface2);padding:14px 16px;flex-wrap:wrap;gap:12px">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<span style="font-size:22px">' + (UNI_ICONS[uni] || '🏢') + '</span>' +
+          '<div><h2 style="font-size:15px;letter-spacing:.05em;color:var(--brass);margin:0">' + esc(nomeBonito(uni)).toUpperCase() + '</h2>' +
+          '<div class="sub" style="font-size:11px;margin-top:2px">Unidade ' + esc(nomeBonito(uni)) + ' · ' + barbs.length + ' barbeiros</div></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto">' +
+          '<div style="display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 9px">' +
+            '<span style="font-size:11px;color:var(--ink3);font-weight:600">Mandados embora:</span>' +
+            '<input type="number" class="field lanc-f" style="width:60px;padding:3px 6px;font-weight:700" min="0" value="' + (perdaVal || '') + '" oninput="lancSetPerdaUni(\'' + esc(uni) + '\',this.value)">' +
+          '</div>' + (isGestor ? '<button class="btn btn-sm btn-ghost" type="button" onclick="lancAbrirGerenciarBarbeiros(\'' + esc(uni) + '\')">✂️ Barbeiros</button>' : '') +
+          '<button class="btn btn-sm btn-ghost" type="button" onclick="lancLimparUni(\'' + esc(uni) + '\')">Limpar</button>' +
+          '<button class="btn btn-sm btn-primary" type="button" id="btn-copiar-' + uniSafe + '" onclick="lancCopiarUni(\'' + esc(uni) + '\')">Copiar</button>' +
+        '</div></div>' +
+        '<div class="lanc-scroll"><table class="lanc-table"><thead><tr><th>Barbeiro</th><th>Folga</th>' + LANC_COLS.map(c => '<th>' + c.t + '</th>').join('') + '<th class="calc">Demanda</th><th class="calc">Total vendas</th></tr></thead><tbody>' + rowsHTML + '</tbody><tfoot>' + totalRowHTML + '</tfoot></table></div>' +
+        '<div class="alert ' + avisoClass + '" style="margin:12px 14px;font-size:12px">' + avisoTxt + '</div>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+  lancRenderHist(unidadesVisiveis[0]);
+}
 
-  // Prévia da mensagem WhatsApp
-  document.getElementById('lanc-prev-msg').textContent = lancMensagem(uni, dia, recepAtual) || 'Nada lançado ainda neste dia.';
+function lancSetUni(uni, recep, b, c, v) {
+  const o = lancReg(uni, document.getElementById('lanc-dia').value, recep, b);
+  const n = lancNum(v);
+  if (n) o[c] = n; else delete o[c];
+  o.folga = false;
+  agendarSalvar();
+  lancAtrasar();
+}
 
-  // Histórico de dias (isolado por perfil)
-  lancRenderHist(uni);
+function lancSetFolgaUni(uni, recep, b, f) {
+  lancReg(uni, document.getElementById('lanc-dia').value, recep, b).folga = f;
+  agendarSalvar();
+  lancRender();
+}
+
+function lancSetPerdaUni(uni, v) {
+  const dia = document.getElementById('lanc-dia').value;
+  const k = lancKeyMeta(uni, dia, lancObterRecepAtiva(), 'perda');
+  const n = lancNum(v);
+  if (n) lancDB()[k] = { n }; else delete lancDB()[k];
+  agendarSalvar();
+  lancAtrasar();
+}
+
+function lancLimparUni(uni) {
+  const dia = document.getElementById('lanc-dia').value;
+  if (!confirm('Limpar unidade ' + nomeBonito(uni) + '?')) return;
+  const db = lancDB();
+  const prefixo = uni + '|' + dia + '|' + lancObterRecepAtiva().toLowerCase().trim() + '|';
+  Object.keys(db).filter(k => k.startsWith(prefixo)).forEach(k => delete db[k]);
+  agendarSalvar();
+  lancRender();
+}
+
+function lancCopiarUni(uni) {
+  const txt = lancMensagem(uni, document.getElementById('lanc-dia').value, lancObterRecepAtiva());
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => toast('Copiado!', 'ok'));
 }
 
 function lancMensagem(uni, dia, recep) {
   const ativos = lancAtivos(uni, dia, recep);
   if (!ativos.length) return '';
-  const L = ['*' + (nomeBonito(uni) || uni).toUpperCase() + '* — ' + lancFmtLongo(dia)];
-  L.push('Lançado por: ' + (recep || '(não informado)'), '');
+  const L = ['*' + nomeBonito(uni).toUpperCase() + '* — ' + lancFmtLongo(dia)];
   ativos.forEach(b => {
-    L.push('*' + b + '*');
-    L.push('Atendimentos: ' + lancN(lancVal(uni, dia, recep, b, 'at')));
-    L.push('Preferência: ' + lancN(lancVal(uni, dia, recep, b, 'pf')));
-    L.push('Demanda (sem preferência): ' + lancN(lancDemanda(uni, dia, recep, b)));
-    L.push('Extra: ' + lancN(lancVal(uni, dia, recep, b, 'qe')) + ' un — ' + lancR$(lancVal(uni, dia, recep, b, 've')));
-    L.push('Produto: ' + lancN(lancVal(uni, dia, recep, b, 'qp')) + ' un — ' + lancR$(lancVal(uni, dia, recep, b, 'vp')));
-    L.push('Total vendas: ' + lancR$(lancTotalB(uni, dia, recep, b)));
-    L.push('');
+    L.push('*' + b + '*: Atend: ' + lancN(lancVal(uni, dia, recep, b, 'at')) + ' | Vendas: ' + lancR$(lancTotalB(uni, dia, recep, b)));
   });
-  const S = c => ativos.reduce((s, b) => s + lancVal(uni, dia, recep, b, c), 0);
-  const sAt = S('at'), sPf = S('pf'), perda = lancPerdaDe(uni, dia, recep);
-  L.push('━━━━━━━━━━━━━━');
-  L.push('*TOTAL DO DIA — ' + (nomeBonito(uni) || uni).toUpperCase() + '*');
-  L.push('Atendimentos: ' + lancN(sAt));
-  L.push('Preferência: ' + lancN(sPf));
-  L.push('Demanda (sem preferência): ' + lancN(Math.max(0, sAt - sPf)));
-  L.push('Mandados embora no dia: ' + lancN(perda));
-  L.push('Procura total: ' + lancN(sAt + perda) + (perda ? '  (' + Math.round(perda / (sAt + perda) * 100) + '% perdido)' : ''));
-  L.push('Extra: ' + lancN(S('qe')) + ' un — ' + lancR$(S('ve')));
-  L.push('Produto: ' + lancN(S('qp')) + ' un — ' + lancR$(S('vp')));
-  L.push('*Total vendas: ' + lancR$(S('ve') + S('vp')) + '*');
-  L.push('Barbeiros no dia: ' + ativos.length);
-  L.push('');
-  // Linha de dados para o painel (compatível com os arquivos offline)
-  L.push('#BB2 ' + dia + '|' + uni + '|' + (recep || '-') + '|' + perda + '|' +
-    ativos.map(b => b + ';' + LANC_COLS.map(c => lancVal(uni, dia, recep, b, c.k)).join(';')).join('|'));
+  L.push('', '#BB2 ' + dia + '|' + uni + '|' + (recep || '-') + '|' + lancPerdaDe(uni, dia, recep) + '|' + ativos.map(b => b + ';' + LANC_COLS.map(c => lancVal(uni, dia, recep, b, c.k)).join(';')).join('|'));
   return L.join('\n');
 }
 
-/* Renderização do histórico com isolamento estrito de usuária */
 function lancRenderHist(uni) {
   const db = lancDB();
-  const dia = document.getElementById('lanc-dia').value;
-  const s = sessaoAtual();
-  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
-  const nomeUser = (s && s.nome) ? s.nome.trim() : '';
-
-  const subEl = document.getElementById('lanc-hist-sub');
-  if (subEl) {
-    subEl.textContent = isGestor ? 'Todos os lançamentos da equipe' : 'Seus lançamentos realizados';
-  }
-
-  // Lista todos os lançamentos
   const itens = [];
-  const vistos = new Set();
-
   Object.keys(db).forEach(k => {
-    if (k.startsWith(uni + '|') && !k.includes('|__')) {
-      const parts = k.split('|');
-      let d = parts[1];
-      let r = parts.length >= 4 ? parts[2] : (lancRecepNome(uni, d, '') || 'Recepção');
-      
-      // Se for recepcionista: SÓ inclui os lançamentos feitos por ela mesma!
-      if (!isGestor) {
-        if (r.toLowerCase() !== nomeUser.toLowerCase() && lancRecepNome(uni, d, r).toLowerCase() !== nomeUser.toLowerCase()) {
-          return; // Descarta lançamentos de outras usuárias
-        }
-      }
-
-      const itemKey = d + '___' + r.toLowerCase();
-      if (!vistos.has(itemKey)) {
-        vistos.add(itemKey);
-        const bs = lancAtivos(uni, d, r);
-        if (bs.length > 0) {
-          const tot = bs.reduce((acc, b) => acc + lancTotalB(uni, d, r, b), 0);
-          itens.push({ dia: d, recep: lancRecepNome(uni, d, r) || r, ativos: bs.length, total: tot });
-        }
-      }
+    if (!k.includes('|__')) {
+      const p = k.split('|');
+      const bs = lancAtivos(p[0], p[1], p[2]);
+      if (bs.length > 0) itens.push({ uni: p[0], dia: p[1], ativos: bs.length });
     }
   });
-
   itens.sort((a, b) => b.dia.localeCompare(a.dia));
-  const sliceItens = itens.slice(0, 45);
-
-  document.getElementById('lanc-hist').innerHTML = sliceItens.length
-    ? sliceItens.map(it => {
-        const isAtivo = (it.dia === dia);
-        const labelRecep = (isGestor && it.recep) ? ' · ' + esc(it.recep) : '';
-        return '<button class="lanc-hb' + (isAtivo ? ' ativo' : '') + '" onclick="lancIrDiaRecep(\'' + it.dia + '\',\'' + esc(it.recep) + '\')">' +
-          lancFmtCurto(it.dia) + ' · ' + it.ativos + ' barb.' +
-          labelRecep +
-          (it.total ? ' · ' + lancR$(it.total) : '') +
-          '</button>';
-      }).join('')
-    : '<span style="font-size:12px;color:var(--ink3)">' +
-        (isGestor ? 'Nenhum dia lançado ainda para esta unidade.' : 'Você ainda não fez nenhum lançamento nesta unidade.') +
-      '</span>';
-}
-
-function lancIrDiaRecep(d, r) {
-  document.getElementById('lanc-dia').value = d;
-  const s = sessaoAtual();
-  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
-  if (isGestor && r) {
-    lancRecepFiltro = r;
-  }
-  lancRender();
+  const histBox = document.getElementById('lanc-hist');
+  if (histBox) histBox.innerHTML = itens.slice(0, 45).map(it => '<button class="lanc-hb" onclick="lancIrDia(\'' + it.dia + '\')">' + lancFmtCurto(it.dia) + ' ' + nomeBonito(it.uni) + ' · ' + it.ativos + ' barb.</button>').join('');
 }
 
 function lancIrDia(d) {
-  lancIrDiaRecep(d, '');
-}
-
-function lancSet(uni, recep, b, c, v) {
-  const dia = document.getElementById('lanc-dia').value;
-  const o = lancReg(uni, dia, recep, b);
-  const n = lancNum(v);
-  if (n) o[c] = n; else delete o[c];
-  o.folga = false;
-  lancSalvar();
-  lancAtrasar();
-}
-
-function lancSetFolga(uni, recep, b, f) {
-  const dia = document.getElementById('lanc-dia').value;
-  lancReg(uni, dia, recep, b).folga = f;
-  lancSalvar();
+  document.getElementById('lanc-dia').value = d;
   lancRender();
 }
 
-function lancSetRecep(v) {
-  const s = sessaoAtual();
-  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
-  if (!isGestor) return; // Recepcionista não altera o nome do seu login
-  const dia = document.getElementById('lanc-dia').value;
-  const recepAtual = lancObterRecepAtiva();
-  const k = lancKeyMeta(lancUni, dia, recepAtual, 'recep');
-  lancDB()[k] = { nome: v.trim() };
-  lancSalvar();
-  lancAtrasar();
-}
-
-function lancSetPerda(v) {
-  const dia = document.getElementById('lanc-dia').value;
-  const recepAtual = lancObterRecepAtiva();
-  const k = lancKeyMeta(lancUni, dia, recepAtual, 'perda');
-  const n = lancNum(v);
-  if (n) lancDB()[k] = { n }; else delete lancDB()[k];
-  lancSalvar();
-  lancAtrasar();
-}
-
-function lancCopiar() {
-  const dia = document.getElementById('lanc-dia').value;
-  const recepAtual = lancObterRecepAtiva();
-  const txt = lancMensagem(lancUni, dia, recepAtual);
-  if (!txt) { toast('Nada lançado nesse dia ainda.', 'err'); return; }
-  const bt = document.getElementById('lanc-btn-copiar');
-  const ok = () => { const o = bt.textContent; bt.textContent = 'Copiado ✓ cole no grupo'; setTimeout(() => bt.textContent = o, 2600); };
-  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, () => lancFallbackCopy(txt, ok));
-  else lancFallbackCopy(txt, ok);
-}
-function lancFallbackCopy(x, cb) {
-  const a = document.createElement('textarea'); a.value = x; document.body.appendChild(a); a.select();
-  try { document.execCommand('copy'); cb(); } catch(e) { prompt('Copie a mensagem:', x); } a.remove();
-}
-
-function lancLimpar() {
-  const dia = document.getElementById('lanc-dia').value;
-  const recepAtual = lancObterRecepAtiva();
-  if (!confirm('Apagar o seu lançamento de ' + lancFmtCurto(dia) + ' em ' + nomeBonito(lancUni) + '?')) return;
-  const db = lancDB();
-  const prefixo = lancUni + '|' + dia + '|' + recepAtual.toLowerCase().trim() + '|';
-  Object.keys(db).filter(k => k.startsWith(prefixo)).forEach(k => delete db[k]);
-  lancSalvar();
-  lancRender();
-}
-
-/* Visão de Gestor / Admin: Resumo comparativo das unidades e recepcionistas */
 function lancAbrirResumo() {
-  const dia = document.getElementById('lanc-dia').value;
+  const diaInput = document.getElementById('lanc-dia');
+  const dia = diaInput ? diaInput.value : lancHojeISO();
   const body = document.getElementById('lanc-resumo-body');
-  document.getElementById('t-lanc-resumo').textContent = 'Resumo do dia — ' + lancFmtLongo(dia);
+  const tit = document.getElementById('t-lanc-resumo');
+  if (tit) tit.textContent = 'Resumo Consolidado do Dia — ' + lancFmtLongo(dia);
+  
   const unidades = ['CABO FRIO', 'BUZIOS', 'RIO DAS OSTRAS'];
   let html = '<div class="lanc-admin-grid">';
+  let totalRedeAt = 0, totalRedeDemanda = 0, totalRedePerda = 0, totalRedeVendas = 0;
   
   unidades.forEach(uni => {
-    const cfg = LANC_CONFIG[uni] || { barbeiros: [] };
-    const receps = lancRecepcionistasDoDia(uni, dia);
-    const recepsParaVer = receps.length ? receps : [''];
+    const barbs = lancObterBarbeiros(uni);
+    const recepAtual = lancObterRecepAtiva();
+    const ativos = lancAtivos(uni, dia, recepAtual);
+    const S = c => barbs.reduce((acc, b) => acc + lancVal(uni, dia, recepAtual, b, c), 0);
+    const sAt = S('at'), sPf = S('pf'), sTot = S('ve') + S('vp'), perda = lancPerdaDe(uni, dia, recepAtual);
+    const demanda = Math.max(0, sAt - sPf);
 
-    html += '<div class="lanc-uni-card">';
-    html += '<div class="lanc-uni-card-h"><h3>' + esc(nomeBonito(uni)) + '</h3>';
-    if (receps.length === 0) {
-      html += '<span class="chip" style="font-size:10px">Sem lançamento</span>';
-    } else {
-      html += '<span class="chip ok" style="font-size:10px">' + receps.length + ' lançamento(s)</span>';
+    totalRedeAt += sAt;
+    totalRedeDemanda += demanda;
+    totalRedePerda += perda;
+    totalRedeVendas += sTot;
+
+    html += '<div class="lanc-uni-card" style="border:1px solid var(--line)">' +
+      '<div class="lanc-uni-card-h" style="background:var(--surface2)">' +
+        '<h3>' + esc(nomeBonito(uni)) + '</h3>' +
+        (ativos.length === 0 ? '<span class="chip" style="font-size:10.5px">Sem lançamento</span>' : '<span class="chip ok" style="font-size:10.5px">' + ativos.length + ' barbeiros</span>') +
+      '</div>' +
+      '<div class="lanc-uni-card-b">' +
+        '<div class="lanc-uni-row"><span class="nm">Atendimentos</span><span class="vl">' + lancN(sAt) + '</span></div>' +
+        '<div class="lanc-uni-row"><span class="nm">Preferência</span><span class="vl">' + lancN(sPf) + '</span></div>' +
+        '<div class="lanc-uni-row"><span class="nm">Demanda (s/ pref.)</span><span class="vl">' + lancN(demanda) + '</span></div>' +
+        '<div class="lanc-uni-row"><span class="nm">Mandados embora</span><span class="vl" style="color:var(--bad)">' + lancN(perda) + '</span></div>' +
+        '<div class="lanc-uni-row"><span class="nm">Total vendas</span><span class="vl" style="color:var(--ok);font-weight:700">' + lancR$(sTot) + '</span></div>';
+
+    if (ativos.length > 0) {
+      html += '<div style="margin-top:8px;font-size:10.5px;color:var(--ink3);font-weight:600;text-transform:uppercase">Barbeiros Ativos</div>';
+      ativos.forEach(b => {
+        html += '<div class="lanc-uni-row"><span class="nm">' + esc(b) + '</span><span class="vl">' + lancN(lancVal(uni, dia, recepAtual, b, 'at')) + ' at · ' + lancR$(lancTotalB(uni, dia, recepAtual, b)) + '</span></div>';
+      });
     }
-    html += '</div><div class="lanc-uni-card-b">';
-
-    recepsParaVer.forEach(r => {
-      const ativos = lancAtivos(uni, dia, r);
-      const S = c => ativos.reduce((s, b) => s + lancVal(uni, dia, r, b, c), 0);
-      const sAt = S('at'), sTot = S('ve') + S('vp'), perda = lancPerdaDe(uni, dia, r);
-      if (receps.length > 1) {
-        html += '<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--line2);font-weight:600;color:var(--brass-light)">Lançamento: ' + esc(r) + '</div>';
-      } else if (r) {
-        html += '<div class="lanc-uni-row"><span class="nm">Recepcionista</span><span class="vl">' + esc(r) + '</span></div>';
-      }
-      html += '<div class="lanc-uni-row"><span class="nm">Atendimentos</span><span class="vl">' + lancN(sAt) + '</span></div>';
-      html += '<div class="lanc-uni-row"><span class="nm">Demanda</span><span class="vl">' + lancN(Math.max(0, sAt - S('pf'))) + '</span></div>';
-      html += '<div class="lanc-uni-row"><span class="nm">Mandados embora</span><span class="vl" style="color:var(--bad)">' + lancN(perda) + '</span></div>';
-      html += '<div class="lanc-uni-row"><span class="nm">Total vendas</span><span class="vl" style="color:var(--ok)">' + lancR$(sTot) + '</span></div>';
-      if (ativos.length > 0) {
-        html += '<div style="margin-top:6px; font-size:10.5px; color:var(--ink3); font-weight:600; text-transform:uppercase">Barbeiros</div>';
-        ativos.forEach(b => {
-          html += '<div class="lanc-uni-row"><span class="nm">' + esc(b) + '</span><span class="vl">' + lancN(lancVal(uni, dia, r, b, 'at')) + ' at · ' + lancR$(lancTotalB(uni, dia, r, b)) + '</span></div>';
-        });
-      }
-    });
 
     html += '</div></div>';
   });
 
   html += '</div>';
-  body.innerHTML = html;
+
+  // Card com os Totais da Rede
+  html = '<div style="background:var(--surface2);border:1px solid var(--brass-dim);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-around;flex-wrap:wrap;gap:12px">' +
+    '<div><div style="font-size:11px;color:var(--ink3);text-transform:uppercase">Atendimentos Rede</div><div style="font-size:18px;font-weight:700;color:var(--brass)">' + lancN(totalRedeAt) + '</div></div>' +
+    '<div><div style="font-size:11px;color:var(--ink3);text-transform:uppercase">Demanda Total</div><div style="font-size:18px;font-weight:700;color:var(--ink)">' + lancN(totalRedeDemanda) + '</div></div>' +
+    '<div><div style="font-size:11px;color:var(--ink3);text-transform:uppercase">Mandados Embora</div><div style="font-size:18px;font-weight:700;color:var(--bad)">' + lancN(totalRedePerda) + '</div></div>' +
+    '<div><div style="font-size:11px;color:var(--ink3);text-transform:uppercase">Faturamento Vendas</div><div style="font-size:18px;font-weight:700;color:var(--ok)">' + lancR$(totalRedeVendas) + '</div></div>' +
+    '</div>' + html;
+
+  if (body) body.innerHTML = html;
   abrirModal('#m-lanc-resumo');
 }
 
 function lancIniciar() {
-  const s = sessaoAtual();
-  const isGestor = s && (s.perfil === 'admin' || s.perfil === 'gerente');
-  const uniSessao = s ? s.unidade : 'CABO FRIO';
-
-  if (isGestor) {
-    document.getElementById('lanc-uni-selector').style.display = '';
-    lancUni = (uniSessao && uniSessao !== 'todas') ? uniSessao : 'CABO FRIO';
-  } else {
-    document.getElementById('lanc-uni-selector').style.display = 'none';
-    lancUni = (uniSessao && uniSessao !== 'todas') ? uniSessao : 'CABO FRIO';
-  }
-
-  // Segment selector
-  document.querySelectorAll('#lanc-seg-uni button').forEach(btn => {
-    btn.classList.toggle('on', btn.dataset.uni === lancUni);
-  });
-
-  document.getElementById('lanc-dia').value = lancHojeISO();
-  lancRecepFiltro = '';
+  const diaEl = document.getElementById('lanc-dia');
+  if (diaEl && !diaEl.value) diaEl.value = lancHojeISO();
   lancRender();
 }
 
 /* Eventos do módulo de lançamento */
 (function() {
-  document.getElementById('lanc-prev-dia').onclick = () => {
-    const i = document.getElementById('lanc-dia');
-    i.value = lancIso(new Date(lancDt(i.value).getTime() - 864e5));
-    lancRender();
-  };
-  document.getElementById('lanc-prox-dia').onclick = () => {
-    const i = document.getElementById('lanc-dia');
-    i.value = lancIso(new Date(lancDt(i.value).getTime() + 864e5));
-    lancRender();
-  };
-  document.getElementById('lanc-hoje').onclick = () => {
-    document.getElementById('lanc-dia').value = lancHojeISO();
-    lancRender();
-  };
-  document.getElementById('lanc-dia').addEventListener('change', lancRender);
-  document.getElementById('lanc-recep').addEventListener('input', e => lancSetRecep(e.target.value));
-  document.getElementById('lanc-perda').addEventListener('input', e => lancSetPerda(e.target.value));
-  document.getElementById('lanc-btn-copiar').onclick = lancCopiar;
-  document.getElementById('lanc-btn-limpar').onclick = lancLimpar;
-  document.getElementById('lanc-btn-resumo').onclick = lancAbrirResumo;
-
-  // Seletor de unidade (admin/gerente)
-  document.querySelectorAll('#lanc-seg-uni button').forEach(btn => {
-    btn.onclick = () => {
-      lancUni = btn.dataset.uni;
-      lancRecepFiltro = '';
-      document.querySelectorAll('#lanc-seg-uni button').forEach(b => b.classList.toggle('on', b === btn));
-      lancRender();
+  const prevBtn = document.getElementById('lanc-prev-dia');
+  if (prevBtn) {
+    prevBtn.onclick = () => {
+      const i = document.getElementById('lanc-dia');
+      if (i) { i.value = lancIso(new Date(lancDt(i.value).getTime() - 864e5)); lancRender(); }
     };
-  });
+  }
+  const proxBtn = document.getElementById('lanc-prox-dia');
+  if (proxBtn) {
+    proxBtn.onclick = () => {
+      const i = document.getElementById('lanc-dia');
+      if (i) { i.value = lancIso(new Date(lancDt(i.value).getTime() + 864e5)); lancRender(); }
+    };
+  }
+  const hojeBtn = document.getElementById('lanc-hoje');
+  if (hojeBtn) {
+    hojeBtn.onclick = () => {
+      const i = document.getElementById('lanc-dia');
+      if (i) { i.value = lancHojeISO(); lancRender(); }
+    };
+  }
+  const diaInput = document.getElementById('lanc-dia');
+  if (diaInput) diaInput.addEventListener('change', lancRender);
+
+  const resBtn = document.getElementById('lanc-btn-resumo');
+  if (resBtn) resBtn.onclick = lancAbrirResumo;
+
+  const btnAddBarbeiro = document.getElementById('btn-add-barbeiro');
+  if (btnAddBarbeiro) {
+    btnAddBarbeiro.onclick = () => {
+      const nome = document.getElementById('nb-nome').value;
+      lancAdicionarBarbeiro(BARBEIRO_UNI_MODAL, nome);
+    };
+  }
+  const nbInput = document.getElementById('nb-nome');
+  if (nbInput) {
+    nbInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        lancAdicionarBarbeiro(BARBEIRO_UNI_MODAL, nbInput.value);
+      }
+    });
+  }
 })();
 
 
